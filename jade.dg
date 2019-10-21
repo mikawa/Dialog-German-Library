@@ -1,0 +1,159 @@
+(story title)	Die Jadestatue
+(story author)	Martin Öhm
+(story noun)	Ein interaktives Exempel
+
+(story ifid)
+		%% This is the IFID for the Dialog port of "Die Jadestatue":
+		A5AA4F02-8F50-4649-A4BD-B1B5C5408B67
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+(intro)
+
+		Endlich! Nach tagelangem Suchen im Dschungel stößt du auf eine Lichtung. 
+		Und auf etwas mehr. Vielleicht ist dies der Ort, an dem sich die
+        Jadestatue befindet?
+		(par)
+
+		(banner)
+		(enter #lichtung)
+
+(room $Room)
+		*(singleton $Room)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#lichtung
+(room *)
+(name *)	Lichtung
+(dict *)    lichtung
+(* is feminin)
+
+(look *)
+
+		Du stehst auf einer Lichtung im dichten Dschungel. Im Norden steht ein 
+		alter, von Ranken überzogener Schrein. Im Süden führt ein schmaler Pfad 
+		zurück in die Zivilisation.
+		{
+			(#stein is pristine)
+			(par)
+			In der Nähe des Schreins liegt ein
+			glatter, runder Stein im Gras.
+			(or)
+		}
+
+(prevent [leave * $X])
+
+		~($X is one of [#north #in #south])
+		Dort ist der Dschungel zu dicht, es gibt
+        keinen Pfad in diese Richtung.
+
+(prevent [leave * #south])
+
+		{
+			~(#jadestatue is #heldby #player)
+			Nicht ohne die Jadestatue!
+		(or)
+			Du schaffst es, mit der Statue wieder zurück in die Zivilisation zu gelangen.
+			(par)
+			(bold)\*\*\* Du hast gewonnen \*\*\*(roman)
+			(game over)
+		}
+
+(from * go #north to #schrein)
+(from * go #in to #schrein)
+
+#stein 
+(item *)
+(name *)	faustgroß(er) Stein(-s)
+(dict *)	stein faustgroß groß rund glatt
+
+(* is maskulin)
+(* is #in #lichtung)
+
+(descr *) 	
+			
+		Der Stein ist so groß wie eine Faust
+		und außergewöhnlich glatt und rund.
+
+#schreinobj
+(name *)	Schrein(-s)
+(dict *)	schrein efeu ranken alt toltekisch
+(fine where it is *)
+
+(* is maskulin)
+(* is #in #lichtung)
+
+(descr *)
+
+		Der alte Toltekenschrein ist fast
+        komplett mit Efeu überwuchert.
+
+(instead of enter *)
+		(try go #north)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#schrein
+(room *)
+(name *)	Im Schrein
+(dict *)    schrein
+
+(look *)
+
+		In dem kleinen Schrein ist es
+        dunkel, nur wenig Licht fällt durch das halb
+        verfallene Dach. Ein großer Lichtstrahl fällt
+        auf eine Steinsäule in der Mitte des Schreins.
+        (par)Die Lichtung liegt im Süden.
+
+(* is maskulin)
+(from * go #south to #lichtung)
+(from * go #out to #lichtung)
+
+#säule
+(fine where it is *)
+(supporter *)
+(name *) Steinsäule
+(dict *) säule steinsäule stein
+(nsyn *) steinpodest podest
+
+(descr *)
+
+        Die Säule ist aus glattem Stein
+        gehauen, etwas mehr als einen Meter hoch und
+        oben flach, wie ein Podest.
+
+(* is #in #schrein)
+(* is feminin)
+
+#jadestatue 
+(item *)
+(name *)	Jadestatue
+(dict *)	grün klein statue figur jadestatue jadefigur jade
+
+(descr *)
+
+        Es ist die Statue einer toltekischen
+        Gottheit, komplett aus grüner Jade geschnitzt.
+        Sie glänzt und sieht sehr wertvoll aus.
+
+(* is feminin)
+(* is #on #säule)
+(* is handled)
+
+(instead of [take *])
+	(* is #on #säule)
+	~(#stein is #on #säule)
+	Als du das Gewicht der Statue von der Säule nimmst, hörst Du ein 
+	klickendes Geräusch. Kurz darauf wirst du von Giftpfeilen durchbohrt.
+	(par)
+	(bold)\*\*\* Du hast verloren \*\*\*(roman)
+	(game over)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#player
+(current player *)
+(* is #in #lichtung)
+(#jadestatue is handled)

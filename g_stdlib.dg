@@ -1,0 +1,6877 @@
+
+(library version)
+	Bibliothek 0.30. D
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 1: Global variables
+
+%% The following variables may be queried directly from the story, but the
+%% library gets confused if you modify them directly with (now). Instead, use
+%% the predicates mentioned in the comments:
+
+%% Update with (select player $):
+(global variable (current player $))
+
+%% Update with (enter $) or (move player to $ $):
+(global variable (current room $))
+
+%% Update with (increase score by $) or (decrease score by $):
+(global variable (current score $))
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Style class declarations
+
+%% These declarations are merely hints to the backend and/or interpreter.
+
+%% Attributes can be ignored based on context. On the Z-machine backend, for
+%% instance, 'height' only has an effect on (status bar $) boxes, whereas
+%% 'width' and 'float' only affect (div $) boxes that are nested inside a
+%% (status bar $) box. The height and width may be specified in em/ch or %.
+
+(style class @status)
+	height: 1em;
+
+(style class @score)
+	float: right;
+	width: 17ch;
+
+(style class @initial-spacer)
+	margin-bottom: 2em;
+
+(style class @title)
+	font-family: Geneva, sans-serif;
+	font-weight: bold;
+	font-size: 1.4em;
+	margin-top: 1em;
+
+(style class @roomheader)
+	margin-top: .3em;
+	font-family: Geneva, sans-serif;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 2: Relations
+
+(relation #in)		%% Note: #in is also a direction
+(relation #on)
+(relation #partof)
+(relation #heldby)
+(relation #wornby)
+(relation #under)
+(relation #behind)
+
+(name #in)		in
+(name #on)		auf
+(name #partof)		fest an
+(name #heldby)		fest im Besitz von 
+(name #wornby)		fester Teil der Kleidung von
+(name #under)		unter
+(name #behind)		hinter
+
+(Name #partof)		Als fester Teil von
+
+(dict #in)		in durch
+(dict #on)		auf
+(dict #under)		unter unterm
+(dict #behind)		hinter hinterm
+
+(dict #partof)		(just) (fail)
+(dict #heldby)		(just) (fail)
+(dict #wornby)		(just) (fail)
+
+(reverse-name #in)	aus
+(reverse-name #on)	von
+(reverse-name #partof)	weg von
+(reverse-name #heldby)	weg von
+(reverse-name #wornby)	ausgezogen
+(reverse-name #under)	heraus
+(reverse-name #behind)	heraus
+
+(the (relation $Rel))	(name $Rel)
+(der (relation $Rel))	(name $Rel)
+(die (relation $Rel))	(name $Rel)
+(den (relation $Rel))	(name $Rel)
+(dem (relation $Rel))	(name $Rel)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 3: German Directions
+
+%% Directions are given special treatment during parsing, so there is no need
+%% for (dict $) rules here. See (parse direction $ $).
+
+#north
+(direction *)
+(name *)		Norden
+(dict *)		n nord norden nördlich
+
+#south
+(direction *)
+(name *)		Süden
+(dict *)		s süd süden südlich
+
+#east
+(direction *)
+(name *)		Osten
+(dict *)		o ost osten östlich
+
+#west
+(direction *)
+(name *)		Westen
+(dict *)		w west westen westlich
+
+#northeast
+(direction *)
+(name *)		Nordosten
+(dict *)		no nordost nordosten nordöstlich
+
+#northwest
+(direction *)
+(name *)		Nordwesten
+(dict *)		nw nordwest nordwesten nordwestlich
+
+#southwest
+(direction *)
+(name *)		Südwesten
+(dict *)		sw südwest südwesten südwestlich
+
+#southeast
+(direction *)
+(name *)		Südosten
+(dict *)		so südost südosten südöstlich
+
+#up
+(direction *)
+(name *)		hinauf
+(dict *)		h hinauf rauf hoch oben
+
+#down
+(direction *)
+(name *)		hinab
+(dict *)		r runter hinunter hinab unten
+
+#in			%% Note: #in is also a relation
+(direction *)
+(dict *)		rein hinein innen drinnen
+
+#out
+(direction *)
+(dict *)		raus hinaus außen draußen
+
+(proper (direction $))
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 4: Common traits and per-object flags
+
+%% Negations
+
+@($Obj is open)			~($Obj is closed)
+@($Obj is unlocked)		~($Obj is locked)
+@($Obj is on)			~($Obj is off)
+@($Obj is revealed)		~($Obj is hidden)
+@($Obj is pristine)		~($Obj is handled)
+@($Obj is unvisited)		~($Obj is visited)
+@($Obj is transparent)		~($Obj is opaque)
+@($Obj is in order)		~($Obj is broken)
+
+%% Inheritance relations
+
+(actor container $Obj)		*(room $Obj)
+(animate $Obj)			*(female $Obj)
+(animate $Obj)			*(male $Obj)
+(container $Obj)		*(actor container $Obj)
+(item $Obj)			*(wearable $Obj)
+(supporter $Obj)		*(actor supporter $Obj)
+(excluded from all $Obj)	*(not here $Obj)
+(excluded from all $Obj)	*(room $Obj)
+(actor container $Obj)		*(in-seat $Obj)
+(actor supporter $Obj)		*(on-seat $Obj)
+(seat $Obj)			*(in-seat $Obj)
+(seat $Obj)			*(on-seat $Obj)
+(openable $Obj)			*(lockable $Obj)
+
+%% A few actor classes
+
+(animate $Obj)			*(actor $Obj)
+(animate $Obj)			*(female actor $Obj)
+(animate $Obj)			*(male actor $Obj)
+($Obj is feminin)		*(female actor $Obj)
+($Obj is maskulin)		*(male actor $Obj)
+
+%% "Edison's Lament: No switch is ever in the right position."
+%% (From "The Grand List Of Console Role Playing Game Clichés")
+%% Of course, you can override these defaults on an object-by-object basis:
+
+((openable $) is closed)
+((lockable $) is locked)
+((switchable $) is off)
+((openable $) is opaque)
+
+%% Convenience predicate:
+
+(reveal $Obj)
+	(now) ($Obj is revealed)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 5: Rules to prevent compiler warnings
+
+%% The following rule definitions have no effect on the behaviour of the
+%% program, but they prevent warnings about undefined predicates. They have
+%% zero impact on performance.
+
+%% These are typically static traits:
+
+(door $)		(fail)
+(edible $)		(fail)
+(female $)		(fail)
+(fine where it is $)	(fail)
+(inherently dark $)	(fail)
+(intangible $)		(fail)
+(item $)		(fail)
+(lockable $)		(fail)
+(male $)		(fail)
+(not here $)		(fail)
+(openable $)		(fail)
+(out of reach $)	(fail)
+(plural $)		(fail)
+(potable $)		(fail)
+(proper $)		(fail)
+(pushable $)		(fail)
+(sharp $)		(fail)
+(singleton $)		(fail)
+(switchable $)		(fail)
+(uncountable $)		(fail)
+(wearable $)		(fail)
+(vehicle $)		(fail)
+(your $)		(fail)
+(on-seat $)		(fail)
+(in-seat $)		(fail)
+(consultable $)		(fail)
+
+(actor $)		(fail)
+(female actor $)		(fail)
+(male actor $)		(fail)
+
+%% These typically involve rule bodies with further conditions:
+
+($ provides light)	(fail)
+
+%% These are typically dynamic (i.e. per-object flags):
+
+($ is broken)		(fail)
+($ is hidden)		(fail)
+
+%% German Genders
+
+($ is maskulin)		(fail)
+($ is feminin)		(fail)
+($ is neutrum)		(fail)
+($ is plural)		(fail)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 6: German grammatical cases
+
+#Nominativ
+#Genitiv
+#Dativ
+#Akkusativ
+
+(current case #Akkusativ)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 7: German articles
+
+#Indefinite
+#Definite
+
+(current article #Indefinite)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 8: German names written out depending on case and article
+
+(einen [])			nichts
+(einen (list $List))	(einen-listing $List)
+
+(ein [])			nichts
+(ein (list $List))	(ein-listing $List)
+
+(den [])		etwas Bestimmtes	%% May appear in incomplete actions.
+(den full [])	etwas Bestimmtes	%% May appear in incomplete actions.
+(dem [])		etwas Bestimmtem	%% May appear in incomplete actions.
+(dem full [])	etwas Bestimmtem	%% May appear in incomplete actions.
+
+(den [1])		jemanden		%% May appear in incomplete actions.
+(den full [1])	jemanden		%% May appear in incomplete actions.
+(dem [1])		jemandem		%% May appear in incomplete actions.
+(dem full [1])	jemandem		%% May appear in incomplete actions.
+
+(den [einen $Obj])			(einen $Obj)
+(den [+ | $List])		(den-listing $List)
+(den (list $List))		(den-listing $List)
+
+(den full [einen $Obj])		(einen full $Obj)
+(den full [+ | $List])		(den-full-listing $List)
+(den full [, | $List])		(den-full-oder-listing $List)
+(den full (list $List))		(den-full-listing $List)
+
+(ein ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+(der ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+
+(ein $Obj)		(current player $Obj) du
+(Ein $Obj)		(current player $Obj) Du
+(eines $Obj)	(current player $Obj) von Dir %% ever needed?
+(Eines $Obj)	(current player $Obj) von Dir %% ever needed?
+(einem $Obj)	(current player $Obj) dir
+(Einem $Obj)	(current player $Obj) Dir
+(einen $Obj)	(current player $Obj) dich
+(Einen $Obj)	(current player $Obj) Dich
+
+(der $Obj)		(current player $Obj) du
+(Der $Obj)		(current player $Obj) Du
+(des $Obj)		(current player $Obj) von dir %% ever needed?
+(Des $Obj)		(current player $Obj) Von Dir %% ever needed?
+(dem $Obj)		(current player $Obj) dir
+(Dem $Obj)		(current player $Obj) Dir
+(den $Obj)		(current player $Obj) dich
+(Den $Obj)		(current player $Obj) Dich
+
+(ein (proper $Obj))		(name $Obj)
+(Ein (proper $Obj))		(name $Obj)
+(eines (proper $Obj))	(name $Obj)
+(Eines (proper $Obj))	(name $Obj)
+(einem (proper $Obj))	(name $Obj)
+(Einem (proper $Obj))	(name $Obj)
+(einen (proper $Obj))	(name $Obj)
+(Einen (proper $Obj))	(name $Obj)
+
+(der (proper $Obj))		(name $Obj)
+(Der (proper $Obj))		(name $Obj)
+(des (proper $Obj))		(name $Obj)
+(Des (proper $Obj))		(name $Obj)
+(dem (proper $Obj))		(name $Obj)
+(Dem (proper $Obj))		(name $Obj)
+(den (proper $Obj))		(name $Obj)
+(Den (proper $Obj))		(name $Obj)
+
+(ein (singleton $Obj))		(der $Obj)
+(eines (singleton $Obj))	(des $Obj)
+(einem (singleton $Obj))	(dem $Obj)
+(einen (singleton $Obj))	(den $Obj)
+
+(ein (uncountable $Obj))	(name $Obj)
+(eines (uncountable $Obj))	(name $Obj)
+(einem (uncountable $Obj))	(name $Obj)
+(einen (uncountable $Obj))	(name $Obj)
+
+(ein $Obj)		
+	(now) (current case #Nominativ)
+	(now) (current article #Indefinite)
+	(if) ($Obj is maskulin) (then)
+		ein
+	(elseif) ($Obj is feminin) (then)
+		eine
+	(elseif) ($Obj is neutrum) (then)
+		ein
+	(else)
+		einige	
+	(endif)
+	(name $Obj)	
+
+(eines $Obj)		
+	(now) (current case #Genitiv)
+	(now) (current article #Indefinite)
+	(if) ($Obj is maskulin) (then)
+		eines
+	(elseif) ($Obj is feminin) (then)
+		einer
+	(elseif) ($Obj is neutrum) (then)
+		eines
+	(else)
+		einiger
+	(endif)
+	(name $Obj)
+
+(einem $Obj)		
+	(now) (current case #Dativ)
+	(now) (current article #Indefinite)
+	(if) ($Obj is maskulin) (then)
+		einem
+	(elseif) ($Obj is feminin) (then)
+		einer
+	(elseif) ($Obj is neutrum) (then)
+		einem
+	(else)
+		einigen
+	(endif)
+	(name $Obj)
+	
+(einen $Obj)		
+	(now) (current case #Akkusativ)
+	(now) (current article #Indefinite)
+	(if) ($Obj is maskulin) (then)
+		einen
+	(elseif) ($Obj is feminin) (then)
+		eine
+	(elseif) ($Obj is neutrum) (then)
+		ein
+	(else)
+		einige
+	(endif)
+	(name $Obj)
+	
+(Ein $Obj)		(uppercase) (ein $Obj)
+(Eines $Obj)	(uppercase) (eines $Obj)
+(Einem $Obj)	(uppercase) (einem $Obj)
+(Einen $Obj)	(uppercase) (einen $Obj)
+	
+(der $Obj)		
+	(now) (current case #Nominativ)
+	(now) (current article #Definite)
+	(if) ($Obj is maskulin) (then)
+		der
+	(elseif) ($Obj is feminin) (then)
+		die
+	(elseif) ($Obj is neutrum) (then)
+		das
+	(else)
+		die
+	(endif)
+	(name $Obj)	
+
+(des $Obj)		
+	(now) (current case #Genitiv)
+	(now) (current article #Definite)
+	(if) ($Obj is maskulin) (then)
+		des
+	(elseif) ($Obj is feminin) (then)
+		der
+	(elseif) ($Obj is neutrum) (then)
+		des
+	(else)
+		der
+	(endif)
+	(name $Obj)
+	
+(dem $Obj)		
+	(now) (current case #Dativ)
+	(now) (current article #Definite)
+	(if) ($Obj is maskulin) (then)
+		dem
+	(elseif) ($Obj is feminin) (then)
+		der
+	(elseif) ($Obj is neutrum) (then)
+		dem
+	(else)
+		den
+	(endif)
+	(name $Obj)
+	
+(den $Obj)		
+	(now) (current case #Akkusativ)
+	(now) (current article #Definite)
+	(if) ($Obj is maskulin) (then)
+		den
+	(elseif) ($Obj is feminin) (then)
+		die
+	(elseif) ($Obj is neutrum) (then)
+		das
+	(else)
+		die
+	(endif)
+	(name $Obj)
+	
+(Der $Obj)	(uppercase) (der $Obj)
+(Des $Obj)	(uppercase) (des $Obj)
+(Dem $Obj)	(uppercase) (dem $Obj)
+(Den $Obj)	(uppercase) (den $Obj)
+
+(ist (current player $Obj)) bist
+(hat (current player $Obj)) hast
+
+(ist $Obj)
+	{
+		($Obj is plural) sind
+	(or)
+		ist
+	}
+
+(hat $Obj)
+	{
+		($Obj is plural) haben
+	(or)
+		hat
+	}
+
+(kann $Obj)	(current player $Obj) kannst 
+(kann $Obj)
+	{
+		($Obj is plural) können 
+	(or)
+		kann
+	}
+
+(nimmt $Obj)	(current player $Obj) nimmst 
+(nimmt $Obj)
+	{
+		($Obj is plural) nehmen 
+	(or)
+		nimmt
+	}
+
+(lässt $Obj)
+	{
+		($Obj is plural) lassen
+	(or)
+		lässt 
+	}
+
+(soll (current player $Obj)) sollst 
+(soll $Obj)
+	{
+		($Obj is plural) sollen
+	(or)
+		soll 
+	}
+
+(muss (current player $Obj)) musst 
+(muss $Obj)
+	{
+		($Obj is plural) müssen 
+	(or)
+		muss
+	}
+
+(sieht (current player $Obj)) siehst 
+(sieht $Obj)
+	{
+		($Obj is plural) sehen 
+	(or)
+		sieht 
+	}
+
+(lässt sich (current player $Obj)) lässt dich 
+(lässt sich $Obj)
+	{
+		($Obj is plural) lassen sich 
+	(or)
+		lässt sich 
+	}
+
+(fühlt sich (current player $Obj)) fühlst dich 
+(fühlt sich $Obj)
+	{
+		($Obj is plural) fühlen sich 
+	(or)
+		fühlt sich 
+	}
+
+(fällt (current player $Obj)) fällst 
+(fällt $Obj)
+	{
+		($Obj is plural) fallen
+	(or)
+		fällt
+	}
+
+(Der (current player $Obj) ist) Du bist
+(Der $Obj ist)
+	{
+		($Obj is plural) (Der $Obj) sind
+	(or)
+		(Der $Obj) ist
+	}
+
+(der full $Obj)		
+	(der $Obj)
+	(add location information for $Obj)
+
+(des full $Obj)		
+	(des $Obj)
+	(add location information for $Obj)
+
+(dem full $Obj)		
+	(dem $Obj)
+	(add location information for $Obj)
+
+(den full $Obj)		
+	(den $Obj)
+	(add location information for $Obj)
+
+(ein full $Obj)		
+	(ein $Obj)
+	(add location information for $Obj)
+
+(eines full $Obj)		
+	(eines $Obj)
+	(add location information for $Obj)
+
+(einen full $Obj)		
+	(einen $Obj)
+	(add location information for $Obj)
+
+(einem full $Obj)		
+	(einem $Obj)
+	(add location information for $Obj)
+
+(er $Obj)
+	{
+		($Obj is maskulin) er
+	(or)
+		($Obj is feminin) sie
+	(or)
+		($Obj is neutrum) es
+	(or)
+		sie
+	}
+
+(er (plural $Obj)) sie
+(Er $Obj) (uppercase)(er $Obj)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 9: German infinitves rewritten in known grammar forms
+
+(understand infinitive $ as Verb $) (fail)
+
+%% Do some rewriting to handle infinitive phrases in actor commands
+
+(rewrite [$1 | $Words] into [$1 | $n3] )
+	*(split $Words by [er sie es] into $Actor and $Right)
+	*(split $Right by [soll möchte sollte könnte kann] into $ and $Order)
+	*(understand infinitive $Inf as Verb $Verb)
+	*(split $Order by $Inf into $Left and $)
+	([$Last | $] = $Verb)
+	(rewrite [$Last | $Left] into $Command )
+	([soll | $Command] = $n1)
+	([er | $n1] = $n2)
+	(append $Actor $n2 $n3)
+	%% Understood: $1 $n3!
+
+(rewrite [$1 | $2] into [$Last | $Rest] )
+	*(understand infinitive $Inf as Verb $Verb)
+	*(split $2 by $Inf into $Left and $)
+	([$Last | $] = $Verb)
+	($Rest = [$1 | $Left])
+	%% Understood: $Last $Rest
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 10: Filter for German articles
+
+(filter [der | $MoreIn] into $MoreOut)
+	(just)
+	(filter $MoreIn into $MoreOut)
+
+(filter [die | $MoreIn] into $MoreOut)
+	(just)
+	(filter $MoreIn into $MoreOut)
+
+(filter [das | $MoreIn] into $MoreOut)
+	(just)
+	(filter $MoreIn into $MoreOut)
+	
+(filter [den | $MoreIn] into $MoreOut)
+	(just)
+	(filter $MoreIn into $MoreOut)
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 11: Additional German dictionary queries
+
+(dict $Obj)
+	(fsyn $Obj)
+	(msyn $Obj)
+	(nsyn $Obj)
+	(psyn $Obj)
+
+(plural dict $)
+
+(plural name $)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 12: German removable word endings
+
+(removable word endings)
+	er en es em e s es n
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 13: German noun endings in printed names
+
+(-s)
+		(current case $Case)
+		(if) ($Case = #Genitiv) (then)
+			(no space)s
+		(endif)
+
+(-es)
+		(current case $Case)
+		(if) ($Case = #Genitiv) (then)
+			(no space)es
+		(endif)
+
+(-n)	
+		(current case $Case) 
+		(if) ($Case = #Akkusativ) (then)
+			(no space)n
+		(endif)
+
+(-en)	
+		(current case $Case) 
+		(if) ($Case = #Akkusativ) (then)
+			(no space)en
+		(endif)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 14: German adjective endings in printed names
+		
+(er)
+		%%Adjektiv Endung Maskulin
+		(current case $Case)
+		(current article $Article) 
+		(if) ($Case = #Nominativ) (then)
+		{
+			(if) ($Article = #Indefinite) (then)
+				(no space)er
+			(else)
+				(no space)e
+			(endif)
+		}
+		(elseif) ($Case = #Genitiv) (then)
+			(no space)en
+		(elseif) ($Case = #Dativ) (then)
+			(no space)en
+		(else) 
+			(no space)en
+		(endif)
+
+(es)
+		%%Adjektiv Endung Neutrum
+		(current case $Case)
+		(current article $Article) 
+		(if) ($Case = #Nominativ) (then)
+		{
+			(if) ($Article = #Indefinite) (then)
+				(no space)es
+			(else)
+				(no space)e
+			(endif)
+		}
+		(elseif) ($Case = #Genitiv) (then)
+			(no space)en
+		(elseif) ($Case = #Dativ) (then)
+			(no space)en
+		(else)
+		{
+			(if) ($Article = #Indefinite) (then)
+				(no space)es
+			(else)
+				(no space)e
+			(endif)
+		}
+		(endif)
+
+(e)
+		%%Adjektiv Endung Feminin
+		(current case $Case)
+		(current article $Article) 
+		(if) ($Case = #Nominativ) (then)
+		{
+			(if) ($Article = #Indefinite) (then)
+				(no space)es
+			(else)
+				(no space)e
+			(endif)
+		}
+		(elseif) ($Case = #Genitiv) (then)
+			(no space)en
+		(elseif) ($Case = #Dativ) (then)
+			(no space)en
+		(else)
+		{
+			(if) ($Article = #Indefinite) (then)
+				(no space)es
+			(else)
+				(no space)e
+			(endif)
+		}
+		(endif)
+
+(e+)
+		%%Adjektiv Endung Plural
+		(current case $Case)
+		(current article $Article)
+		(if) ($Case = #Nominativ) (then)
+		{
+			(if) ($Article = #Indefinite) (then)
+				(no space)e
+			(else)
+				(no space)en
+			(endif)
+		}
+		(elseif) ($Case = #Genitiv) (then)
+			(if) ($Article = #Indefinite) (then)
+				(no space)er
+			(else)
+				(no space)en
+			(endif)
+		(elseif) ($Case = #Dativ) (then)
+			(no space)en
+		(else)
+			(if) ($Article = #Indefinite) (then)
+				(no space)e
+			(else)
+				(no space)en
+			(endif)
+		(endif)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 15: Rooms and doors
+
+(name (room $))		location
+(room header $Room)	(Name $Room)
+(look (room $R))	Du bist hier.
+
+%% Given a room and a direction, what room (if any) is reachable that way?
+
+(from $Here go $Dir to room $Room)
+	*(from $Here go $Dir to $Target)
+	(if) (room $Target) (then)
+		($Target = $Room)
+	(elseif) (direction $Target) (then)
+		(from $Here go $Target to room $Room)
+	(else)
+		(door $Target)
+		~($Target blocks passage)
+		(from $Here through $Target to $Room)
+	(endif)
+
+%% Given a room and a direction, what object, door and/or room is visible
+%% that way?
+
+(from $Room go $Dir to object $Obj)
+	(from $Room go $Dir to $Point)
+	(if) (direction $Point) (then)
+		*(from $Room go $Point to object $Obj)
+	(elseif) (door $Point) (then)
+		{
+			~($Point blocks light)
+			(from $Room through $Point to $Obj)
+		(or)
+			($Obj = $Point)
+		}
+	(else)
+		($Obj = $Point)
+	(endif)
+
+($Door blocks passage)
+	($Door is closed)
+
+($Door blocks light)
+	($Door is opaque)
+	($Door is closed)
+
+@(from $Room go $Dir through $Door to $Target)
+	*(from $Room go $Dir to $Door)
+	*(from $Room through $Door to $Target)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 16: Access rules
+
+(global variable (current visibility ceiling $))
+
+(recompute visibility)
+	(current player $Player)
+	(visibility ceiling of $Player is $Ceil)
+	(now) (current visibility ceiling $Ceil)
+	(if) (light reaches ceiling $Ceil) (then)
+		(now) (player can see)
+	(else)
+		(now) ~(player can see)
+	(endif)
+
+(recompute visibility)
+	%% E.g. if there is no current player.
+
+(light reaches ceiling (room $Ceil))
+	~(inherently dark $Ceil)
+
+(light reaches ceiling $Ceil)
+	*($Obj provides light)
+	(visibility ceiling of $Obj is $Ceil)
+
+(visibility ceiling of (room $R) is $R)
+
+(visibility ceiling of $Obj is $Parent)
+	($Obj is #in $Parent)
+	($Parent is opaque)
+	($Parent is closed)
+
+(visibility ceiling of $Obj is $Ceil)
+	($Obj has parent $Parent)
+	(visibility ceiling of $Parent is $Ceil)
+
+($Obj is visible to player)
+	(current visibility ceiling $Ceil)
+	(if) (visibility ceiling of $Obj is $Ceil) (then)
+		{
+			(player can see)
+		(or)
+			(current player $Player)
+			($Obj has ancestor $Player)
+		}
+	(else)
+		(room $Obj)
+		(room $Ceil)
+		(player can see)
+		{
+			(from $Ceil go $ to $Obj)
+		(or)
+			(from $Ceil through $Door to $Obj)
+			~($Door blocks light)
+		}
+	(endif)
+
+(reachability ceiling of $O is $Ceil)
+	(if) ($O is $Rel $Parent) (then)
+		(if) ($Rel = #in) ($Parent is closed) (then)
+			($Parent = $Ceil)
+		(else)
+			(reachability ceiling of $Parent is $Ceil)
+		(endif)
+	(else)
+		($O = $Ceil)
+	(endif)
+
+(trace reachability $Obj to $Obj or $)
+(trace reachability $Obj to $ or $Obj)
+(trace reachability $Obj to $Ceil1 or $Ceil2)
+	($Obj is $Rel $Parent)
+	~{ ($Rel = #in) ($Parent is closed) }
+	(trace reachability $Parent to $Ceil1 or $Ceil2)
+
+($Obj is reachable by $Actor)
+	~(out of reach $Obj)
+	(reachability ceiling of $Actor is $Ceil)
+	(reachability ceiling of $Obj is $Ceil)
+
+($Obj is reachable by player)
+	~(out of reach $Obj)
+	(current player $Player)
+	(reachability ceiling of $Player is $Ceil)
+	(trace reachability $Obj to $Player or $Ceil)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 17: Scope
+
+%% This predicate can be extended by the game, typically using rules that check
+%% certain conditions, e.g. what the current room is:
+
+(add $ to scope)	(fail)
+
+%% These rules should be left as they are:
+
+(rebuild scope)
+	(recompute visibility)
+	(forget pronouns out of scope)
+
+($Obj is in scope)
+	*(add $Obj to scope)
+
+($Obj is in scope)
+	(if) (player can see) (then)
+		(current visibility ceiling $Ceil)
+		{
+			*($Obj is visible up to $Ceil)
+		(or)
+			(room $Ceil)
+			{
+				*(from $Ceil go $ to $Obj)
+				(room $Obj)
+			(or)
+				*(from $Ceil through $Door to $Obj)
+				~($Door blocks light)
+			}
+		}
+	(else)
+		{
+			(current visibility ceiling $Obj)
+		(or)
+			(current player $Player)
+			*($Obj is visible up to $Player)
+		}
+	(endif)
+
+($Obj is visible up to $Obj)
+
+($Obj is visible up to $Ceiling)
+	(if) (bound $Obj) (then)
+		($Obj has parent $Parent)
+		~{
+			($Obj has relation #in)
+			($Parent is closed)
+			($Parent is opaque)
+		}
+		($Parent is visible up to $Ceiling)
+	(else)
+		(if) ($Ceiling is closed) ($Ceiling is opaque) (then)
+			*($Sub has parent $Ceiling)
+			~($Sub has relation #in)
+		(else)
+			*($Sub has parent $Ceiling)
+		(endif)
+		*($Obj is visible up to $Sub)
+	(endif)
+
+(scope)
+	(rebuild scope)
+	The current scope is: (line)
+	(exhaust) {
+		*($Obj is in scope)
+		$Obj:
+		%% Prevent (der $) from revealing hidden objects
+		(if) ($Obj is hidden) (then)
+			(der $Obj)
+			(now) ($Obj is hidden)
+		(else)
+			(der $Obj)
+		(endif)
+		(line)
+	}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 18: Select player, enter a room or other location, move floating objects
+
+(select player $Player)
+	(clear all pronouns)
+	(now) (current player $Player)
+	(update environment around player)
+
+(move player to $Rel $Loc)
+	(current player $Player)
+	(now) ($Player is $Rel $Loc)
+	(update environment around player)
+
+(enter $Room)
+	(move player to #in $Room)
+	(narrate entering $Room)
+
+(enter $Room by $Vehicle)
+	(now) ($Vehicle is #in $Room)
+	(now) ($Vehicle is handled)
+	(update environment around player)
+	(narrate entering $Room)
+
+(update environment around player)
+	(recompute visibility)
+	(if) (current player $Player) ($Player is in room $Room) (then)
+		(now) (current room $Room)
+		(if) ($Room is unvisited) (player can see) (then)
+			(now) ($Room is visited)
+		(endif)
+		(exhaust) {
+			*($Room attracts $Object)
+			(now) ($Object is #in $Room)
+		}
+	(endif)
+
+(narrate entering (room $))
+	(par)
+	(try [look])
+
+(narrate entering $Obj)
+	Du steigst in (den $Obj).
+
+(narrate entering (supporter $Obj))
+	Du steigst auf (den $Obj).
+
+(prevent entering $Obj)
+	(when $Obj won't accept actor #in)
+
+(narrate failing to leave $ $)
+	In dieser Richtung scheint es keinen Ausgang zu geben.
+
+%% Extend the following predicate to simulate objects occupying multiple rooms:
+
+($Room attracts $Obj)
+	*(from $Room go $ to $Obj)
+	~(direction $Obj)
+	~(room $Obj)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 19: Standard actions
+
+%% LOOK <dir>
+
+(describe action [look $Dir])
+	nach (den $Dir) schauen
+
+(understand infinitive [schauen/blicken/sehen] as Verb [schau])
+
+(understand [schau/blick/sieh/seh | $Words] as [look $Dir])
+	*(understand $Words as direction $Dir)
+
+(understand [schau/blick/sieh/seh nach | $Words] as [look $Dir])
+	*(understand $Words as direction $Dir)
+
+(unlikely [look $])
+
+(prevent [look $])
+	~(player can see)
+	Du kannst in der Dunkelheit nichts sehen.
+
+(perform [look $Dir])
+	(if)
+		(current visibility ceiling $Room)
+		(room $Room)
+		(from $Room go $Dir to $Target)
+	(then)
+		(if) (direction $Target) (then)
+			(try [look $Target])
+		(elseif) (door $Target) ~($Target blocks light) (then)
+			(from $Room through $Target to $OtherRoom)
+			(if) ($OtherRoom is visited) (then)
+				Durch (den $Target) siehst du (den $OtherRoom).
+				(notice $OtherRoom)
+			(else)
+				Du kannst nicht erkennen, was genau auf der anderen Seite
+				(des $Target) liegt.
+				(notice $Target)
+			(endif)
+		(elseif) (room $Target) ($Target is unvisited) (then)
+			Von hier aus kannst du in dieser Richtung wenig erkennen.
+		(else)
+			Im (name $Dir) liegt (der $Target).
+			(notice $Target)
+		(endif)
+	(else)
+		(narrate failing to look $Dir)
+	(endif)
+
+(narrate failing to look #up)
+	Du siehst nichts Ungewöhnliches über dir.
+
+(narrate failing to look #down)
+	Du siehst nichts Ungewöhnliches unter dir.
+
+(narrate failing to look #in)
+	Du siehst drinnen nichts Ungewöhnliches.
+
+(narrate failing to look #out)
+	Du siehst draußen nichts Ungewöhnliches.
+
+(narrate failing to look $)
+	Du siehst in dieser Richtung nichts Ungewöhnliches.
+
+%% LOOK <rel> <obj>
+
+(describe action [look $Rel $Obj])
+	(name $Rel) (den full $Obj) schauen
+
+(understand [schau/blick/sieh/seh | $Words] as [look $Rel $Obj])
+	*(split $Words by relation $Rel into [] and $MoreWords)
+	*(understand $MoreWords as single object $Obj)
+
+(unlikely [look #in $Obj])
+	~(container $Obj)
+
+(unlikely [look #on $Obj])
+	~(supporter $Obj)
+
+%% Reachability not required, but visibility:
+
+(refuse [look $ $Obj])
+	(just)
+	{
+		(when $Obj is not here)
+		(or) (when $Obj is out of sight)
+	}
+
+(before [look #in $Obj])
+	($Obj is opaque)
+	($Obj is closed)
+	(first try [open $Obj])
+
+(instead of [look #in (current room $)])
+	(try [look])
+
+(instead of [look #in $Obj])
+	{ (room $Obj) (or) (door $Obj) }
+	(current room $Here)
+	{
+		(from $Here go $Dir to $Obj)
+	(or)
+		(from $Here through $Door to $Obj)
+		(from $Here go $Dir to $Door)
+	}
+	(direction $Dir)
+	(try [look $Dir])
+
+(prevent [look #in $Obj])
+	~(container $Obj)
+	(Der $Obj) (kann $Obj) keine Dinge aufnehmen.
+
+(prevent [look #in $Obj])
+	($Obj is opaque)
+	($Obj is closed)
+	~(current visibility ceiling $Obj)
+	(if) (openable $Obj) (then)
+		(Der $Obj ist) geschlossen.
+	(else)
+		Du kannst nicht sehen, was in (dem $Obj) ist.
+	(endif)
+
+(prevent [look #behind (room $Obj)])
+	Hinter (den $Obj) zu schauen bringt dich auch nicht weiter.
+
+(perform [look $Rel $Obj])
+	(collect $C)
+		*($C is $Rel $Obj)
+		(now) ($C is revealed)
+	(into $List)
+	(if) (empty $List) (then)
+		(if) (#in = $Rel) (then)
+			(Der $Obj ist) leer.
+		(else)
+			(if) ($Rel is one of [#under #behind]) (then)
+				Du findest
+			(else)
+				Da ist
+			(endif)
+			nichts (name $Rel) (dem $Obj).
+		(endif)
+	(else)
+		(Name $Rel) (dem $Obj) siehst du (einen $List). (notice $List)
+	(endif)
+
+%% examine <obj>
+
+(describe action [examine $Obj])
+	(den full $Obj) untersuchen
+
+(understand infinitive [beobachten/untersuchen/betrachten/beschreiben/anschauen/ansehen] as Verb [untersuch])
+
+(understand [x/beobacht/beschreib/betracht/untersuch/u | $Words] as [examine $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(understand [schau/sieh/seh/blick | $Words] as [examine $Obj])
+	*(split $Words by [an] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [wer bin ich] as [untersuch $Player])
+	(current player $Player)
+
+~(refuse [examine $]) %% No need for reachability.
+
+(instead of [examine (room $Obj)])
+	(current room $Here)
+	~($Here = $Obj)
+	(if)
+		(from $Here go $Dir to $Obj)
+	(then)
+		(try [look $Dir])
+	(elseif)
+		(from $Here through $Door to $Obj)
+		~($Door blocks light)
+		(from $Here go $Dir to $Door)
+	(then)
+		(try [look $Dir])
+	(else)
+		Von hier aus siehst du (den $Obj) nicht so gut.
+	(endif)
+
+(perform [examine $Obj])
+	(current player $Player)
+	(visibility ceiling of $Player is $Obj)
+	(look $Obj)
+
+(perform [examine $Obj])
+	(descr $Obj)
+	(if) (supporter $Obj) (then)
+		(if) (fungibility enabled) (then)
+			(collect $Child)
+				*($Child is #on $Obj)
+			(into $OnList)
+			(fungibility-enabled appearance $OnList #on $Obj)
+		(else)
+			(exhaust) {
+				*($Child is #on $Obj)
+				(par)
+				(appearance $Child #on $Obj)
+			}
+		(endif)
+	(endif)
+	(if) (container $Obj) ~{ ($Obj is opaque) ($Obj is closed) } (then)
+		(if) (fungibility enabled) (then)
+			(collect $Child)
+				*($Child is #in $Obj)
+			(into $InList)
+			(fungibility-enabled appearance $InList #in $Obj)
+		(else)
+			(exhaust) {
+				*($Child is #in $Obj)
+				(par)
+				(appearance $Child #in $Obj)
+			}
+		(endif)
+	(endif)
+	(par)
+
+%% LOOK
+
+(understand [l/lage/schau/blick/sieh/seh] as [look])
+(understand [schau/blick/sieh/seh dich um] as [look])
+(understand [wo bin ich] as [look])
+
+(describe action [look])
+	umschauen
+
+(perform [look])
+	(current player $Player)
+	(current visibility ceiling $Ceil)
+	(div @roomheader) (location headline)
+	(if) (player can see) (then)
+		(look $Ceil)
+		($Player is $Rel $Loc)
+		(make appearances $Rel $Loc)
+		(par)
+	(else)
+		(narrate darkness)
+	(endif)
+
+%% SEARCH <obj>
+
+(understand infinitive [durchsuchen/durchwühlen/durchforsten] as Verb [durchsuch])
+
+(describe action [search $Obj])
+	(den full $Obj) durchsuchen
+
+(understand [durchsuch/durchwühl/durchforst | $Words] as [search $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(instead of [search (current room $R)])
+	(try [look])
+
+(perform [search $O])
+	(if) ($O is closed) ($O is opaque) (then)
+		($InList = [])
+	(else)
+		(collect $C) *($C is #in $O) (reveal $C) (into $InList)
+	(endif)
+	(collect $C) *($C is #on $O) (reveal $C) (into $OnList)
+	(collect $C) *($C is #behind $O) (reveal $C) (into $BehindList)
+	(collect $C) *($C is #under $O) (reveal $C) (into $UnderList)
+	(if) (nonempty $InList) (then)
+		(if) ($InList = [$InObj]) (then)
+			(Ein $InObj) (ist $InObj) in (dem $O).
+		(else)
+			In (dem $O) findest du (einen $InList).
+		(endif)
+		(notice $InList)
+	(endif)
+	(if) (nonempty $OnList) (then)
+		(if) ($OnList = [$OnObj]) (then)
+			(Ein $OnObj) (ist $OnObj) auf (dem $O).
+		(else)
+			Auf (dem $O) findest du (einen $OnList).
+		(endif)
+		(notice $OnList)
+	(endif)
+	(if) (nonempty $BehindList) (then)
+		Du entdeckst (einen $BehindList) hinter (dem $O).
+		(notice $BehindList)
+	(endif)
+	(if) (nonempty $UnderList) (then)
+		Du entdeckst (einen $UnderList) unter (dem $O).
+		(notice $UnderList)
+	(endif)
+	(if)
+		(empty $InList)
+		(empty $OnList)
+		(empty $BehindList)
+		(empty $UnderList)
+	(then)
+		Du findest nichts interessantes.
+	(endif)
+
+%% FEEL <obj>
+
+(describe action [feel $Obj])
+	(den full $Obj) anfühlen
+
+(understand infinitive [betasten/berühren/fühlen/tasten/antasten] as Verb [fühl])
+
+(rewrite [betast/berühr/fühl/reib/tast | $Words] into [fühl | $Words])
+
+(understand [fühl/reib/tast | $Words] as [feel $Obj])
+	*(split $Words by [an] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [fühl | $Words] as [feel $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(perform [feel $Obj])
+	(feel $Obj)
+
+%% LISTEN TO <obj>
+%% LISTEN
+
+(describe action [listen to $Obj])
+	(dem full $Obj) zuhören
+
+(describe action [listen])
+	zuhören
+
+(understand infinitive [lauschen/zuhören/anhören] as Verb [hör])
+
+(understand [hör] as [listen])
+(understand [hör zu] as [listen])
+
+(rewrite [lausch | $Words] into [hör | $Words])
+
+(understand [hör | $Words] as [listen to $Obj])
+	*(understand $Words as single object $Obj)
+
+(understand [hör | $Words] as [listen to $Obj])
+	*(split $Words by [zu an] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as single object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as single object $Obj)
+	}
+
+%% Don't require reachability:
+
+(refuse [listen to $Obj])
+	(just) (when $Obj is not here)
+
+(perform [listen to $Obj])
+	(if) (current player $Obj) (then)
+		Dein Blut rauscht dir in den Ohren und du spürst ein
+		schwaches Aufbäumen deiner Nerven.
+	(elseif) (animate $Obj) (then)
+		(Der $Obj) (ist $Obj) still.
+	(elseif) (room $Obj) (then)
+		Du hörst nichts Ungewöhnliches.
+	(else)
+		Du hörst nichts Ungewöhnliches von (dem $Obj).
+	(endif)
+
+(instead of [listen])
+	(current room $Room)
+	(try [listen to $Room])
+
+%% KISS <obj>
+
+(describe action [kiss $Obj])
+	(den full $Obj) küssen
+
+(understand infinitive [umarmen/küssen/lieben] as Verb [küss])
+
+(rewrite [umarm/lieb | $Words] into [küss | $Words])
+
+(understand [küss | $Words] as [kiss $Obj])
+	*(understand $Words as single object $Obj preferably animate)
+
+(prevent [kiss $Obj])
+	(current player $Player)
+	{
+		($Obj = $Player)
+	(or)
+		($Obj is part of $Player)
+	}
+	Deine Gefühle sind vorwiegend platonischer Art.
+
+(perform [kiss $Obj])
+	(Der $Obj ist) von deiner Zuneigung sichtlich unbeeindruckt.
+
+%% JUMP
+
+(describe action [jump])
+	springen
+
+(understand infinitive [hüpfen/springen] as Verb [spring])
+
+(understand [spring/übe/hüpf] as [jump])
+
+(perform [jump])
+	Du springst ein wenig auf der Stelle.
+
+%% DANCE
+
+(describe action [dance])
+	tanzen
+
+(understand infinitive [tanzen] as Verb [tanz])
+(understand infinitive [drehen] as Verb [dreh])
+(understand infinitive [bewegen] as Verb [beweg])
+
+(rewrite [beweg/dreh dich] into [tanz])
+(rewrite [wirbel herum] into [dance])
+
+(understand [tanz] as [dance])
+
+(perform [dance])
+	Du übst deine Moves.
+
+%% WAVE <obj>
+%% WAVE
+
+(describe action [wave $Obj])
+	mit (dem $Obj) winken
+
+(describe action [wave])
+	winken
+
+(understand infinitive [schütteln] as Verb [schüttel])
+(understand infinitive [winken] as Verb [wink])
+
+(understand [schüttl | $Words] as [schüttel $Obj])
+	*(understand $Words as object $Obj preferably held)
+
+(unlikely [wave $Obj])
+	(current player $Player)
+	~($Obj is #heldby $Player)
+	~($Obj is part of $Player)
+
+(before [wave $Obj])
+	(ensure $Obj is held)
+
+(prevent [wave $Obj])
+	(current player $Player)
+	~($Obj is part of $Player)
+	(when $Obj isn't directly held)
+
+(perform [wave $Obj])
+	Du schüttelst (den $Obj), ohne erkennbare Veränderung.
+
+(understand [schüttel dich] as [wave])
+(understand [wink] as [wave])
+
+(perform [wave])
+	Du schüttelst deine Hände in die Luft.
+
+%% SING
+
+(describe action [sing])
+	singen
+
+(understand infinitive [summen/singen] as Verb [sing])
+
+(rewrite [summ] into [sing])
+(understand [sing])
+
+(perform [sing])
+	Du summst ein paar Takte.
+
+%% THROW <obj> AT <obj>
+%% THROW <obj>
+%% THROW <obj> <dir>
+
+(describe action [throw $Obj at $Dest])
+	(den full $Obj) auf (den $Dest) werfen
+
+(describe action [throw $Obj])
+	(den full $Obj) werfen
+
+(describe action [throw $Obj $Dir])
+	(den full $Obj) nach (den $Dir) werfen
+
+(understand infinitive [werfen] as Verb [werf])
+
+(rewrite [werf | $Words] into [wirf | $Words])
+
+(understand [wirf | $Words] as [throw $Obj])
+	*(split $Words by [weg] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [wirf | $Words] as [throw $A at $B])
+	*(split $Words by [auf gegen in] into $Left and $Right)
+	*(understand $Left as object $A preferably held)
+	*(understand $Right as single object $B)
+
+(understand [wirf | $Words] as [throw $Obj])
+	*(understand $Words as object $Obj preferably held)
+
+(understand [wirf | $Words] as [throw $Obj $Dir])
+	(last $Words $Last)
+	(parse direction [$Last] $Dir)
+	(reverse $Words [$ | $RevWords])
+	(reverse $RevWords $Left)
+	*(understand $Left as object $Obj preferably held)
+
+(unlikely [throw $Obj | $])
+	(current player $Actor)
+	~($Obj has ancestor $Actor)
+
+(perform [throw $Obj])
+	Worauf?
+	(asking for object in [throw $Obj at []])
+
+(instead of [throw $Obj $Dir])
+	(current room $Here)
+	(if) (from $Here go $Dir to object $Target) (then)
+		(try [throw $Obj at $Target])
+	(else)
+		(try [throw $Obj])
+	(endif)
+
+%% The target doesn't have to be reachable:
+
+(refuse [throw $Obj at $Target])
+	(just)
+	{
+		(when $Obj is not here)
+		(or) (when $Target is not here)
+		(or) (when $Obj is out of reach)
+	}
+
+(before [throw $Obj at $])
+	(current player $Actor)
+	($Obj has ancestor $Actor)
+	(ensure $Obj is held)
+
+(prevent [throw $Obj at $])
+	~(current player $Obj)
+	(when $Obj isn't directly held)
+
+(perform [throw $Obj at $Target])
+	(Den $Obj) auf (den $Target) zu werfen wird dich nicht weiter bringen.
+	(tick) (stop)
+
+%% THINK
+
+(describe action [think])
+	nachdenken
+
+(understand infinitive [denken/überlegen/nachdenken] as Verb [denk])
+
+(understand [denk] as [think])
+(understand [überleg] as [think])
+(understand [denk nach] as [think])
+
+(perform [think])
+	Das wäre schon mal ein Anfang.
+	(line) \( Versuch es mit HINWEIS, wenn du verzweifelt bist. \) (line)
+
+%% SLEEP
+
+(describe action [sleep])
+	schlafen
+
+(understand infinitive [schlafen/träumen/einschlafen] as Verb [schlaf])
+
+(understand [schlaf] as [sleep])
+(understand [mach ein nickerchen] as [sleep])
+(understand [schlaf ein] as [sleep])
+(understand [träum] as [sleep])
+
+(perform [sleep])
+	Du bist nicht müde.
+
+%% TAKE <obj>
+%% TAKE <obj> FROM <obj>
+
+(describe action [take $Obj])
+	(den full $Obj) nehmen
+
+(describe action [take $Obj $Rel $Holder])
+	(den full $Obj) (reverse-name $Rel) (dem $Holder) nehmen
+
+(understand infinitive [nehmen/aufheben/mitnehmen/schnappen/greifen] as Verb [nimm])
+
+(rewrite [nehm | $Words] into [nimm | $Words])
+(rewrite [nimm/nehm/greif/schnapp dir | $Words] into [nimm | $Words])
+
+(understand [nimm | $Words] as [take $Obj])
+	*(split $Words by [auf mit] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [heb | $Words] as [throw $Obj])
+	*(split $Words by [auf] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [nimm/entfern | $Words] as [take $Obj from $Parent])
+	*(split $Words by [von aus in] into $Left and $Right)
+	*(understand $Right as single object $Parent)
+	*(understand $Left as object $Obj preferably child of $Parent)
+
+(understand [nimm | $Words] as [take $Obj])
+	*(understand $Words as object $Obj preferably takable)
+
+(unlikely [take $Obj])
+	{ (current player $Actor) ($Obj is $Rel $Actor) ($Rel is one of [#heldby #wornby]) }
+	(or) ~(item $Obj)
+	(or) ($Obj has relation #partof)
+
+(unlikely [take $Obj from $Parent])
+	~($Obj has ancestor $Parent)
+
+(prevent [take $Obj from $Parent])
+	~($Obj has ancestor $Parent)
+	(if) (animate $Parent) (then)
+		(Der $Parent) (hat $Parent) (den $Obj) nicht.
+	(elseif) (container $Parent) (then)
+		(Der $Obj ist) nicht in (dem $Parent).
+	(elseif) (supporter $Parent) (then)
+		(Der $Obj ist) nicht auf (dem $Parent).
+	(else)
+		(Der $Obj ist) woanders.
+	(endif)
+
+(perform [take $Obj from $Parent])
+	(current player $Player)
+	($Obj is recursively worn by $Player)
+	{
+		($Parent = $Player)
+	(or)
+		($Parent has ancestor $Player)
+	}
+	(try [remove $Obj])
+
+(perform [take $Obj from $])
+	(try [take $Obj])
+
+(prevent [take $Obj])
+	(when $Obj is already held)
+	(or) (when $Obj is fine where it is)
+	(or) (when $Obj is part of something)
+	(or) (when $Obj can't be taken)
+
+(narrate taking $Obj)
+	(current player $Actor)
+	Du nimmst (den $Obj)
+	(if) ($Obj is $Rel $Parent) ~($Actor has ancestor $Parent) (then)
+		(reverse-name $Rel) (dem $Parent)
+	(endif)
+	.
+
+(perform [take $Obj])
+	(narrate taking $Obj)
+	(current player $Actor)
+	(now) ($Obj is #heldby $Actor)
+	(now) ($Obj is handled)
+
+%% REMOVE <obj>
+
+(describe action [remove $Obj])
+	(den full $Obj) entfernen
+
+(understand infinitive [lassen] as Verb [lass])
+(understand infinitive [ziehen] as Verb [zieh])
+(understand infinitive [ausziehen] as Verb [entfern])
+
+(understand [lass | $Words] as [remove $Obj])
+	*(split $Words by [fallen] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as object $Obj preferably worn)
+	(or)
+		($Right = [])
+		*(understand $Left as object $Obj preferably worn)
+	}
+
+(understand [zieh | $Words] as [remove $Obj])
+	*(split $Words by [aus] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as object $Obj preferably worn)
+	(or)
+		($Right = [])
+		*(understand $Left as object $Obj preferably worn)
+	}
+
+(understand [setz/leg | $Words] as [remove $Obj])
+	*(split $Words by [ab] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as object $Obj preferably worn)
+	(or)
+		($Right = [])
+		*(understand $Left as object $Obj preferably worn)
+	}
+
+(understand [entfern | $Words] as [remove $Obj])
+	*(understand $Words as object $Obj preferably worn)
+
+(unlikely [remove $Obj])
+	(current player $Actor)
+	~($Obj is #wornby $Actor)
+
+(instead of [remove $Obj])
+	~(wearable $Obj)
+	~($Obj has relation #partof)
+	(item $Obj)
+	(try [take $Obj])
+
+(prevent [remove $Obj])
+	(when $Obj is part of something)
+
+(prevent [remove $Obj])
+	(current player $Actor)
+	~($Obj is recursively worn by $Actor)
+	Aber du hast (den $Obj) gar nicht angezogen.
+
+(narrate removing $Obj)
+	Du ziehst (den $Obj) aus.
+
+(perform [remove $Obj])
+	(narrate removing $Obj)
+	(current player $Actor)
+	(now) ($Obj is #heldby $Actor)
+	(now) ($Obj is handled)
+
+%% WEAR <obj>
+
+(describe action [wear $Obj])
+	(den full $Obj) anziehen
+
+(understand infinitive [tragen/anziehen/anlegen] as Verb [trag])
+
+(rewrite [trage | $Words] into [trag | $Words])
+
+(understand [trag | $Words] as [wear $Obj])
+	*(understand $Words as object $Obj preferably held)
+
+(understand [zieh/leg | $Words] as [wear $Obj])
+	*(split $Words by [an] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as object $Obj preferably held)
+	(or)
+		($Right = [])
+		*(understand $Left as object $Obj preferably held)
+	}
+
+(unlikely [wear $Obj])
+	~(wearable $Obj)
+
+(unlikely [wear $Obj])
+	(current player $Actor)
+	($Obj is #wornby $Actor)
+
+(before [wear $Obj])
+	(wearable $Obj)
+	(current player $Actor)
+	~($Obj is nested #wornby $Actor)
+	(ensure $Obj is held)
+
+(prevent [wear $Obj])
+	(current player $Actor)
+	($Obj is recursively worn by $Actor)
+	Du trägst (den $Obj) schon.
+
+(prevent [wear $Obj])
+	~(wearable $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht anziehen.
+
+(prevent [wear $Obj])
+	(when $Obj isn't directly held)
+
+(narrate wearing $Obj)
+	Du ziehst (den $Obj) an.
+
+(perform [wear $Obj])
+	(narrate wearing $Obj)
+	(current player $Actor)
+	(now) ($Obj is #wornby $Actor)
+	(now) ($Obj is handled)
+
+%% PUT <obj> <rel> <obj>
+
+(describe action [put $Obj $Rel $Dest])
+	(den full $Obj) (name $Rel) (den $Dest) legen
+
+(understand infinitive [legen] as Verb [leg])
+(understand infinitive [verstecken] as Verb [versteck])
+
+(understand [leg | $Words] as [put $Obj $Rel $Dest])
+	*(split $Words by relation $Rel into $Left and $Right)
+	*(understand $Right as single object $Dest)
+	*(understand $Left as object $Obj preferably held excluding $Dest)
+
+(understand [versteck | $Words] as [put $Obj $Rel $Dest])
+	*(split $Words by relation $Rel into $Left and $Right)
+	~($Rel = #on)
+	*(understand $Right as single object $Dest)
+	*(understand $Left as object $Obj preferably held excluding $Dest)
+
+(understand [stell | $Words] as [put $Obj #in $Dest])
+	*(split $Words by [in auf] into $Left and $Right)
+	*(understand $Right as single object $Dest)
+	*(understand $Left as object $Obj preferably held excluding $Dest)
+
+(unlikely [put $Obj $ $])
+	(current player $Actor)
+	~($Obj has ancestor $Actor)
+
+(unlikely [put $ #on $Dest])
+	~(supporter $Dest)
+
+(unlikely [put $ #in $Dest])
+	~(container $Dest)
+
+(unlikely [put $Obj $ $Obj])
+
+(unlikely [put $Obj $ $Dest])
+	($Dest has ancestor $Obj)
+
+(before [put $Obj $Rel $Dest])
+	~($Obj is $Rel $Dest)
+	(ensure $Obj is held)
+
+(before [put $ #in $Dest])
+	($Dest is closed)
+	(first try [open $Dest])
+
+(instead of [put (current player $) #in $Dest])
+	(try [enter $Dest])
+
+(instead of [put (current player $) #on $Dest])
+	(try [climb $Dest])
+
+(instead of [put $Obj $Rel $Dest])
+	(current player $Player)
+	($Player is $Rel $Dest)
+	(try [drop $Obj])
+
+(prevent [put $Obj $Rel $Dest])
+	(when $Obj is already $Rel $Dest)
+	(or) (when $Obj isn't directly held)
+
+(prevent [put $Obj $Rel $Dest])
+	($Dest is nested $ $Obj)
+	(Der $Obj) kann nicht
+	(name $Rel) (den $Dest) gelegt werden.
+
+(prevent [put $Obj $Rel $Obj])
+	Du kannst (den $Obj) nicht (name $Rel) (den $Obj) legen.
+
+(prevent [put $ $Rel $Dest])
+	(when $Dest won't accept $Rel)
+
+(prevent [put $ #in $Dest])
+	(when $Dest is closed)
+
+(narrate putting $Obj $Rel $Dest)
+	Du legst (den $Obj) (name $Rel) (den $Dest).
+
+(perform [put $Obj $Rel $Dest])
+	(narrate putting $Obj $Rel $Dest)
+	(now) ($Obj is $Rel $Dest)
+	(now) ($Obj is handled)
+
+%% DROP <obj>
+
+(describe action [drop $Obj])
+	(den full $Obj) hinlegen
+
+(understand infinitive [ablegen/hinstellen/weglegen/hinlegen] as Verb [lass])
+
+(understand [leg/stell | $Words] as [drop $Obj])
+	*(split $Words by [ab hin weg] into $Left and [])
+	*(understand $Left as object $Obj preferably held)
+
+(understand [lass | $Words] as [drop $Obj])
+	*(understand $Words as object $Obj preferably held)
+
+(understand [lass | $Words] as [drop $Obj])
+	*(split $Words by [hier fallen] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as object $Obj preferably held)
+	(or)
+		($Right = [])
+		*(understand $Left as object $Obj preferably held)
+	}
+
+(understand [stell | $Words] as [drop $Obj])
+	*(split $Words by [ab hin weg] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as object $Obj preferably held)
+	(or)
+		($Right = [])
+		*(understand $Left as object $Obj preferably held)
+	}
+
+(unlikely [drop $Obj])
+	(current player $Actor)
+	~($Obj has ancestor $Actor)
+
+(before [drop $Obj])
+	(current player $Actor)
+	($Obj has ancestor $Actor)
+	~($Obj has relation #partof)
+	(ensure $Obj is held)
+
+(prevent [drop $Obj])
+	(when $Obj is part of something)
+	(or) (when $Obj isn't directly held)
+
+(narrate dropping $Obj)
+	(current player $Actor)
+	($Actor is $Rel $Loc)
+	(Der $Obj) (fällt $Obj)
+	(if) ($Rel = #on) (then)
+		auf (den $Loc).
+	(else)
+		auf den Boden.
+	(endif)
+
+(perform [drop $Obj])
+	(narrate dropping $Obj)
+	(current player $Actor)
+	($Actor is $Rel $Loc)
+	(now) ($Obj is $Rel $Loc)
+	(now) ($Obj is handled)
+
+%% INVENTORY
+
+(describe action [inventory])
+	das Inventar betrachten
+
+(understand [inventar/i/inv] as [inventory])
+(understand [was hab ich] as [inventory])
+(understand [was hab ich dabei] as [inventory])
+(understand [betracht inventar] as [inventory])
+
+(perform [inventory])
+	(current player $Actor)
+	(collect $C) *($C is #heldby $Actor) (into $HeldList)
+	(collect $C) *($C is #wornby $Actor) (into $WornList)
+	Du hast
+	(if) (empty $HeldList) (then)
+		nichts dabei
+	(else)
+		(einen $HeldList)
+	(endif)
+	(if) ~(empty $WornList) (then)
+		. Du hast (einen $WornList) angezogen
+	(endif)
+	. (line)
+
+%% EXITS
+
+(describe action [exits])
+	die Äusgänge anzeigen
+
+(understand [ausgänge/ausgang] as [exits])
+(understand [zeig mir den ausgang] as [exits])
+(understand [zeig mir die ausgänge] as [exits])
+(understand [zeig ausgang] as [exits])
+(understand [zeig ausgänge] as [exits])
+(understand [map/karte] as [exits])
+
+(prevent [exits])
+	~(player can see)
+	In dieser Dunkelheit bist du nicht sicher, wo sich die Ausgänge genau befinden.
+
+(perform [exits])
+	(current room $Room)
+	(if)
+		~{
+			*(from $Room go $Dir to $Target)
+			(direction $Dir)
+			{ (room $Target) (or) (door $Target) }
+		}
+	(then)
+		There are no obvious exits here.
+	(else)
+		Offensichtliche Ausgänge sind: (line)
+		(exhaust) {
+			*(from $Room go $Dir to $Target)
+			(direction $Dir)
+			(if) (door $Target) (then)
+				(Name $Dir)
+				Durch (den $Target)
+				(if) ($Target is closed) (then)
+					\(momentan geschlossen\)
+				(elseif)
+					(from $Room through $Target to $R)
+					($R is visited)
+				(then)
+					nach
+					(if) (inherently dark $R) (then)
+						, in die Dunkelheit
+					(else)
+						, zu (dem $R)
+					(endif)
+				(endif)
+				. (line)
+			(elseif) (room $Target) (then)
+				Nach
+				(if) ($Dir = #in) (then)
+					drinnen
+				(else)
+					(Name $Dir)
+				(endif)
+				(if) ($Target is visited) (then)
+					(if) (inherently dark $Target) (then)
+						, in die Dunkelheit
+					(else)
+						, zu (dem $Target)
+					(endif)
+				(endif)
+				. (line)
+			(endif)
+		}
+	(endif)
+
+%% EXIST (misspelled EXITS, just for the giggles)
+
+(understand [cogito ergo sum] as [exist])
+(understand [ich denke also bin ich] as [exist])
+
+(perform [exist])
+	Genau.
+
+%% WAIT
+
+(describe action [wait])
+	warten
+
+(understand infinitive [warten/chillen] as Verb [wart])
+
+(rewrite [z/wart/chill] into [wart])
+
+(understand [wart] as [wait])
+
+(perform [wait])
+	Ein Moment verstreicht.
+
+%% GIVE <obj> TO <obj>
+%% GIVE <obj>
+
+(describe action [give $Obj to $Dest])
+	(den full $Obj) (dem $Dest) geben
+
+(describe action [give $Obj])
+	(den full $Obj) weggeben
+
+(understand infinitive [geben/übergeben] as Verb [gib])
+
+(rewrite [übergib/übergeb/geb | $Words] into [gib | $Words])
+
+(understand [gib | $Words] as [give $Obj to $Dest])
+	*(split $Words by [an dem der] into $Left and $Right)
+	*(understand $Right as single object $Dest preferably animate)
+	*(understand $Left as object $Obj preferably held excluding $Dest)
+
+(understand [gib | $Words] as [give $Obj to $Dest])
+	*(split $Words anywhere into $Left and $Right)
+	*(understand $Left as single object $Dest preferably animate)
+	*(understand $Right as object $Obj preferably held excluding $Dest)
+
+(understand [gib | $Words] as [give $Obj to $Dest])
+	*(split $Words anywhere into $Left and $Right)
+	*(understand $Right as single object $Dest preferably animate)
+	*(understand $Left as object $Obj preferably held excluding $Dest)
+
+(understand [gib | $Words] as [give $Obj])
+	*(understand $Words as object $Obj preferably held)
+
+(unlikely [give $Obj to $Obj])
+
+(unlikely [give $Obj to $])
+	(current player $Player)
+	~($Obj has ancestor $Player)
+
+(unlikely [give $ to $Dest])
+	~(animate $Dest)
+
+(unlikely [give $])
+
+(perform [give $Obj])
+	To whom?
+	(asking for object in [give $Obj to []])
+
+(before [give $Obj to $])
+	(ensure $Obj is held)
+
+(prevent [give $Obj to $])
+	(when $Obj isn't directly held)
+
+(perform [give $ to $Dest])
+	(if) (animate $Dest) (then)
+		(Der $Dest ist) daran nicht interessiert.
+	(else)
+		(Einem $Dest) kannst du keine Dinge geben.
+	(endif)
+	(tick) (stop)
+
+%% SHOW <obj> TO <obj>
+%% SHOW <obj>
+
+(describe action [show $Obj to $Dest])
+	(den full $Obj) (dem $Dest) zeigen
+
+(describe action [show $Obj])
+	(den full $Obj) herzeigen
+
+(understand infinitive [zeigen] as Verb [zeig])
+
+(understand [zeig | $Words] as [show $Obj to $Dest])
+	*(split $Words anywhere into $Left and $Right)
+	*(understand $Left as single object $Dest preferably animate)
+	*(understand $Right as object $Obj preferably held excluding $Dest)
+
+(understand [zeig | $Words] as [show $Obj])
+	*(understand $Words as object $Obj preferably held)
+
+(unlikely [show $Obj to $Obj])
+
+(unlikely [show $Obj to $])
+	(item $Obj)
+	(current player $Actor)
+	~($Obj is nested #heldby $Actor)
+
+(unlikely [show $ to $Dest])
+	~(animate $Dest)
+
+(unlikely [show $])
+
+(refuse [show $Obj to $Person])
+	(just)
+	{
+		(when $Obj is not here)
+		(or) (when $Person is not here)
+		(or) (when $Obj is out of reach)
+	}
+
+(perform [show $Obj])
+	Wem?
+	(asking for object in [show $Obj to []])
+
+(before [show $Obj to $])
+	(item $Obj)
+	(ensure $Obj is held)
+
+(prevent [show $Obj to $])
+	(item $Obj)
+	(when $Obj isn't directly held)
+
+(perform [show $ to $Dest])
+	(if) (animate $Dest) (then)
+		(Der $Dest ist) scheinbar nicht interessiert daran.
+	(else)
+		(Dem $Dest) Dinge zu zeigen bringt nichts.
+	(endif)
+	(tick) (stop)
+
+%% OPEN <obj>
+
+(describe action [open $Obj])
+	(den full $Obj) öffnen
+
+(understand infinitive [öffnen/aufmachen] as Verb [öffne])
+
+(understand [öffne | $Words] as [open $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(understand [mach | $Words] as [open $Obj])
+	*(split $Words by [auf] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [pack | $Words] as [open $Obj])
+	*(split $Words by [aus] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(unlikely [open $Obj])
+	~(openable $Obj) (or) ($Obj is open)
+
+(before [open $Obj])
+	($Obj is closed)
+	($Obj is locked)
+	(current player $Player)
+	*($Key is nested #heldby $Player)
+	($Key unlocks $Obj)
+	~($Key is hidden)
+	(first try [unlock $Obj with $Key])
+
+(prevent [open $Obj])
+	~(openable $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht öffnen.
+
+(prevent [open (openable $Obj)])
+	($Obj is open)
+	(Der $Obj ist) schon offen.
+
+(prevent [open $Obj])
+	($Obj is locked)
+	(Der $Obj ist) verschlossen.
+
+(narrate opening $Obj)
+	Du öffnest (den $Obj)
+	(collect $Child)
+		*($Child is #in $Obj)
+		(reveal $Child)
+	(into $List)
+	(if) (nonempty $List) (then)
+		und entdeckst (einen $List)
+		(notice $List)
+	(endif)
+	.
+
+(perform [open $Obj])
+	(narrate opening $Obj)
+	(now) ($Obj is open)
+
+%% CLOSE <obj>
+
+(describe action [close $Obj])
+	(den full $Obj) schließen
+
+(understand infinitive [schließen/zumachen] as Verb [schließ])
+
+(understand [mach | $Words] as [close $Obj])
+	*(split $Words by [zu] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [pack | $Words] as [close $Obj])
+	*(split $Words by [ein] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [schließ | $Words] as [close $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(unlikely [close $Obj])
+	~(openable $Obj) (or) ($Obj is closed)
+
+(prevent [close $Obj])
+	~(openable $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht schließen.
+
+(prevent [close $Obj])
+	($Obj is closed)
+	(Der $Obj ist) schon geschlossen.
+
+(narrate closing $Obj)
+	Du schließt (den $Obj).
+
+(perform [close $Obj])
+	(narrate closing $Obj)
+	(now) ($Obj is closed)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% UNLOCK <obj> WITH <obj>
+%% UNLOCK <obj>
+
+(describe action [unlock $Obj with $Key])
+	(den full $Obj) mit (dem $Key) aufschließen
+
+(describe action [unlock $Obj])
+	(den full $Obj) aufschließen
+
+(understand infinitive [aufschließen/aufsperren] as Verb [öffne])
+
+(understand [öffne | $Words] as [unlock $Obj with $Key])
+	*(split $Words by [mit] into $Left and $Right)
+	*(understand $Left as non-all object $Obj)
+	*(understand $Right as single object $Key preferably held)
+
+(understand [schließ/mach/sperr | $Words] as [unlock $Obj with $Key])
+	*(split $Words by [auf] into $Left and $Right)
+	{
+		($Left = [])
+		*(split $Right by [mit] into $Was and $Ist)
+	(or)
+		($Right = [])
+		*(split $Left by [mit] into $Was and $Ist)
+	(or)
+		($Left = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Right)
+	(or) 
+		($Right = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Left)
+	}
+	*(understand $Was as non-all object $Obj)
+	*(understand $Ist as single object $Key preferably held)
+
+(understand [schließ/mach/sperr | $Words] as [unlock $Obj])
+	*(split $Words by [auf] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(unlikely [unlock $Obj | $])
+	~(lockable $Obj) (or) ($Obj is unlocked)
+
+(before [unlock $ with $Key])
+	(ensure $Key is held)
+
+(instead of [unlock $Obj])
+	(current player $Player)
+	*($Key is nested #heldby $Player)
+	($Key unlocks $Obj)
+	~($Key is hidden)
+	(line) \(mit (dem $Key)\) (line)
+	(try [unlock $Obj with $Key])
+
+(prevent [unlock $Obj | $])
+	~(lockable $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht aufschließen.
+
+(prevent [unlock (lockable $Obj) | $])
+	($Obj is unlocked)
+	(Der $Obj ist) schon aufgeschlossen.
+
+(perform [unlock $Obj])
+	Womit?
+	(asking for object in [unlock $Obj with []])
+
+(prevent [unlock $Obj with $Key])
+	~($Key unlocks $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht mit (dem $Key) öffnen.
+
+(narrate unlocking $Obj with $Key)
+	Du öffnest (den $Obj) mit (dem $Key).
+
+(perform [unlock $Obj with $Key])
+	(narrate unlocking $Obj with $Key)
+	(now) ($Obj is unlocked)
+
+%% LOCK <obj> WITH <obj>
+%% LOCK <obj>
+
+(describe action [lock $Obj with $Key])
+	(den full $Obj) mit (dem $Key) abschließen
+
+(describe action [lock $Obj])
+	(den full $Obj) abschließen
+
+(understand infinitive [verspererren/verschließen/absperren/abschließen] as Verb [verschließ])
+
+(rewrite [versperr | $Words] into [verschließ | $Words])
+
+(understand [schließ/sperr | $Words] as [lock $Obj with $Key])
+	*(split $Words by [ab zu] into $Left and $Right)
+	{
+		($Left = [])
+		*(split $Right by [mit] into $Was and $Ist)
+	(or)
+		($Right = [])
+		*(split $Left by [mit] into $Was and $Ist)
+	(or)
+		($Left = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Right)
+	(or) 
+		($Right = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Left)
+	}
+	*(understand $Was as non-all object $Obj)
+	*(understand $Ist as single object $Key preferably held)
+
+(understand [mach | $Words] as [lock $Obj with $Key])
+	*(split $Words by [zu] into $Left and $Right)
+	{
+		($Left = [])
+		*(split $Right by [mit] into $Was and $Ist)
+	(or)
+		($Right = [])
+		*(split $Left by [mit] into $Was and $Ist)
+	(or)
+		($Left = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Right)
+	(or) 
+		($Right = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Left)
+	}
+	*(understand $Was as non-all object $Obj)
+	*(understand $Ist as single object $Key preferably held)
+
+(understand [schließ | $Words] as [lock $Obj with $Key])
+	*(split $Words by [mit] into $Left and $Right)
+	*(understand $Left as non-all object $Obj)
+	*(understand $Right as single object $Key preferably held)
+
+(understand [verschließ | $Words] as [lock $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(unlikely [lock $Obj | $])
+	~(lockable $Obj)
+	(or) ($Obj is locked)
+
+(before [lock $ with $Key])
+	(ensure $Key is held)
+
+(instead of [lock $Obj])
+	(current player $Player)
+	*($Key is nested #heldby $Player)
+	($Key unlocks $Obj)
+	~($Key is hidden)
+	(line) \(mit (dem $Key)\) (line)
+	(try [lock $Obj with $Key])
+
+(prevent [lock $Obj | $])
+	~(lockable $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht verschließen.
+
+(prevent [lock (lockable $Obj) | $])
+	($Obj is locked)
+	(Der $Obj ist) schon verschlossen.
+
+(perform [lock $Obj])
+	Womit?
+	(asking for object in [lock $Obj with []])
+
+(prevent [lock $Obj with $Key])
+	~($Key unlocks $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht mit (dem $Key) abschließen.
+
+(narrate locking $Obj with $Key)
+	Du schließt (den $Obj) mit (dem $Key) ab.
+
+(perform [lock $Obj with $Key])
+	(narrate locking $Obj with $Key)
+	(now) ($Obj is locked)
+
+%% SWITCH ON <obj>
+
+(describe action [switch on $Obj])
+	(den full $Obj) anschalten
+
+(understand infinitive [einschalten/anschalten/aktivieren] as Verb [aktivier])
+
+(understand [mach | $Words] as [switch on $Obj])
+	*(split $Words by [an] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [dreh/stell/schalt | $Words] as [switch on $Obj])
+	*(split $Words by [an ein] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [aktivier | $Words] as [switch on $Obj])
+	*(understand $Words as single object $Obj)
+	(switchable $Obj)
+
+(understand [schalt | $Words] as [switch on $Obj])
+	*(understand $Words as single object $Obj)
+	(switchable $Obj)
+	($Obj is off)
+
+(unlikely [switch on $Obj])
+	~(switchable $Obj) (or) ($Obj is on)
+
+(describe action [switch on $Obj])
+	(den full $Obj) anzuschalten
+
+(prevent [switch on $Obj])
+	~(switchable $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht anschalten.
+
+(prevent [switch on $Obj])
+	($Obj is on)
+	(Der $Obj ist) schon an.
+
+(narrate switching on $Obj)
+	Du schaltest (den $Obj) an.
+
+(perform [switch on $Obj])
+	(narrate switching on $Obj)
+	(now) ($Obj is on)
+
+%% SWITCH OFF <obj>
+
+(describe action [switch off $Obj])
+	(den full $Obj) abschalten
+
+(understand infinitive [abschalten/ausschalten/deaktivieren] as Verb [deaktivier])
+
+(understand [schalt/dreh/stell | $Words] as [switch off $Obj])
+	*(split $Words by [ab aus] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [mach | $Words] as [switch off $Obj])
+	*(split $Words by [aus] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [schalt | $Words] as [switch off $Obj])
+	*(understand $Words as single object $Obj)
+	(switchable $Obj)
+	($Obj is on)
+
+(understand [deaktivier | $Words] as [switch off $Obj])
+	*(understand $Words as single object $Obj)
+	(switchable $Obj)
+
+(unlikely [switch off $Obj])
+	~(switchable $Obj) (or) ($Obj is off)
+
+(describe action [switch off $Obj])
+	(den full $Obj) auszuschalten
+
+(prevent [switch off $Obj])
+	($Obj is off)
+	(Der $Obj ist) schon aus.
+
+(prevent [switch off $Obj])
+	~(switchable $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht ausschalten.
+
+(narrate switching off $Obj)
+	Du schaltest (den $Obj) aus.
+
+(perform [switch off $Obj])
+	(narrate switching off $Obj)
+	(now) ($Obj is off)
+
+%% SQUEEZE <obj>
+
+(describe action [squeeze $Obj])
+	(den full $Obj) zerdrücken
+
+(understand infinitive [zerdrücken/zerquetschen/quetsch] as Verb [quetsch])
+
+(rewrite [zerdrück | $Words] into [quetsch | $Words])
+
+(understand [quetsch | $Words] as [squeeze $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(perform [squeeze $Obj])
+	Du gibst (dem $Obj) einen festen Druck.
+
+%% FIX <obj>
+
+(rewrite [restaurier | $Words] into [reparier | $Words])
+
+(understand [stell | $Words] as [fix $Obj])
+	*(split $Words by [wieder] into $Left and $Right)
+	{
+		($Right = [her])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [reparier | $Words] as [fix $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(unlikely [fix $Obj])
+	($Obj is in order)
+
+(prevent [fix $Obj])
+	($Obj is in order)
+	Du kannst an (dem $Obj) keinen Fehler feststellen.
+
+(perform [fix $Obj])
+	Du hast keine Ahnung, ob sich (der $Obj) reparieren lässt.
+	(tick) (stop)
+
+%% TASTE <obj>
+
+(describe action [taste $Obj])
+	(den full $Obj) probieren
+
+(understand infinitive [lecken/schlecken/probieren] as Verb [probier])
+
+(rewrite [leck/schleck | $Words] into [probier | $Words])
+
+(understand [probier | $Words] as [taste $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(unlikely [taste $Obj])
+	~(edible $Obj)
+	~(potable $Obj)
+
+(prevent [taste $Obj])
+	~(edible $Obj)
+	~(potable $Obj)
+	Igitt!
+
+(perform [taste $Obj])
+	Du genießt den Geschmack (des $Obj).
+
+%% FLY
+
+(describe action [fly])
+	fliegen
+
+(understand infinitive [fliegen/schweben] as Verb [schweb])
+
+(understand [schweb/flieg] as [fly])
+
+(perform [fly])
+	Dir fehlt die Fähigkeit dazu.
+
+%% BITE <obj>
+
+(understand infinitive [kauen/beißen] as Verb [beiß])
+
+(rewrite [kau | $Words] into [beiß | $Words])
+(rewrite [kau an | $Words] into [beiß | $Words])
+(rewrite [beiß in | $Words] into [beiß | $Words])
+
+(understand [beiß | $Words] as [bite $Obj])
+	*(understand $Words as single object $Obj)
+
+(perform [bite (animate $Obj)])
+	(try [attack $Obj])
+
+(perform [bite $Obj])
+	(try [eat $Obj])
+
+%% EAT <obj>
+
+(describe action [eat $Obj])
+	(den full $Obj) essen
+
+(understand infinitive [essen/verschlingen] as Verb [iss])
+
+(understand [ess/verschling/iss | $Words] as [eat $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(understand [iss | $Words] as [eat $Obj])
+	*(split $Words by [auf] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(unlikely [eat $Obj])
+	~(edible $Obj)
+	~(potable $Obj)
+
+(before [eat $Obj])
+	(item $Obj)
+	(ensure $Obj is held)
+
+(instead of [eat $Obj])
+	~(edible $Obj)
+	(potable $Obj)
+	(try [drink $Obj])
+
+(prevent [eat $Obj])
+	(current player $Player)
+	{
+		($Obj = $Player)
+	(or)
+		($Obj is part of $Player)
+	}
+	Kannibalismus ist hier nicht die Lösung.
+
+(prevent [eat $Obj])
+	~(edible $Obj)
+	(Der $Obj ist) ungenießbar.
+
+(prevent [eat $Obj])
+	(item $Obj)
+	(when $Obj isn't directly held)
+
+(narrate eating $Obj)
+	Du isst (den $Obj).
+
+(perform [eat $Obj])
+	(narrate eating $Obj)
+	(now) ($Obj is nowhere)
+	(now) ($Obj is handled)
+
+%% DRINK <obj>
+
+(describe action [drink $Obj])
+	(den full $Obj) trinken
+
+(understand infinitive [trinken/schlucken/verschlucken] as Verb [trink])
+(understand infinitive [nippen] as Verb [nipp])
+
+(rewrite [nipp/schluck/verschluck | $Words] into [trink | $Words])
+
+(understand [nipp | $Words] as [drink $Obj])
+	*(split $Words by [an] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as non-all object $Obj)
+	(or)
+		($Right = [])
+		*(understand $Left as non-all object $Obj)
+	}
+
+(understand [trink | $Words] as [drink $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(unlikely [drink $Obj])
+	~(potable $Obj)
+
+(before [drink $Obj])
+	(item $Obj)
+	(ensure $Obj is held)
+
+(prevent [drink $Obj])
+	~(potable $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht trinken.
+
+(prevent [drink $Obj])
+	(item $Obj)
+	(when $Obj isn't directly held)
+
+(perform [drink $Obj])
+	Du genießt einen Schluck von (den $Obj).
+
+%% CUT <obj> WITH <obj>
+%% CUT <obj>
+
+(describe action [cut $Obj with $Tool])
+	(den full $Obj) mit (dem $Tool) abschneiden
+
+(describe action [lock $Obj])
+	(den full $Obj) abschneiden
+
+(understand infinitive [trennen/durchtrennen/durchschneiden/kürzen/abschneiden] as Verb [schneid])
+
+(rewrite [trenn/durchtrenn/durchschneid/kürz | $Words] into [schneid | $Words])
+
+(understand [schneid/trenn | $Words] as [cut $A with $B])
+	*(split $Words by [durch ab] into $Left and $Right)
+	{
+		($Left = [])
+		*(split $Right by [mit] into $Was and $Ist)
+	(or)
+		($Right = [])
+		*(split $Left by [mit] into $Was and $Ist)
+	(or)
+		($Left = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Right)
+	(or) 
+		($Right = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Left)
+	}
+	*(understand $Was as non-all object $A)
+	*(understand $Ist as single object $B)
+
+(understand [schneid | $Words] as [cut $A with $B])
+	*(split $Words by [mit] into $Left and $Right)
+	*(understand $Left as non-all object $A)
+	*(understand $Right as single object $B)
+
+(understand [schneid | $Words] as [cut $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(unlikely [cut $ with $Obj])
+	~(sharp $Obj)
+
+(perform [cut $Obj])
+	With what?
+	(asking for object in [cut $Obj with []])
+
+(prevent [cut $ with $Obj])
+	~(sharp $Obj)
+	(Der $Obj ist) dafür zu stumpf. %% Funny when Obj is the player.
+
+(perform [cut $Obj with $])
+	Du erwägst (den $Obj)
+	(if) ($Obj is part of $Player) (current player $Player) (then)
+		ab
+	(else)
+		auseinander
+	(endif)
+	zu schneiden, verwirfst die Idee aber wieder.
+
+%% USE <obj>
+
+(describe action [use $Obj])
+	(den full $Obj) benutzen
+
+(understand infinitive [benutzen] as Verb [benutz])
+
+(understand [benutz | $Words] as $Action)
+	*(understand $Words as single object $Obj)
+	(if)
+		(implicit action is $Implicit)
+		~(implicit action wants direction)
+	(then)
+		(recover implicit action $Implicit $Obj into $Action)
+	(else)
+		($Action = [use $Obj])
+	(endif)
+
+(instead of [use (door $Door)])
+	(try [enter $Door])
+
+(perform [use $])
+	Wie? Sei bitte etwas präziser.
+	(stop)
+
+%% CONSULT <obj> ABOUT <topic>
+
+(describe action [consult $Obj about $Topic])
+	in (dem $Obj) nach (describe topic $Topic) suchen
+
+(understand infinitive [nachschlagen/nachschauen/konsultieren] as Verb [konsultier])
+
+(understand [schlag/schau | $Words] as [consult $Obj about $Topic])
+	*(split $Words by [nach] into $Left and $Right)
+	{
+		($Left = [])
+		*(split $Right by [in] into $Was and $Ist)
+	(or)
+		($Right = [])
+		*(split $Left by [in] into $Was and $Ist)
+	(or)
+		($Left = [in | $Rest])
+		($Ist = $Rest)
+		($Was = $Right)
+	(or) 
+		($Right = [in | $Rest])
+		($Ist = $Rest)
+		($Was = $Left)
+	}
+	*(understand $Was as topic $Topic)
+	*(understand $Ist as single object $Obj)
+
+(understand [find | $Words] as [consult $Obj about $Topic])
+	*(split $Words by [in] into $Left and $Right)
+	*(understand $Left as single object $Obj)
+	*(understand $Right as topic $Topic)
+
+(understand [konsultier | $Words] as [consult $Obj about $Topic])
+	*(split $Words by [über] into $Left and $Right)
+	*(understand $Left as single object $Obj)
+	*(understand $Right as topic $Topic)
+
+(describe action [consult $Obj about $Topic])
+	in (dem full $Obj) (describe topic $Topic) nachzuschlagen
+
+(refuse [consult $Obj about $])
+	(just) {
+		(when $Obj is not here)
+		(or) (when $Obj is out of reach)
+	}
+
+(prevent [consult $Obj about $])
+	~(consultable $Obj)
+	In (dem $Obj) (lässt sich $Obj) nichts nachschlagen.
+
+(perform [consult $Obj about $Topic])
+	Du findest keine Information über (describe topic $Topic) in (dem $Obj).
+
+%% ASK/TELL <obj> ABOUT <topic> (redirected to TALK TO by default)
+
+(describe action [ask $Obj about $Topic])
+	(describe person $Obj) nach (describe topic $Topic) fragen
+
+(describe action [tell $Obj about $Topic])
+	(describe dative person $Obj) von (describe topic $Topic) erzählen
+
+(understand infinitive [fragen/befragen] as Verb [frag])
+(understand infinitive [sagen] as Verb [sag])
+(understand infinitive [erzählen] as Verb [erzähl])
+
+(understand [frag/befrag | $Words] as [ask $Person about $Topic])
+	*(split $Words by [nach über] into $Left and $Right)
+	*(understand $Left as single object $Person preferably animate)
+	*(understand $Right as topic $Topic)
+
+(understand [erzähl | $Words] as [tell $Person about $Topic])
+	*(split $Words by [über von] into $Left and $Right)
+	*(understand $Left as single object $Person preferably animate)
+	*(understand $Right as topic $Topic)
+
+(understand [sag | $Words] as [tell $Person about $Topic])
+	*(split $Words by [zu] into $Left and $Right)
+	*(understand $Left as topic $Topic)
+	*(understand $Right as single object $Person preferably animate)
+
+(understand [red/sprech/sprich mit | $Words] as [tell $Person about $Topic])
+	*(split $Words by [über] into $Left and $Right)
+	*(understand $Left as single object $Person preferably animate)
+	*(understand $Right as topic $Topic)
+
+(describe action [ask $Person about $Topic])
+	(describe person $Person) nach (describe topic $Topic) fragen
+
+(describe action [tell $Person about $Topic])
+	(describe person $Person) von (describe topic $Topic) erzählen
+
+(understand [frag | $Words] as [ask $Obj])
+	*(understand $Words as single object $Obj preferably animate)
+
+(understand [erzähl | $Words] as [tell $Obj])
+	*(understand $Words as single object $Obj preferably animate)
+
+(describe action [ask $Person])
+	(describe person $Person) nach etwas fragen
+
+(describe action [tell $Person])
+	(describe person $Person) etwas erzählen
+
+%% Don't require reachability:
+
+(refuse [ask $Obj | $])
+	(just) (when $Obj is not here)
+
+(refuse [tell $Obj about $])
+	(just) (when $Obj is not here)
+
+(refuse [tell $Obj])
+	(just) (when $Obj is not here)
+
+(perform [ask $Person about $])
+	(try [talk to $Person])
+
+(perform [tell $Person about $])
+	(try [talk to $Person])
+
+(perform [ask $Obj])
+	(try [talk to $Obj])
+
+(perform [tell $Obj])
+	(try [talk to $Obj])
+
+%% TALK TO <obj>
+%% TALK
+
+(describe action [talk to $Obj])
+	mit (describe dative person $Obj) reden
+
+(describe action [talk])
+	reden
+
+(understand infinitive [reden] as Verb [red])
+(understand infinitive [sprechen] as Verb [sprech])
+
+(understand [red/sprich/sprech mit | $Words] as [talk to $Obj])
+	*(understand $Words as single object $Obj preferably animate)
+
+(understand [red] as [talk])
+
+(unlikely [talk to $Obj])
+	~(animate $Obj)
+
+(perform [talk])
+	Mit wem?
+	(asking for object in [talk to []])
+
+%% Don't require reachability:
+
+(refuse [talk to $Obj])
+	(just) (when $Obj is not here)
+
+(perform [talk to (current player $)])
+	Du sprichst dir wenige ausgewählte Worte zu.
+
+(perform [talk to $])
+	Du bekommst keine Antwort.
+
+%% CURSE
+
+(understand infinitive [fluchen/schimpfen] as Verb [fluch])
+
+(understand [fluch/schmipf/mist/kacke/shit/fuck/scheiße] as [curse])
+
+(perform [curse])
+	Du sprichst wenige ausgewählte Worte laut aus.
+
+%% SHOUT TO <obj> (redirected to TALK TO by default)
+%% SHOUT (redirected to TALK by default)
+
+(describe action [shout to $Obj])
+	(describe dative person $Obj) schreien
+
+(describe action [shout])
+	schreien
+
+(rewrite [brüll | $Words] into [schrei | $Words])
+
+(understand [schrei | $Words] as [shout to $Obj])
+	*(split $Words by [an] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as single object $Obj preferably animate)
+	(or)
+		($Right = [])
+		*(understand $Left as single object $Obj preferably animate)
+	}
+
+(unlikely [shout to $Obj])
+	~(animate $Obj)
+
+(refuse [shout to $Obj])
+	(just) (when $Obj is not here)
+
+(perform [shout to $Obj])
+	(try [talk to $Obj])
+
+(understand [schrei] as [shout])
+
+(perform [shout])
+	Wem?
+	(asking for object in [shout to []])
+
+%% PRAY
+
+(describe action [pray])
+	beten
+
+(understand infinitive [beten] as Verb [bet])
+
+(understand [bet] as [pray])
+(understand [schick ein gebet] as [pray])
+
+(perform [pray])
+	Du schickst ein Gebet zum Himmel.
+
+%% SHRUG
+
+(describe action [shrug])
+	die Schultern zucken
+
+(understand [zuck mit der schulter/achsel] as [shrug])
+
+(perform [shrug])
+	Du zuckst ungewiss mit deiner Schulter.
+
+%% CALL <obj> (redirected to SHOUT TO by default)
+%% CALL (redirected to SHOUT by default)
+%% Stories containing a phone would override these.
+
+(describe action [call $Obj])
+	(den full $Obj) rufen
+
+(describe action [call])
+	rufen
+
+(understand infinitive [rufen] as Verb [ruf])
+
+(understand [ruf | $Words] as [call $Obj])
+	*(split $Words by [an] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as single object $Obj preferably animate)
+	(or)
+		($Right = [])
+		*(understand $Left as single object $Obj preferably animate)
+	}
+
+(understand [ruf | $Words] as [call $Obj])
+	*(understand $Words as single object $Obj preferably animate)
+
+(unlikely [call $Obj])
+	~(animate $Obj)
+
+(refuse [call $Obj])
+	(just) (when $Obj is not here)
+
+(perform [call $Obj])
+	(try [shout to $Obj])
+
+(understand [ruf an] as [call])
+
+(perform [call])
+	Wen?
+	(asking for object in [call []])
+
+%% GREET <obj> (redirected to TALK TO by default)
+%% GREET
+
+(describe action [greet $Obj])
+	(den full $Obj) grüßen
+
+(describe action [greet])
+	grüßen
+
+(understand infinitive [begrüßen/grüßen] as Verb [begrüß])
+
+(understand [begrüß/grüß/hallo/hi | $Words] as [greet $Obj])
+	*(understand $Words as single object $Obj preferably animate)
+
+(understand [sag hallo/hi zu | $Words] as [greet $Obj])
+	*(understand $Words as single object $Obj preferably animate)
+
+(unlikely [greet $Obj])
+	~(animate $Obj)
+
+(refuse [greet $Obj])
+	(just) (when $Obj is not here)
+
+(perform [greet $Obj])
+	(try [talk to $Obj])
+
+(understand [greet])
+
+(perform [greet])
+	Du wirfst ein Hallo in die Runde.
+
+%% TELL <obj> TO | <action>
+
+(understand infinitive [sagen] as Verb [sag])
+(understand infinitive [bitten] as Verb [bitt])
+
+(understand [sag/bitt | $Words] as [tell $Actor to | $Action])
+	*(split $Words by [er sie es] into $Left and $Right)
+	*(understand $Left as single object $Actor preferably animate)
+	*(split $Right by [soll möchte sollte könnte kann] into $ and $Order)
+	(rewrite $Order into $Simplified)
+	*(understand $Simplified as $Action)
+
+(understand [bitt | $Words] as [tell $Actor to | $Action])
+	*(split $Words by [,] into $Left and $Right)
+	*(understand $Left as single object $Actor preferably animate)
+	(rewrite $Right into $Simplified)
+	*(understand $Simplified as $Action)
+
+(understand [bitt | $Words] as [tell $Actor to give $Obj to $Player])
+	*(split $Words by [um] into $Left and $Right)
+	*(understand $Left as single object $Actor preferably animate)
+	*(understand $Right as object $Obj preferably child of $Actor)
+	(current player $Player)
+
+%% The rule for "name comma action" is further down in the file.
+
+(unlikely [tell $Addressee to | $])
+	~(animate $Addressee)
+
+(describe action [tell $Actor to give $Obj to (current player $)])
+	(describe person $Actor) um (den full $Obj) bitten
+
+(describe action [tell $Actor to | $Action])
+	(describe person $Actor) sagen, (er $Actor) (soll $Actor) (describe action $Action)
+
+(refuse [tell $NPC to | $])
+	(just) (when $NPC is not here)
+
+(instead of [tell $NPC to greet])
+	(try [greet $NPC])
+
+(perform [tell $Actor to | $])
+	(if) (animate $Actor) (then)
+		(Der $Actor) weigert sich.
+	(else)
+		(Der $Actor) (nimmt $Actor) keine Befehle entgegen.
+	(endif)
+
+%% SMELL <obj>
+
+(describe action [smell $Obj])
+	an (dem $Obj) riechen
+
+(understand infinitive [schnüffeln] as Verb [schnüffel])
+(understand infinitive [riechen] as Verb [riech])
+
+(rewrite [schnüffel/riech an | $Words] into [riech | $Words])
+
+(understand [riech/schnüffel | $Words] as [smell $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(refuse [smell $Obj])
+	(just) (when $Obj is not here)
+
+(perform [smell $Obj])
+	(Der $Obj) riecht wie erwartet.
+
+(understand [smell])
+
+(perform [smell])
+	Du atmest ein und riechst nichts Ungewöhnliches.
+
+%% WAKE UP
+
+(describe action [wake up])
+	aufwachen
+
+(understand infinitive [erwachen/aufwachen/zwicken] as Verb [wach auf])
+
+(understand [wach auf] as [wake up])
+
+(understand [zwick/weck | $Words] as [wake up])
+	*(understand $Words as single object $Obj)
+	(current player $Player)
+	{
+		($Obj = $Player)
+	(or)
+		($Obj is part of $Player)
+	}
+
+(perform [wake up])
+	Du versuchst aufzuwachen, aber es hat sich nichts verändert.
+
+%% CLIMB <obj>
+
+(understand infinitive [klettern] as Verb [kletter])
+(understand infinitive [erklimmen/ersteigen/erklettern] as Verb [erkletter])
+
+(understand [kletter | $Words] as [climb $Obj])
+	*(split $Words by [hoch] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as single object $Obj preferably supporter)
+	(or)
+		($Right = [])
+		*(understand $Left as single object $Obj preferably supporter)
+	}
+
+(understand [sitz/steh/geh/steig auf | $Words] as [climb $Obj])
+	*(understand $Words as single object $Obj preferably supporter)
+
+(understand [setz dich auf | $Words] as [climb $Obj])
+	*(understand $Words as single object $Obj preferably supporter)
+
+(understand [erkletter/erklimm/ersteig | $Words] as [climb $Obj])
+	*(understand $Words as single object $Obj preferably supporter)
+
+(unlikely [climb $Obj])
+	~(actor supporter $Obj)
+
+(unlikely [climb $Obj])
+	(current player $Actor)
+	($Obj has ancestor $Actor)
+
+(unlikely [climb $Obj])
+	(current player $Actor)
+	($Actor is nested #on $Obj)
+
+(describe action [climb $Obj])
+	auf (den full $Obj) zu klettern
+
+(instead of [climb (room $Room)])
+	~(actor supporter $Room)
+	(try [go #up])
+
+(instead of [climb (actor container $Obj)])
+	~(actor supporter $Obj)
+	(seat $Obj)
+	(try [enter $Obj])
+
+(prevent [climb $Obj])
+	(current player $Actor)
+	{
+		(when $Actor is already #on $Obj)
+		(or) (when $Obj won't accept actor #on)
+	}
+
+(prevent [climb $Dest])
+	(current player $Actor)
+	($Dest is nested #in $Actor)
+	Das geht schlecht, solange du (den $Dest) bei dir hast.
+
+(narrate climbing $Obj)
+	Du bist nun auf (dem $Obj).
+
+(perform [climb $Obj])
+	(narrate climbing $Obj)
+	(current player $Actor)
+	(now) ($Actor is #on $Obj)
+
+%% ENTER <obj>
+
+(understand infinitive [betreten] as Verb [betritt])
+(understand infinitive [steigen] as Verb [steig])
+(understand infinitive [klettern] as Verb [kletter])
+(understand infinitive [setzen] as Verb [setz])
+(understand infinitive [liegen] as Verb [lieg])
+(understand infinitive [gelangen] as Verb [gelang])
+
+(understand [betritt/betret | $Words] as [enter $Obj])
+	*(understand $Words as single object $Obj preferably container)
+
+(understand [geh/spring/gelang/sitz/kletter/lieg/sitz/steig in/durch | $Words] as [enter $Obj])
+	*(understand $Words as single object $Obj preferably container)
+
+(understand [setz dich in | $Words] as [enter $Obj])
+	*(understand $Words as single object $Obj preferably container)
+
+(understand [geh | $Words] as [enter $Obj])
+	*(understand $Words as single object $Obj)
+	{ (door $Obj) (or) ~(room $Obj) (actor container $Obj) }
+
+(unlikely [enter $Obj])
+	~(actor container $Obj)
+	~(door $Obj)
+
+(unlikely [enter $Obj])
+	(current player $Actor)
+	($Obj has ancestor $Actor)
+
+(unlikely [enter $Obj])
+	(current player $Actor)
+	($Actor is nested #in $Obj)
+
+(describe action [enter $Obj])
+	in (den full $Obj) steigen
+
+~(refuse [enter (room $)])
+
+(instead of [enter (room $Room)])
+	(current room $Here)
+	~($Here = $Room)
+	(if)
+		(from $Here go $Dir to $Room)
+	(or)
+		(from $Here through $Door to $Room)
+		(from $Here go $Dir to $Door)
+	(then)
+		(direction $Dir) %% Assure the compiler that $Dir is bound.
+		(try [go $Dir])
+	(else)
+		(Der $Room ist) nicht hier.
+		(tick) (stop)
+	(endif)
+
+(instead of [enter (door $Obj)])
+	(current room $Room)
+	(from $Room go $Dir to $Obj)
+	(direction $Dir) %% Assure the compiler that $Dir is bound.
+	(try [go $Dir])
+
+(instead of [enter (wearable $Obj)])
+	(try [wear $Obj])
+
+(instead of [enter (actor supporter $Obj)])
+	~(actor container $Obj)
+	(seat $Obj)
+	(try [climb $Obj])
+
+(prevent [enter $Obj])
+	(current player $Actor)
+	{
+		(when $Actor is already #in $Obj)
+		(or) (prevent entering $Obj)
+	}
+
+(prevent [enter $Dest])
+	(current player $Actor)
+	($Dest is nested #in $Actor)
+	Das geht schlecht, solange du (den $Dest) bei dir hast.
+
+(perform [enter $Obj])
+	(narrate entering $Obj)
+	(current player $Actor)
+	(now) ($Actor is #in $Obj)
+
+%% SIT
+
+(describe action [sit])
+	hinsetzen
+
+(understand [setz dich] as [sit])
+(understand [sitz] as [sit])
+
+(unlikely [sit])
+
+(perform [sit])
+	Worauf?
+	(asking for object in [climb []])
+
+%% STAND
+
+(rewrite [steh auf] into [steh])
+
+(understand [steh] as [stand])
+
+(describe action [stand])
+	aufzustehen
+
+(instead of [stand])
+	(current player $Player)
+	($Player has parent $Obj)
+	~(room $Obj)
+	(try [leave $Obj])
+
+(perform [stand])
+	Du stehst schon.
+	(tick) (stop)
+
+%% LEAVE <obj>
+%% LEAVE
+
+(describe action [leave])
+	weggehen
+
+(describe action [leave $Obj])
+	(den full $Obj) verlassen
+
+(understand infinitive [verlassen] as Verb [verlass])
+(understand infinitive [fliehen] as Verb [flieh])
+
+(understand [verlass | $Words] as [leave $Obj])
+	*(understand $Words as single object $Obj)
+
+(understand [geh/flieh/spring aus | $Words] as [leave $Obj])
+	*(understand $Words as single object $Obj preferably container)
+
+(understand [geh/flieh/spring von | $Words] as [leave $Obj])
+	*(understand $Words as single object $Obj preferably supporter)
+
+(understand [geh] as [leave])
+(understand [geh raus] as [leave])
+
+(understand [geh runter] as [leave])
+	(current player $Player)
+	($Player has relation #on)
+
+(understand [spring runter] as [leave])
+	(current player $Player)
+	($Player has relation #on)
+
+(describe action [leave $Obj])
+	(current player $Player)
+	($Player is $Rel $Obj)
+	(reverse-name $Rel) (den full $Obj) zu verlassen
+
+(describe action [leave])
+	(current player $Player)
+	($Player is $Rel $Obj)
+	~(room $Obj)
+	(reverse-name $Rel) (den full $Obj) zu verlassen
+
+(unlikely [leave $Obj])
+	(current player $Actor)
+	~{
+		($Actor has ancestor $Obj)
+	(or)
+		($Obj is nested #wornby $Actor)
+	}
+
+(refuse [leave (room $Room)])
+	~(current room $Room)
+	Aber du bist gar nicht in (dem $Room).
+
+(perform [leave])
+	(current player $Player)
+	($Player has parent $Obj)
+	(if) (room $Obj) (then)
+		(try [go #out])
+	(else)
+		(try [leave $Obj])
+	(endif)
+
+(before [leave $Obj])
+	(current player $Actor)
+	($Actor has ancestor $Obj)
+	(recursively leave descendants of $Obj)
+
+(instead of [leave $Obj])
+	(current player $Actor)
+	($Obj is nested #wornby $Actor)
+	(try [remove $Obj])
+
+(instead of [leave (current room $)])
+	(try [go #out])
+
+(prevent [leave $Obj])
+	(current player $Player)
+	~($Player has parent $Obj)
+	Du bist nicht
+	(if) (supporter $Obj) (then)
+		(if) (container $Obj) (then)
+			in
+		(endif)
+		auf
+	(else)
+		in
+	(endif)
+	(dem $Obj).
+
+(narrate leaving $Obj)
+	Du verlässt (den $Obj).
+
+(perform [leave $Obj])
+	(narrate leaving $Obj)
+	(current player $Player)
+	($Obj is $NewRel $NewObj)
+	(now) ($Player is $NewRel $NewObj)
+
+%% GO TO <room>
+
+%% It is only possible to go to visited rooms and non-hidden objects in this
+%% way.
+
+(describe action [go to $Room])
+	(den $Room) aufsuchen
+
+(understand infinitive [nähern] as Verb [näher])
+
+(rewrite [geh zu | $Words] into [geh in | $Words])
+(rewrite [näher dich | $Words] into [geh in | $Words])
+
+(understand [geh in | $Words] as [go to $Room])
+	(filter $Words into $Filtered)
+	(nonempty $Filtered)
+	(determine object $Room)
+		*(room $Room)
+		($Room is visited)
+	(from words)
+		*(dict $Room)
+	(matching all of $Filtered)
+
+(understand [such | $Words] as [go to $Room])
+	*(split $Words by [auf] into $Left and $Right)
+	{
+		($Left = [])
+		(filter $Right into $Filtered)
+		(nonempty $Filtered)
+		(determine object $Room)
+			*(room $Room)
+			($Room is visited)
+		(from words)
+			*(dict $Room)
+		(matching all of $Filtered)
+	(or)
+		($Right = [])
+		(filter $Left into $Filtered)
+		(nonempty $Filtered)
+		(determine object $Room)
+			*(room $Room)
+			($Room is visited)
+		(from words)
+			*(dict $Room)
+		(matching all of $Filtered)
+	}
+
+(unlikely [go to (current room $)])
+
+~(refuse [go to $])
+
+(perform [go to $Room])
+	(current room $Here)
+	(if) ($Here = $Room) (then)
+		Du bist schon in (dem $Room).
+		(tick) (stop)
+	(elseif) (shortest path from $Here to $Room is $Path) (then)
+		(exhaust) {
+			*($Dir is one of $Path)
+			(line) \( nach (name $Dir) gehen \) (line)
+			(try [go $Dir])
+			(tick)
+			(par)
+		}
+		(inhibit next tick)
+	(else)
+		Du weißt nicht, wie du von hier zu (dem $Room) gelangst.
+		(tick) (stop)
+	(endif)
+
+%% FIND <obj>
+
+%% FIND takes the player to the room that currently contains the object.
+%% For objects that move around autonomously, it may be a good idea to override
+%% this rule, to say e.g. "you don't know where the cat might be right now".
+%% Note that floating objects, including doors, will remain in the room where
+%% they were last encountered. This will usually put the player on the expected
+%% side of doors.
+
+(describe action [find $Obj])
+	(den full $Obj) finden
+
+(understand infinitive [finden] as Verb [find])
+(understand infinitive [suchen] as Verb [such])
+
+(understand [find | $Words] as [find $Obj])
+	{
+		(filter $Words into $Filtered)
+		(nonempty $Filtered)
+		(determine object $Obj)
+			*(object $Obj)
+			~(direction $Obj)
+			~(relation $Obj)
+			~($Obj is in scope) %% Prevent double matches due to next branch.
+			~($Obj is hidden)
+			($Obj is in room $Room)
+			($Room is visited)
+		(from words)
+			*(dict $Obj)
+		(matching all of $Filtered)
+	(or)
+		%% The purpose of this branch is to support pronouns, as well
+		%% as not-here objects that are in scope.
+		*(understand $Words as single object $Obj)
+		~(room $Obj)
+	}
+	
+(understand [such nach | $Words] as [find $Obj])
+	{
+		(filter $Words into $Filtered)
+		(nonempty $Filtered)
+		(determine object $Obj)
+			*(object $Obj)
+			~(direction $Obj)
+			~(relation $Obj)
+			~($Obj is in scope) %% Prevent double matches due to next branch.
+			~($Obj is hidden)
+			($Obj is in room $Room)
+			($Room is visited)
+		(from words)
+			*(dict $Obj)
+		(matching all of $Filtered)
+	(or)
+		%% The purpose of this branch is to support pronouns, as well
+		%% as not-here objects that are in scope.
+		*(understand $Words as single object $Obj)
+		~(room $Obj)
+	}
+
+(unlikely [find $Obj])
+	($Obj is nowhere)
+
+~(refuse [find $])
+
+(prevent [find (not here $Obj)])
+	Du weißt nicht, wo sich (der $Obj) befindet.
+
+(prevent [find $Obj])
+	(when $Obj is already held)
+
+(prevent [find $Obj])
+	($Obj is in room $Room)
+	(current room $Room)
+	(Der $Obj ist) 
+	(if) ($Obj is $Rel $Loc) ~(room $Loc) (then)
+		(name $Rel) (dem $Loc)
+	(else)
+		hier
+	(endif)
+	.
+
+(prevent [find $Obj])
+	($Obj is in room $Room)
+	(current room $Here)
+	~(shortest path from $Here to $Room is $)
+	Du weißt nicht, wie man von hier zu (dem $Obj) gelangt.
+
+(perform [find $Obj])
+	(if) ($Obj is in room $Room) (then)
+		(line) \( zu (dem $Room) gehen \) (line)
+		(try [go to $Room])
+	(else)
+		Du hast keine Ahnung, wo du (den $Obj) findest.
+	(endif)
+
+%% Navigation by direction:
+
+%% What the player types is eventually translated into one of:
+
+%% [leave $Room $Dir]
+%% [leave $Room $Dir by $Vehicle]
+%% [leave $Room $Dir with $Obj]
+
+%% These are generally the ones to override/extend.
+
+%% The default rules for the aforementioned actions invoke '(prevent entering
+%% $Room)' and '(narrate entering $Room)'. These predicates can of course also
+%% be overridden. Thus, entering a room is not an action of its own, but is
+%% an inherent part of leaving a room.
+
+%% GO <direction>
+
+(describe action [go $Dir])
+	nach (den $Dir) gehen
+
+(rewrite [kriech | $Words] into [geh | $Words])
+
+%% The rule for just typing a list of directions (without a verb) is further
+%% down in the file.
+
+(understand infinitive [gehen] as Verb [geh])
+(understand infinitive [gelangen] as Verb [gelang])
+
+(understand [geh weiter nach | $Words] as [go $Dir])
+	*(understand $Words as direction $Dir)
+
+(understand [geh nach | $Words] as [go $Dir])
+	*(understand $Words as direction $Dir)
+
+(understand [geh | $Words] as [go $Dir])
+	*(understand $Words as direction $Dir)
+
+(understand [gelang nach | $Words] as [go $Dir])
+	*(understand $Words as direction $Dir)
+
+(understand [kletter nach | $Words] as [go $Dir])
+	*(understand $Words as direction $Dir)
+
+(understand [beweg dich nach | $Words] as [go $Dir])
+	*(understand $Words as direction $Dir)
+
+(understand [geh] as [go #out])
+
+(understand [raus] as [go #out])
+(understand [hinaus] as [go #out])
+(understand [rein] as [go #in])
+(understand [hinein] as [go #in])
+
+(understand [kletter hoch] as [go #up])
+(understand [geh hoch] as [go #up])
+(understand [hoch] as [go #up])
+
+(understand [kletter runter] as [go #down])
+(understand [geh runter] as [go #down])
+(understand [runter] as [go #down])
+
+(unlikely-complex [go $DirList])
+	(just)
+	(if) (direction $DirList) (then)
+		($Dir = $DirList)
+	(else)
+		%% Only consider the first direction in the list.
+		([+ $Dir | $] = $DirList)
+	(endif)
+	(current room $Room)
+	~{
+		(from $Room go $Dir to $Target)
+		{ (room $Target) (or) (door $Target) (or) (direction $Target) }
+	}
+
+(before [go $Dir])
+	(current player $Actor)
+	~{ ($Dir = #down) ($Actor has relation #on) }
+	~{ ($Dir = #out) ($Actor has relation #in) }
+	~{ ($Dir = #up) ($Actor has parent $Parent) (seat $Parent) }
+	(recursively leave non-vehicles)
+
+(before [go $Dir])
+	(current player $Actor)
+	~{ ($Dir = #down) ($Actor has relation #on) }
+	~{ ($Dir = #out) ($Actor has relation #in) }
+	(current room $Room)
+	(from $Room go $Dir to $Target)
+	(door $Target)
+	($Target is closed)
+	(first try [open $Target])
+
+(instead of [go #up])
+	(current player $Player)
+	($Player has parent $Obj)
+	(seat $Obj)
+	(try [leave $Obj])
+
+(instead of [go #down])
+	(current player $Actor)
+	($Actor is #on $Obj)
+	(try [leave $Obj])
+
+(instead of [go #out])
+	(current player $Actor)
+	($Actor is #in $Obj)
+	~(room $Obj)
+	(try [leave $Obj])
+
+(prevent [go $])
+	(current player $Actor)
+	($Actor is $Rel $Obj)
+	~(room $Obj)
+	~(vehicle $Obj)
+	(when $Actor is $Rel $Obj)
+
+(perform [go $Dir])
+	(current player $Actor)
+	(current room $Room)
+	(if) ($Actor has parent $Room) (then)
+		(try [leave $Room $Dir])
+	(else)
+		($Actor has parent $Vehicle)
+		(try [leave $Room $Dir by $Vehicle])
+	(endif)
+
+%% PUSH <obj> <dir>
+
+(describe action [push $Obj $Dest])
+	(den full $Obj) nach (name $Dest) schieben
+
+(understand infinitive [schieben] as Verb [schieb])
+(understand infinitive [verschieben] as Verb [verschieb])
+(understand infinitive [drücken] as Verb [drück])
+(understand infinitive [hieven] as Verb [hiev])
+
+(understand [schieb/verschieb/beweg/drück/hiev | $Words] as [push $Obj $Dir])
+	*(split $Words by [nach] into $Left and $Right)
+	*(understand $Right as direction $Dir)
+	*(understand $Left as single object $Obj)
+
+(understand [schieb | $Words] as [push $Obj $Dir])
+	*(split $Words anywhere into $Left and $Right)
+	*(understand $Right as direction $Dir)
+	*(understand $Left as single object $Obj)
+
+(unlikely [push $Obj $])
+	~(pushable $Obj)
+
+(before [push $ $])
+	(recursively leave non-vehicles)
+
+(before [push $ $Dir])
+	(current room $Room)
+	(from $Room go $Dir to $Target)
+	(door $Target)
+	($Target is closed)
+	(first try [open $Target])
+
+(prevent [push $Obj $])
+	~(pushable $Obj)
+	(Der $Obj) (lässt sich $Obj) nicht schieben.
+
+(prevent [push $ $])
+	(current player $Actor)
+	($Actor is $Rel $Obj)
+	~{ ($Rel = #in) (room $Obj) }
+	(when $Actor is $Rel $Obj)
+
+(perform [push $Obj $Dir])
+	(current room $Room)
+	(try [leave $Room $Dir with $Obj])
+
+%% PUSH <obj>
+
+(describe action [push $Obj])
+	(den full $Obj) schieben
+
+(understand infinitive [schieben] as Verb [schieb])
+
+(understand [schieb/verschieb/beweg/drück/hiev | $Words] as [push $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(understand [schieb | $Words] as [push $Obj])
+	*(split $Words by [an] into $Left and $Right)
+	{
+		($Left = [])
+		*(understand $Right as single object $Obj preferably animate)
+	(or)
+		($Right = [])
+		*(understand $Left as single object $Obj preferably animate)
+	}
+
+(perform [push (pushable $Obj)])
+	In welche Richtung?
+	(asking for direction in [push $Obj []])
+
+(perform [push (room $)])
+	Deine Umgebung herum zu schieben, hat keinen nennenswerten Effekt.
+
+(perform [push (item $Obj)])
+	Du gibst (dem $Obj) einen kleinen Schubs.
+
+(perform [push $Obj])
+	Du versuchst, (den $Obj) zu schieben, aber (er $Obj) bewegt sich nicht.
+
+%% PULL <obj>
+
+(describe action [pull $Obj])
+	(den full $Obj) ziehen
+
+(understand infinitive [zerren] as Verb [zerr])
+
+(rewrite [zerr an | $Words] into [zieh | $Words])
+
+(understand [zieh | $Words] as [pull $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(perform [pull $Obj])
+	Du ziehst an (dem $Obj), aber
+	(if) (item $Obj) (then)
+		ohne nennenswerte Auswirkung.
+	(else)
+		(der $Obj) (lässt sich $Obj) nicht bewegen.
+	(endif)
+
+%% TURN <obj>
+
+(describe action [turn $Obj])
+	(den full $Obj) drehen
+
+(understand infinitive [wenden] as Verb [wend])
+
+(rewrite [wend | $Words] into [dreh | $Words])
+
+(understand [dreh | $Words] as [turn $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(prevent [turn (room $Obj)])
+	Du kannst (den $Obj) nicht drehen.
+
+(perform [turn $Obj])
+	(Den $Obj) zu drehen zeigt keine Wirkung.
+
+%% READ <obj>
+
+(describe action [read $Obj])
+	(den full $Obj) lesen
+
+(understand infinitive [lesen] as Verb [les])
+
+(understand [lies/lies | $Words] as [read $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(prevent [read $])
+	~(player can see)
+	Es ist zu dunkel zum lesen.
+
+(perform [read $Obj])
+	Da ist keine Schrift auf (dem $Obj).
+
+%% FLUSH <obj>
+%% FLUSH
+
+(describe action [fluh $Obj])
+	(den full $Obj) spülen
+
+(understand infinitive [spülen] as Verb [spül])
+
+(understand [spül | $Words] as [flush $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(perform [flush $Obj])
+	(Der $Obj) (lässt sich $Obj) nicht spülen.
+	(tick) (stop)
+
+(prevent [flush $Obj])
+	(current player $Obj)
+	Wirklich?
+
+(understand [spül] as [flush])
+
+(perform [flush])
+	Was willst du spülen?
+	(asking for object in [flush []])
+
+%% SWIM IN <obj>
+%% SWIM
+
+(describe action [swim $Obj])
+	(den full $Obj) spülen
+
+(understand infinitive [schwimmen] as Verb [schwimm])
+(understand infinitive [baden] as Verb [bad])
+
+(understand [schwimm/bad] as [swim])
+
+(understand [schwimm/bad in | $Words] as [swim in $Obj])
+	*(understand $Words as single object $Obj)
+
+(perform [swim in $Obj])
+	Du kannst nicht in (dem $Obj) schwimmen.
+	(tick) (stop)
+
+(understand [swim])
+
+(perform [swim])
+	Worin?
+	(asking for object in [swim in []])
+
+%% CLEAN <obj>
+
+(describe action [clean $Obj])
+	(den full $Obj) reinigen
+
+(understand infinitive [reinigen] as Verb [reinig])
+(understand infinitive [bürsten] as Verb [bürst])
+(understand infinitive [wischen] as Verb [wisch])
+(understand infinitive [polieren] as Verb [polier])
+(understand infinitive [fegen] as Verb [feg])
+(understand infinitive [entstauben] as Verb [entstaub])
+(understand infinitive [schrubben] as Verb [schrubb])
+
+(understand [reinig/bürst/wisch/polier/feg/entstaub/schrubb | $Words] as [clean $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(perform [clean $Obj])
+	Du startest einen halbherzigen Versuch, (den $Obj) zu reinigen.
+
+%% TIE <obj> TO <obj>
+%% TIE <obj>
+
+(describe action [tie $Obj to $Dest])
+	(den full $Obj) an (den $Dest) binden
+
+(understand infinitive [binden] as Verb [bind])
+(understand infinitive [verbinden] as Verb [verbind])
+(understand infinitive [befestigen] as Verb [befestig])
+(understand infinitive [machen] as Verb [mach])
+
+(rewrite [verbind | $Words] into [bind | $Words])
+(rewrite [befestig | $Words] into [bind | $Words])
+
+(understand [bind/mach | $Words] as [tie $A to $B])
+	*(split $Words by [fest] into $Left and $Right)
+	{
+		($Left = [])
+		*(split $Right by [an] into $Was and $Ist)
+	(or)
+		($Right = [])
+		*(split $Left by [an] into $Was and $Ist)
+	(or)
+		($Left = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Right)
+	(or) 
+		($Right = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Left)
+	}
+	*(understand $Was as single object $A)
+	*(understand $Ist as single object $B)
+
+(understand [bind | $Words] as [tie $A to $B])
+	*(split $Words by [an um auf] into $Left and $Right)
+	*(understand $Left as single object $A)
+	*(understand $Right as single object $B)
+
+(understand [bind | $Words] as [tie $Obj])
+	*(understand $Words as single object $Obj)
+
+(unlikely [tie $])
+
+(perform [tie $Obj])
+	Woran?
+	(asking for object in [tie $Obj to []])
+
+(perform [tie $A to $B])
+	Du siehst keine Möglichkeit, (den $A) an (den $B) zu binden.
+	(tick) (stop)
+
+%% UNTIE <obj> FROM <obj>
+%% UNTIE <obj>
+
+(describe action [untie $Obj from $Dest])
+	(den full $Obj) von (dem $Dest) lösen
+
+(understand infinitive [lockern] as Verb [locker])
+(understand infinitive [lösen] as Verb [lös])
+
+(understand [mach | $Words] as [tie $A to $B])
+	*(split $Words by [locker] into $Left and $Right)
+	{
+		($Left = [])
+		*(split $Right by [von] into $Was and $Ist)
+	(or)
+		($Right = [])
+		*(split $Left by [von] into $Was and $Ist)
+	(or)
+		($Left = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Right)
+	(or) 
+		($Right = [mit | $Rest])
+		($Ist = $Rest)
+		($Was = $Left)
+	}
+	*(understand $Was as single object $A)
+	*(understand $Ist as single object $B)
+
+(understand [lös/locker | $Words] as [untie $A from $B])
+	*(split $Words by [von] into $Left and $Right)
+	*(understand $Left as single object $A)
+	*(understand $Right as single object $B)
+
+(unlikely [untie $Obj from $])
+	(unlikely [untie $Obj])
+
+(understand [lös/locker | $Words] as [untie $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(perform [untie $Obj])
+	(Der $Obj) (lässt sich $Obj) nicht lösen.
+	(tick) (stop)
+
+(perform [untie $Obj from $OtherObj])
+	(Der $Obj ist) nicht an (dem $OtherObj) befestigt.
+	(tick) (stop)
+
+%% ATTACK <obj> WITH <obj>
+%% ATTACK <obj>
+
+(describe action [attack $Obj with $Weapon])
+	(den full $Obj) mit (dem $Weapon) angreifen
+
+(understand infinitive [brechen] as Verb [brech])
+(understand infinitive [zerbrechen] as Verb [zerbrech])
+(understand infinitive [zerschlagen] as Verb [zerschlag])
+(understand infinitive [hauen] as Verb [hau])
+(understand infinitive [treten] as Verb [tret])
+(understand infinitive [quälen] as Verb [quäl])
+(understand infinitive [zerstören] as Verb [zerstör])
+(understand infinitive [töten] as Verb [töt])
+(understand infinitive [ermorden] as Verb [ermord])
+(understand infinitive [kämppfen] as Verb [kämpf])
+
+(rewrite [brech/zerbrech/brich/zerbrich/zerschlag/hau/tret/quäl/zerstör/töt/ermord | $Words] into [schlag | $Words])
+(rewrite [kämpf mit | $Words] into [brich | $Words])
+
+(understand [brich | $Words] as [attack $A with $B])
+	*(split $Words by [mit] into $Left and $Right)
+	*(understand $Left as non-all object $A)
+	*(understand $Right as object $B preferably held)
+
+(understand [schlag | $Words] as [attack $A with $B])
+	*(split $Words by [mit] into $Left and $Right)
+	*(understand $Left as non-all object $A)
+	*(understand $Right as object $B preferably held)
+
+(unlikely [attack $ with $Obj])
+	~(item $Obj)
+
+(unlikely [attack $ with $Obj])
+	(current player $Actor)
+	~($Obj has ancestor $Actor)
+
+(before [attack $ with $Obj])
+	(ensure $Obj is held)
+
+(prevent [attack $ with $Obj])
+	(when $Obj isn't directly held)
+
+(perform [attack $Obj with $])
+	(try [attack $Obj])
+
+(understand [attack | $Words] as [attack $Obj])
+	*(understand $Words as single object $Obj)
+
+(perform [attack $])
+	Du verwirfst die Idee wieder.
+
+%% LEAVE <room> <dir>
+%% LEAVE <room> <dir> BY <vehicle>
+%% LEAVE <room> <dir> WITH <object>
+
+(describe action [leave $Room $Dest])
+	(den $Room) nach (name $Dest) verlassen
+
+(describe action [leave $Room $Dest with $Obj])
+	(den $Room) nach (name $Dest) mit (dem $Obj) verlassen
+
+(describe action [leave $Room $Dest by $Obj])
+	(den $Room) nach (name $Dest) mit (dem $Obj) verlassen
+
+(instead of [leave $Room $Dir])
+	(from $Room go $Dir to $Target)
+	(direction $Target)
+	(try [leave $Room $Target])
+
+(prevent [leave $Room $Dir])
+	(if) (from $Room go $Dir to $Target) (then)
+		(if) (door $Target) (then)
+			{
+				(when $Target blocks passage)
+			(or)
+				(from $Room through $Target to $OtherRoom)
+				(prevent entering $OtherRoom)
+			}
+		(elseif) (room $Target) (then)
+			(prevent entering $Target)
+		(else)
+			(narrate failing to leave $Room $Dir)
+		(endif)
+	(else)
+		(if) ($Dir is one of [#out #in]) (then)
+			In welche Richtung?
+			(asking for direction in [go []])
+		(else)
+			(narrate failing to leave $Room $Dir)
+		(endif)
+	(endif)
+
+(narrate leaving $Room $Dir)
+	Du
+	(if) ($Dir is one of [#up #down]) (then)
+		kletterst
+	(elseif) (player can see) (then)
+		gehst nach
+	(else)
+		fühlst den Weg nach
+	(endif)
+	(if) ($Dir = #in) (then)
+		drinnen
+	(else)
+		(name $Dir)
+	(endif)
+	(if) (from $Room go $Dir to $Target) (door $Target) (then)
+		durch (den $Target)
+	(endif)
+	.
+
+(perform [leave $Room $Dir])
+	(narrate leaving $Room $Dir)
+	(from $Room go $Dir to room $Target)
+	(enter $Target)
+
+(instead of [leave $Room $Dir with $Obj])
+	(from $Room go $Dir to $Target)
+	(direction $Target)
+	(try [leave $Room $Target with $Obj])
+
+(prevent [leave $Room $Dir with $])
+	(prevent [leave $Room $Dir])
+
+(narrate leaving $ $Dir with $Obj)
+	Du schiebst (den $Obj) nach (name $Dir).
+	(par)
+
+(perform [leave $Room $Dir with $PushObj])
+	(narrate leaving $Room $Dir with $PushObj)
+	(from $Room go $Dir to room $NewRoom)
+	(now) ($PushObj is #in $NewRoom)
+	(now) ($PushObj is handled)
+	(enter $NewRoom)
+
+(instead of [leave $Room $Dir by $Obj])
+	(from $Room go $Dir to $Target)
+	(direction $Target)
+	(try [leave $Room $Target by $Obj])
+
+(prevent [leave $Room $Dir by $])
+	(prevent [leave $Room $Dir])
+
+(narrate leaving $ $Dir by $Obj)
+	Du gelangst mit (dem $Obj) nach (name $Dir).
+	(par)
+
+(perform [leave $Room $Dir by $Vehicle])
+	(narrate leaving $Room $Dir by $Vehicle)
+	(from $Room go $Dir to room $NewRoom)
+	(enter $NewRoom by $Vehicle)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 20: Commands
+
+@(understand command $Action)
+	(understand $Action)
+	(command $Action)
+
+(describe action (command $Action))
+	issue the (exhaust) { *($Word is one of $Action) $Word } command
+
+%% AGAIN and UNDO are treated as a special cases in the toplevel parser.
+
+%% (rewrite [g] into [again]) NOT NECESSARY??
+
+%% QUIT
+
+(command [quit])
+(understand [quit/q/ende] as [quit])
+
+(perform [quit])
+	Willst du wirklich aufhören? \(j (no space) / (no space) n\)
+	(if) (yesno) (then)
+		(display quit message)
+		(line)
+		(quit)
+	(endif)
+	(stop)
+
+(display quit message)
+	(par)
+	Danke für's Spielen!
+
+%% RESTART
+
+(command [restart])
+(understand [neustart/start] as [restart])
+(perform [restart])
+	Willst du wirklich von vorn beginnen? \(j (no space) / (no space) n\)
+	(if) (yesno) (then)
+		(restart)
+		Neustart fehlgeschlagen.
+	(endif)
+	(stop)
+
+%% SAVE
+
+(command [save])
+(understand [speicher/save] as [save])
+(perform [save])
+	(if) (save $ComingBack) (then)
+		(if) ($ComingBack = 1) (then)
+			(roman)
+			Spielstand erfolgreich geladen.
+			(line)
+			(location headline)
+		(else)
+			Spielstand erfolgreich gespeichert.
+		(endif)
+	(else)
+		Das Speichern ist fehlgeschlagen.
+	(endif)
+	(stop)
+
+%% RESTORE
+
+(command [restore])
+(understand [lad/load/restore] as [restore])
+(perform [restore])
+	(restore)
+	Das Laden ist fehlgeschlagen.
+	(stop)
+
+%% TRANSCRIPT
+
+(command [transcript on])
+(understand [transcript/script on] as [transcript on])
+(understand [transcript/script] as [transcript on])
+
+(perform [transcript on])
+	(if) (transcript on) (then)
+		Spielmitschrift aktiviert.
+	(else)
+		Das Einschalten der Spielmitschrift ist fehlgeschlagen.
+		(stop)
+	(endif)
+
+(command [transcript off])
+(understand [transcript/script off] as [transcript off])
+
+(perform [transcript off])
+	(transcript off)
+	Spielmitschrift deaktiviert.
+
+%% SCORE
+
+(understand command [score])
+	(scoring enabled)
+
+(perform [score])
+	(scoring enabled)
+	(current score $Score)
+	Du hast momentan $Score
+	(if) ($Score = 1) (then) Punkt (else) Punkte (endif)
+	(if) (maximum score $Max) (then)
+		von maximal $Max 
+	(endif)
+	erreicht.
+
+%% NOTIFY
+
+(understand command [notify on])
+	(scoring enabled)
+
+(perform [notify on])
+	(scoring enabled)
+	(now) (score notifications are on)
+	Punktemitteilung aktiviert.
+
+(understand command [notify off])
+	(scoring enabled)
+
+(perform [notify off])
+	(scoring enabled)
+	(now) ~(score notifications are on)
+	Punktemitteilung deaktiviert.
+
+%% PRONOUNS
+
+(understand command [pronouns])
+(perform [pronouns])
+	"Mich" bezieht sich auf dich. (line)
+
+	(collect $Obj)
+		(player's es refers to $Obj)
+	(or)
+		(narrator's es refers to $Obj)
+	(into $EsList)
+	(if) (nonempty $EsList) (then) "Es" bezieht sich auf (den-oder-listing $EsList). (line) (endif)
+
+	(collect $Obj)
+		(player's ihn refers to $Obj)
+	(or)
+		(narrator's ihn refers to $Obj)
+	(into $IhnList)
+	(if) (nonempty $IhnList) (then) "Ihn" bezieht sich auf (den-oder-listing $IhnList). (line) (endif)
+
+	(collect $Obj)
+		(player's sie refers to $Obj)
+	(or)
+		(narrator's sie refers to $Obj)
+	(into $SieList)
+	(if) (nonempty $SieList) (then) "Sie" bezieht sich auf (den-oder-listing $SieList). (line) (endif)
+
+	(if) (player's ihnen refers to $Ihnen) (then) "Ihnen" in Bezug auf den Spieler bezieht sich auf (den $Ihnen). (line) (endif)
+	(if) (narrator's ihnen refers to $Ihnen) (then) "Ihnen" im Bezug auf den Erzähler bezieht sich auf (den $Ihnen). (line) (endif)
+
+%% VERBOSE / BRIEF / SUPERBRIEF
+
+(understand command [verbose])
+(understand [brief/superbrief] as [verbose])
+
+(perform [verbose])
+	Die Wortfülle ist in dieser Geschichte nicht einstellbar.
+	(stop)
+
+%% VERSION
+
+(understand command [version])
+(understand [banner] as [version])
+(perform [version])
+	(banner)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 21: Understanding actions with special syntax
+
+%% Rules for understanding actions that do not begin with a verb should go
+%% here. This allows the other rules (that do begin with a verb) to be lumped
+%% together into a single, efficient lookup operation.
+
+(understand $Words as [go $Dir])
+	~(implicit action wants direction)
+	*(understand $Words as direction $Dir)
+
+(understand $Words as [tell $Actor to | $Action])
+	*(split $Words by [,] into $Left and $Right)
+	*(understand $Left as single object $Actor preferably animate)
+	(object $Actor) %% Significant when allowing parse errors.
+		(current actor $OldActor)
+	(now) (current actor $Actor)
+	(rewrite $Right into $Simplified)
+		(collect $A)
+		*(understand $Simplified as $A)
+	(into $List)
+	(now) (current actor $OldActor)
+	*($Action is one of $List)
+
+(understand $Words as $Action)
+	(default actions enabled)
+	*(understand $Words as non-all object $Obj)
+	~(empty $Obj)
+	~($Obj = [1])
+	(if) ($Obj = [a $RealObj]) (then)
+		(default action $RealObj $Action)
+	(else)
+		(default action $Obj $Action)
+	(endif)
+
+(understand $Words as $Action)
+	(implicit action is $Implicit)
+	(if) (implicit action wants direction) (then)
+		*(understand $Words as direction $O)
+	(else)
+		%% We don't know the correct policy, so fall back on 'non-all'.
+		*(understand $Words as non-all object $O)
+	(endif)
+	(recover implicit action $Implicit $O into $Action)
+
+(default action $Obj [examine $Obj])
+
+(understand $Words as $Words)
+	(understand $Words)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 22: Dealing with actions
+
+%% If the player enters multiple actions on one line ("get lamp. n"), they
+%% are parsed and carried out one at a time.
+
+%% A complex action ("get all") is broken down, and the simple actions are
+%% carried out in turn.
+
+%% A (simple) action may invoke preliminary actions (e.g. open the door
+%% before walking through it). These are carried out in turn.
+
+%% After the preliminary actions (before) have been carried out, the action
+%% is potentially refused. Normally, actions that involve unreachable objects
+%% are refused; this is overridden by actions, such as look at, that don't
+%% require reachability.
+
+%% If the action wasn't refused, it will be handled by the (instead of $)
+%% predicate. This predicate can be overridden for special cases in the story.
+%% The default behaviour is to further break down handling into two stages:
+%% Prevent and perform.
+%% They are separate because it's convenient to be able to override
+%% e.g. what happens when you put the twig in the fire without also overriding
+%% the default checks, such as whether you are holding the twig.
+
+%% (prevent $) should print something and succeed if the player character
+%% tries, but there's a problem with completing the action. When prevent
+%% succeeds, time is advanced (tick), and further actions are stopped.
+
+%% If prevent fails, (perform $) is invoked to carry out the action. For the
+%% eighteen core actions in this standard library, the perform rules call out
+%% to a separate (narrate ...) rule, for stories that wish to override the
+%% narration without affecting the default operations on the object tree.
+
+%% Note that the world model is updated after narrating. This allows the
+%% narrate rule to query the world as it used to be, before carrying out the
+%% operation, in order to say for instance 'you take the worm out of the can'.
+
+%% If something dramatic happens, an overriding rule should advance time if
+%% necessary and (stop). So if the player types "n. n", and the first action
+%% implies opening a door, which implies unlocking the door, and the unlocking
+%% triggers a cutscene, then opening the door is cancelled, and the second "n"
+%% is also ignored.
+
+%% After a non-command action, time is advanced using (tick). This can be
+%% inhibited by querying (inhibit next tick).
+
+%% Throughout this procedure, as soon as a refuse or prevent rule succeeds (or
+%% (stop) is invoked), the entire procedure stops, and further actions are
+%% ignored.
+
+(describe action $Action)
+	(describe self-describing action $Action)
+
+(describe self-describing action [])
+
+(describe self-describing action [(word $W) | $More])
+	(just)
+	$W(no space)en
+	(describe self-describing action $More)
+	
+(describe self-describing action [$Obj | $More])
+	(den $Obj)
+	(describe self-describing action $More)
+
+(actions on)
+	(now) (tracing actions)
+
+(actions off)
+	(now) ~(tracing actions)
+
+(try $Action)
+	(if) (tracing actions) (then)
+		(line) ACTION: $Action \( (describe action $Action) \) (line)
+	(endif)
+	~{ (refuse $Action) (stop) }
+	(exhaust) *(before $Action)
+	~{ (refuse $Action) (stop) }
+	(instead of $Action)
+
+(try $)
+	%% Try always succeeds; this prevents accidental double-triggers.
+
+(first try $Action)
+	(line) \( erst (describe action $Action) \) (line)
+	(try $Action)
+	(tick)
+	(par)
+
+(refuse $Action)
+	*($Obj is one of $Action)
+	(object $Obj)
+	~(direction $Obj)
+	~(relation $Obj)
+	{
+		(when $Obj is not here)
+		(or) (when $Obj is out of reach)
+	}
+
+(before $)	(fail)
+
+(instead of $Action)
+	~{ (prevent $Action) (tick) (stop) }
+	(perform $Action)
+
+(prevent $)	(fail)
+
+(perform $)
+
+(try-complex [$Verb | $ComplexObjects])
+	(if) ([] is one of $ComplexObjects) (then)
+		Dir ist so etwas nicht bekannt! (line) (fail)
+	(elseif) ([+ | $FirstMulti] is one of $ComplexObjects) (then)
+		%% If at least two actions are implied,
+		%% describe each one in turn.
+		(if) ~{ *($Obj is one of $FirstMulti) (direction $Obj) } (then)
+			(strip decorations from $FirstMulti into $Stripped)
+			(notice player's $Stripped) %% Set 'them'.
+		(endif)
+		(exhaust) {
+			*(expand complex objlist $ComplexObjects $ObjList)
+			(line)(uppercase)(describe action [$Verb | $ObjList]):
+			(try-decorated $Verb $ObjList)
+		}
+	(else)
+		*(expand complex objlist $ComplexObjects $ObjList)
+		(try-decorated $Verb $ObjList)
+	(endif)
+
+(try-decorated $Verb $ObjList)
+	(strip decorations from $ObjList into $CleanList)
+	(if)
+		*($Obj is one of $CleanList)
+		(object $Obj)
+		~(direction $Obj)
+		~(relation $Obj)
+		~(room $Obj)
+	(then)
+		(notice player's $Obj)
+	(endif)
+	(exhaust) {
+		*($Obj is one of $CleanList)
+		(object $Obj)
+		(now) ~($Obj is hidden)
+	}
+	($Action = [$Verb | $CleanList])
+	(try $Action)
+	(if) (command $Action) (then)
+		(now) (narrator's it is protected)
+	(else)
+		(tick)
+	(endif)
+	(par)
+
+(strip decorations from [] into [])
+
+(strip decorations from [[a $Obj] | $MoreIn] into [$Obj | $MoreOut])
+	(strip decorations from $MoreIn into $MoreOut)
+
+(strip decorations from [$Obj | $MoreIn] into [$Obj | $MoreOut])
+	(strip decorations from $MoreIn into $MoreOut)
+
+(expand complex objlist [] [])
+	(just)
+
+(expand complex objlist [[+ | $ObjList] | $MoreIn] [$Obj | $MoreOut])
+	(just)
+	*($Obj is one of $ObjList)
+	*(expand complex objlist $MoreIn $MoreOut)
+
+(expand complex objlist [$Other | $MoreIn] [$Other | $MoreOut])
+	*(expand complex objlist $MoreIn $MoreOut)
+
+(unlikely-complex [$Verb | $ComplexObjList])
+	*(expand complex objlist $ComplexObjList $SimpleObjList)
+	(strip decorations from $SimpleObjList into $Stripped)
+	(unlikely [$Verb | $Stripped])
+
+%% Current and nearby rooms are in scope, but they're rarely what the
+%% player means. The following rules ensure that most actions that mention
+%% rooms directly are considered unlikely.
+
+(unlikely $Action)
+	(unlikely due to room $Action)
+
+(unlikely due to room $Action)
+	~($Action = [leave $])
+	~($Action = [go to $])
+	~($Action = [enter $])
+	*($Obj is one of $Action)
+	(room $Obj)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 23: Daemons
+
+(inhibit next tick)
+	(now) (inhibiting next tick)
+
+(tick)
+	(if) (inhibiting next tick) (then)
+		(now) ~(inhibiting next tick)
+	(else)
+		(recompute visibility)
+		(exhaust) *(on every tick)
+	(endif)
+
+%% Stories may add rules to this predicate, or to (on every tick in $):
+
+(on every tick)
+	(current room $Room)
+	*(on every tick in $Room)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 24: Numbers
+
+(parse numeral @null into 0)
+(parse numeral @eins into 1)
+(parse numeral @eine into 1)
+(parse numeral @einen into 1)
+(parse numeral @eines into 1)
+(parse numeral @zwei into 2)
+(parse numeral @drei into 3)
+(parse numeral @vier into 4)
+(parse numeral @fünf into 5)
+(parse numeral @sechs into 6)
+(parse numeral @sieben into 7)
+(parse numeral @acht into 8)
+(parse numeral @neun into 9)
+(parse numeral @zehn into 10)
+(parse numeral @elf into 11)
+(parse numeral @zwölf into 12)
+(parse numeral @dreizehn into 13)
+(parse numeral @vierzehn into 14)
+(parse numeral @fünfzehn into 15)
+(parse numeral @sechzehn into 16)
+(parse numeral @siebzehn into 17)
+(parse numeral @achtzehn into 18)
+(parse numeral @neunzehn into 19)
+(parse numeral @zwanzig into 20)
+(parse numeral $N into $N) (number $N)
+
+(understand [$Word] as number $N)
+	(parse numeral $Word into $N)
+
+(spell out 1)		ein
+(spell out 2)		zwei
+(spell out 3)		drei
+(spell out 4)		vier
+(spell out 5)		fünf
+(spell out 6)		sechs
+(spell out 7)		sieben
+(spell out 8)		acht
+(spell out 9)		neun
+(spell out 10)		zehn
+(spell out 11)		elf
+(spell out 12)		zwölf
+(spell out 13)		dreizehn
+(spell out 14)		vierzehn
+(spell out 15)		fünfzehn
+(spell out 16)		sechszehn
+(spell out 17)		siebzehn
+(spell out 18)		achtzehn
+(spell out 19)		neunzehn
+(spell out 20)		zwanzig
+(spell out $N)		$N
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 25: Printing the names of objects and object lists
+
+(add location information for $Obj)
+	(if) (clarify location of $Obj) ~(direction $Obj) ~(relation $Obj) (then)
+		(if)
+			(current room $Room)
+			(from $Room go $Dir to $Obj)
+			(direction $Dir)
+		(then)
+			(if) ($Dir = #down) (then)
+				unter dir
+			(elseif) ($Dir = #up) (then)
+				über dir
+			(else)
+				nach (name $Dir) von dir
+			(endif)
+		(elseif)
+			($Obj is $Rel $Loc)
+			~(room $Loc)
+		(then)
+			(name $Rel) (dem $Loc)
+		(endif)
+	(endif)
+
+(clarify location of $Obj)
+	~(singleton $Obj)
+
+(ein ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+(eines ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+(einem ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+(einen ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+
+(der ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+(des ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+(dem ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+(den ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 26: German signatures
+
+(name $)
+
+(fsyn $)
+(msyn $)
+(nsyn $)
+(psyn $)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 27: German state of objects vocabulary
+
+(Name $Obj)		(uppercase) (name $Obj)
+
+($Obj)
+	($Obj {(name $Obj)})
+
+($Obj $Text)
+	(if) (interpreter supports links) (then)
+		(collect words)
+			(name $Obj)
+		(into $Words)
+		(link $Words) (query $Text)
+	(else)
+		(query $Text)
+	(endif)
+
+(maybe link $Obj)
+	(maybe link $Obj {(name $_)})
+
+(maybe link $Obj $Closure)
+	(if) (library links enabled) (then)
+		(if) (current player $Obj) (then)
+			($Words = [dich])
+		(else)
+			(collect words)
+				(query $Closure $Obj)
+			(into $Words)
+		(endif)
+		(link $Words) (query $Closure $Obj)
+	(else)
+		(query $Closure $Obj)
+	(endif)
+
+(open or closed $Obj)
+	(if) ($Obj is open) (then)
+		geöffnet
+	(else)
+		geschlossen
+	(endif)
+
+(einen-listing $List)
+	(listing $List {(einen $_)} @und 0)
+(den-listing $List)
+	(listing $List {(den $_)} @und 0)
+(den-full-listing $List)
+	(listing $List {(den full $_)} @und 0)
+(den-full-oder-listing $List)
+	(listing $List {(maybe link $_ {(den full $_)})} @oder 0)
+(den-oder-listing $List)
+	(listing $List {(den $_)} @oder 0)
+
+(ein-listing $List)
+	(listing $List {(ein $_)} @und 0)
+
+(listing [] $ $ 0)
+	nichts
+(listing [$Head | $Tail] $PrintClosure $Conjunction $NPrinted)
+	(if) (fungibility enabled) (then)
+		(combine-fungible $Tail $Head $NInc $Rest)
+	(else)
+		($Rest = $Tail)
+	(endif)
+	(if) (empty $Rest) (then)
+		%%(if) ($NPrinted > 1) (then) , (endif)
+		(if) ($NPrinted > 0) (then) $Conjunction (endif)
+	(else)
+		(length of $Rest into $len)
+		(if) ($NPrinted > 0) (then)
+			(if) ($len > 1) (then)
+				,
+			(endif) 
+		(endif)
+	(endif)
+	(if) (fungibility enabled) ($NInc > 1) (then)
+		(spell out $NInc)
+		(if) (library links enabled) (interpreter supports links) (then)
+			($Head {(plural name $Head)})
+		(else)
+			(plural name $Head)
+		(endif)
+	(else)
+		(query $PrintClosure $Head)
+	(endif)
+	($NPrinted plus 1 into $NPp1)
+	(if) (nonempty $Rest) (then)
+		(listing $Rest $PrintClosure $Conjunction $NPp1)
+	(endif)
+
+(list of objects $Rel $Loc)
+	(collect $Obj)
+		*($Obj is $Rel $Loc)
+	(into $List)
+	(einen $List)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 28: Generating dictionary words for objects
+
+(dict (your $))
+	mein dein
+
+(dict (openable $Obj))
+	(if) ($Obj is open) (then)
+		offen geöffnet
+	(else)
+		geschlossen
+	(endif)
+
+(dict (lockable $Obj))
+	(if) ($Obj is locked) (then)
+		verschlossen versperrt abgeschlossen
+	(else)
+		unverschlossen unversperrt aufgeschlossen
+	(endif)
+
+(dict (room $Room))
+	(inherently dark $Room)
+	~(light reaches ceiling $Room)
+	finsternis dunkelheit
+
+%% In German, no word mentioned in the name rule is included.
+%% All name rules have special declination and adjective extensions
+%% so this feature was removed
+
+%% The plural dict should only mention a noun, so the default rule can't
+%% invoke (plural name $).
+
+(plural dict $)
+	(fail)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 29: Setting the pronouns from an object
+
+(notice $Obj)
+	(if) (object $Obj) (then)
+		(reveal $Obj)
+		(if) (plural $Obj) (or) ($Obj is plural) (or) (changing gender is #plu) (then)
+			%%!Narrators plu!
+			(now) (narrator's ihnen refers to [$Obj])
+			(now) (narrator's sie refers to $Obj)
+		(elseif) ($Obj is feminin) (or) (changing gender is #fem) (then)
+			%%!Narrators fem!
+			(now) (narrator's sie refers to $Obj)
+			(now) (narrator's ihr refers to $Obj)
+		(elseif) ($Obj is maskulin) (or) (changing gender is #mas) (then)
+			%%!Narrators mas!
+			(now) (narrator's ihn refers to $Obj)
+			(now) (narrator's ihm refers to $Obj)
+		(elseif) ($Obj is neutrum) (or) (changing gender is #neu) (then)
+			%%!Narrators neu!
+			(now) (narrator's es refers to $Obj)
+			(now) (narrator's ihm refers to $Obj)
+		(elseif) (female $Obj) (then)
+			(now) (her refers to $Obj)
+		(elseif) (male $Obj) (then)
+			(now) (him refers to $Obj)
+		(else)
+			(now) (narrator's it refers to $Obj)
+			(now) (narrator's it is protected)
+			(if) (player's it refers to $Obj) (then)
+				(now) ~(player's it refers to $)
+			(endif)
+		(endif)
+	(elseif) (list $Obj) (then)
+		(if) ($Obj = [$Single]) (then)
+			(notice $Single)
+		(else)
+			(length of $Obj into $N)
+			(if) ($N < 16) (then)
+				(now) (narrator's ihnen refers to $Obj)
+			(endif)
+		(endif)
+	(endif)
+
+(notice player's $Obj)
+	(if) ~(current player $Obj) (then)
+		(if) ($Obj is plural) (then)
+			(now) (player's ihnen refers to [$Obj])
+			(now) (player's sie refers to $Obj)
+		(elseif) (list $Obj) (then)
+			(if) ($Obj = [$Single]) (then)
+				(notice player's $Single)
+			(else)
+				(length of $Obj into $N)
+				(if) ($N < 16) (then)
+					(now) (player's ihnen refers to $Obj)
+					(now) (player's sie refers to $Obj)
+				(endif)
+			(endif)
+		(elseif) (changing gender is #fem) (then)
+			%%!players CG FEM!
+			(now) (player's sie refers to $Obj)
+			(now) (player's ihr refers to $Obj)
+		(elseif) (changing gender is #mas) (then)
+			%%!players CG MAS!
+			(now) (player's ihn refers to $Obj)
+			(now) (player's ihm refers to $Obj)
+		(elseif) (changing gender is #neu) (then)
+			%%!players CG NEU!
+			(now) (player's es refers to $Obj)
+			(now) (player's ihm refers to $Obj)
+		(elseif) (changing gender is #plu) (then)
+			%%!players CG PLU!
+			(now) (player's ihnen refers to $Obj)
+			(now) (player's sie refers to $Obj)
+		(elseif) ($Obj is feminin) (then)		
+			%%!players FEM!
+			(now) (player's sie refers to $Obj)
+			(now) (player's ihr refers to $Obj)
+		(elseif) ($Obj is maskulin) (then)
+			%%!players MAS!
+			(now) (player's ihn refers to $Obj)
+			(now) (player's ihm refers to $Obj)
+		(elseif) ($Obj is neutrum) (then)
+			%%!players NEU!
+			(now) (player's es refers to $Obj)
+			(now) (player's ihm refers to $Obj)
+		(elseif) ($Obj is plural) (then)
+			%%!players PLU!
+			(now) (player's ihnen refers to $Obj)
+		(elseif) (female $Obj) (then)
+			(now) (her refers to $Obj)
+		(elseif) (male $Obj) (then)
+			(now) (him refers to $Obj)
+		(else)
+			(now) (player's it refers to $Obj)
+			(if) (narrator's it refers to $Obj) (then)
+				(now) ~(narrator's it refers to $)
+			(endif)
+		(endif)
+	(endif)
+
+(clear all pronouns)
+	(now) ~(player's es refers to $)
+	(now) ~(narrator's es refers to $)
+	(now) ~(player's ihn refers to $)
+	(now) ~(narrator's ihn refers to $)
+	(now) ~(player's sie refers to $)
+	(now) ~(narrator's sie refers to $)
+	(now) ~(player's ihm refers to $)
+	(now) ~(narrator's ihm refers to $)
+	(now) ~(player's ihr refers to $)
+	(now) ~(narrator's ihr refers to $)
+	(now) ~(player's ihnen refers to $)
+	(now) ~(narrator's ihnen refers to $)
+
+(forget pronouns out of scope)
+	(if) (player's es refers to $Obj) ~($Obj is in scope) (then)
+		(now) ~(player's es refers to $)
+	(endif)
+	(if) (narrator's es refers to $Obj) ~($Obj is in scope) (then)
+		(now) ~(narrator's es refers to $)
+	(endif)
+	(if) (player's ihn refers to $Obj) ~($Obj is in scope) (then)
+		(now) ~(player's ihn refers to $)
+	(endif)
+	(if) (player's ihm refers to $Obj) ~($Obj is in scope) (then)
+		(now) ~(player's ihm refers to $)
+	(endif)
+	(if) (player's sie refers to $Obj) ~($Obj is in scope) (then)
+		(now) ~(player's sie refers to $)
+	(endif)
+	(if) (player's ihr refers to $Obj) ~($Obj is in scope) (then)
+		(now) ~(player's ihr refers to $)
+	(endif)
+	(if)
+		(player's ihnen refers to $ObjList)
+		*($Obj is one of $ObjList)
+		~($Obj is in scope)
+	(then)
+		(now) ~(player's ihnen refers to $)
+	(endif)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 30: Default descriptions etc.
+
+(descr (current player $))
+	Nun ja, hier bist du.
+
+(descr (door $Door))
+	~($Door blocks light)
+	(current room $Room)
+	(from $Room through $Door to $R)
+	Durch (den $Door) siehst du (den $R).
+
+(descr (door $Door))
+	(openable $Door)
+	(Der $Door ist) im Moment (open or closed $Door).
+
+(descr $O)
+	(current room $Room)
+	*(from $Room go $Dir to $O)
+	(direction $Dir)
+	(Der $O ist) weiter im (name $Dir).
+
+(descr $Obj)
+	(Er $Obj) (sieht $Obj) harmlos aus.
+
+(look $Obj)
+	($Obj has parent $Parent)
+	(look $Parent)
+
+(feel (room $))
+	Du tastest deine Umgebung ab und bemerkst nichts Außergewöhnliches.
+
+(feel $Obj)
+	(Der $Obj) (fühlt sich $Obj) wie erwartet an.
+
+(appearance (item $Obj) #in (room $Room))
+	($Obj is handled)
+	Du siehst hier (einen $Obj).
+	(notice $Obj)
+
+(appearance (item $Obj) $Rel $Loc)
+	($Obj is handled)
+	(Ein $Obj) (ist $Obj) (name $Rel) (dem $Loc).
+	(notice $Obj)
+
+(appearance (list $List) $Rel $Loc)
+	(fungibility enabled)
+	(if) ($Rel = #in) (room $Loc) (then)
+		Du siehst hier (einen $List).
+	(else)
+		(Ein $List) sind (name $Rel) (dem $Loc).
+	(endif)
+	(notice $List)
+
+(make appearances $Rel $Loc)
+	(if)
+		~{ ($Loc is opaque) ($Loc is closed) ($Rel = #in) }
+		($Loc is $ParentRel $ParentLoc)
+	(then)
+		(make appearances $ParentRel $ParentLoc)
+	(endif)
+	(if) (fungibility enabled) (then)
+		(collect $Obj)
+			*($Obj is $Rel $Loc)
+			~($Obj is hidden)
+		(into $ObjList)
+		(fungibility-enabled appearance $ObjList $Rel $Loc)
+	(else)
+		(exhaust) {
+			*($Object is $Rel $Loc)
+			~($Object is hidden)
+			(par)
+			(appearance $Object $Rel $Loc)
+		}
+	(endif)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 31: Fungibility
+
+(fungibility enabled)	(fail)	%% Override this from the story.
+
+(fungible $A $A)
+
+(truly fungible $A $B)
+	(fungible $A $B)
+	($A is $Rel $Parent)
+	($B is $Rel $Parent)
+
+(combine-fungible [] $ 1 [])
+(combine-fungible [$Head | $Tail] $Key $N $Excluded)
+	(if) (truly fungible $Head $Key) (then)
+		(combine-fungible $Tail $Key $NMore $Excluded)
+		($NMore plus 1 into $N)
+	(else)
+		(combine-fungible $Tail $Key $N $MoreExcl)
+		($Excluded = [$Head | $MoreExcl])
+	(endif)
+
+(strip-fungible [] [])
+(strip-fungible [$HeadIn | $MoreIn] [$HeadOut | $MoreOut])
+	(combine-fungible $MoreIn $HeadIn $N $Rest)
+	(if) (1 < $N) (then)
+		($HeadOut = [a $HeadIn]) %% Decorated.
+	(else)
+		($HeadOut = $HeadIn)
+	(endif)
+	(strip-fungible $Rest $MoreOut)
+
+(fungibility-enabled appearance [] $ $)
+
+(fungibility-enabled appearance [$Head | $Tail] $Rel $Loc)
+	(combine-fungible $Tail $Head $NInc $Rest)
+	(par)
+	(if) ($NInc = 1) (then)
+		(appearance $Head $Rel $Loc) (or)
+	(else)
+		(remove from $Tail matching $Rest into $Similar)
+		(appearance [$Head | $Similar] $Rel $Loc)
+	(endif)
+	(fungibility-enabled appearance $Rest $Rel $Loc)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 32: Common complaints and prevent-checks
+
+(when $O is out of sight)
+	~($O is visible to player)
+	(if) (player can see) (then)
+		Du siehst hier so etwas nicht.
+	(else)
+		Du siehst in der Dunkelheit zu wenig.
+	(endif)
+
+(when $O is already held)
+	(current player $Actor)
+	{
+		($O is #heldby $Actor)
+		Du hast (den $O) schon mitgenommen.
+	(or)
+		($O is recursively worn by $Actor)
+		Du trägst (den $O) schon.
+	}
+
+(when $O isn't directly held)
+	(current player $Actor)
+	~($O is #heldby $Actor)
+	Du hast (den $O) aber gar nicht.
+
+(when $Obj is not here)
+	(not here $Obj)
+	(Der $Obj ist) nicht hier.
+
+(when $O is out of reach)
+	~($O is reachable by player)
+	(if) ($O is visible to player) (then)
+		Du kannst (den $O) nicht erreichen.
+	(else)
+		(Der $O ist) nicht hier.
+	(endif)
+
+(when (intangible $O) is out of reach)
+	(Der $O ist) unerreichbar.
+
+(when $O is part of something)
+	($O is #partof $Parent)
+	(Er $O) (ist $O) Teil (des $Parent).
+
+(when $Obj is fine where it is)
+	(fine where it is $Obj)
+	(Der $Obj ist) da, wo (er $Obj) (ist $Obj), gut aufgehoben.
+
+(when ~(item $O) can't be taken)
+	Du kannst (den $O) nicht mitnehmen.
+
+~(when (supporter $O) won't accept #on)
+
+~(when (container $O) won't accept #in)
+
+(when $O won't accept $Rel)
+	(if) ($Rel is one of [#under #behind]) (then)
+		Dinge (name $Rel) (den $O) zu legen, wird dich nicht weiter bringen.
+	(else)
+		Du kannt nichts (name $Rel) (den $O) legen.
+	(endif)
+
+~(when (actor supporter $O) won't accept actor #on)
+
+~(when (actor container $O) won't accept actor #in)
+
+(when $O won't accept actor $Rel)
+	(if) ($Rel is one of [#under #behind]) (then)
+		(uppercase)(name $Rel) (den $O) zu gelangen, wird dich nicht weiter bringen.
+	(else)
+		(uppercase)(name $Rel) (den $O) zu gelangen, ist unmöglich.
+	(endif)
+
+(when $O is already $Rel $Dest)
+	($O is $Rel $Dest)
+	(Der $O ist) schon (name $Rel) (dem $Dest).
+
+(when $O is $Rel $Parent)
+	($O is $Rel $Parent)
+	(Der $O) (muss $O) erst (reverse-name $Rel) (dem $Parent) entfernt werden.
+
+(when $Obj is closed)
+	($Obj is closed)
+	(Der $Obj ist) geschlossen.
+
+(when $Obj blocks passage)
+	($Obj blocks passage)
+	(if) ($Obj is closed) (then)
+		(Der $Obj ist) geschlossen.
+	(else)
+		(Der $Obj) (lässt $Obj) dich nicht vorbei.
+	(endif)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chpater 35: Program entry, main loop, status bar, score
+
+(program entry point)
+	(div @initial-spacer) {}
+	(update environment around player)
+	(stoppable) (intro)
+	(par)
+	*(repeat forever) (read-parse-act) (fail)
+
+(intro)
+	(banner)
+	(try [look])
+
+(read-parse-act)
+	(stoppable) {
+		(if) (scoring enabled) (score notifications are on) (then)
+			(reported score is $Reported)
+			(current score $Score)
+			(if) ($Score < $Reported) (then)
+				($Reported minus $Score into $Diff)
+				\( Your score has gone down by (spell out $Diff)
+				point (if) ~(1 = $Diff) (then) (no space) s (endif)
+				. \)
+				(par)
+				(now) (reported score is $Score)
+			(elseif) ($Score > $Reported) (then)
+				($Score minus $Reported into $Diff)
+				\( Your score has gone up by (spell out $Diff)
+				point (if) ~(1 = $Diff) (then) (no space) s (endif)
+				. \)
+				(par)
+				(now) (reported score is $Score)
+			(endif)
+		(endif)
+		(redraw status bar)
+		> (get input $Words)
+		(parse commandline $Words)
+	}
+	(if) (narrator's it is protected) (then)
+		(now) ~(narrator's it is protected)
+	(elseif) (player's it refers to $) (then)
+		%% The narrator's it is short-lived, except when
+		%% 'it' unambiguously refers to it.
+		(now) ~(narrator's it refers to $)
+	(endif)
+	(par)
+
+(redraw status bar)
+	(status bar @status) {
+		(score headline)
+		(status headline)
+	}
+
+(redraw status bar)
+	%% This predicate shouldn't fail.
+
+(status headline)
+	(location headline)
+
+(location headline)
+	(current player $Player)
+	(if) (player can see) (then)
+		(current room $Room)
+		(bold) (room header $Room) (unstyle)
+		($Player is $Rel $Loc)
+		(if) ~{ ($Rel = #in) ($Loc = $Room) } (then)
+			\( (name $Rel) (dem $Loc) \)
+		(endif)
+	(else)
+		(bold) (darkness headline) (unstyle)
+	(endif)
+
+(darkness headline)
+	In völliger Dunkelheit
+
+(narrate darkness)
+	You are surrounded by darkness.
+	(current visibility ceiling $Ceil)
+	(notice $Ceil)
+
+(current score 0)
+(reported score is 0)
+
+(score notifications are on)
+	(scoring enabled)
+
+(increase score by $Delta)
+	(current score $Old)
+	($Old plus $Delta into $New)
+	(now) (current score $New)
+
+(decrease score by $Delta)
+	(current score $Old)
+	($Old minus $Delta into $New)
+	(now) (current score $New)
+
+(score headline)
+	(if) (scoring enabled) (then)
+		(current score $Score)
+		(div @score) {
+			Score: $Score
+			(if) (maximum score $Max) (then)
+				of $Max
+			(endif)
+		}
+	(endif)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chpater 36: Banner and default metadata
+
+%% There is no formal requirement to print the banner, but it's appreciated
+%% and useful to the community and yourself.
+
+(banner)
+	(par)
+	(div @title) (story title or default)
+	(story noun) von (story author or default).
+	(line)
+	(story release $RelNum)
+	Release $RelNum.
+	Serial number (serial number).
+	(line)
+	(compiler version).
+	(library version)
+	(exhaust) { *(extension version) }
+	(par)
+
+%% Library extensions can add their name and version number to the banner:
+
+(extension version)	(fail)
+
+%% The following predicates help to conserve space when a title or author is
+%% provided. The compiler is smart enough to eliminate the second rule if the
+%% first is known to succeed:
+
+(story title or default)	(story title)
+(story title or default)	Ein Textadventure
+
+(story author or default)	(story author)
+(story author or default)	Anonymus
+
+%% Don't warn about querying these; however, this does not disable the warning
+%% about them not being defined (for a sufficiently large story):
+
+(story title)		(fail)
+(story author)		(fail)
+
+%% We can safely supply defaults for the following:
+
+(story release 1)
+
+(story noun)	
+	Ein Textadventure
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chpater 37: Game over
+
+(game over)
+	(par)
+	(game over status bar)
+	(if) (scoring enabled) (then)
+		(current score $Score)
+		Das Spiel is zu Ende. Du hast $Score
+		(if) ($Score = 1) (then) Punkt (else) Punkte (endif)
+		(if) (maximum score $Max) (then)
+			von maximal $Max
+		(endif)
+		erreicht.
+		(par)
+	(endif)
+	*(repeat forever) (game over menu) (fail)
+
+(game over $Message)
+	(par)
+	(space 5)
+	(bold) \*\*\* (query $Message) \*\*\* (unstyle)
+	(game over)
+
+(game over status bar)
+	(status bar @status) {
+		(score headline)
+		Game Over
+	}
+
+(game over menu)
+	(line)
+	Möchtest du:
+	(if) (interpreter supports undo) (then)
+		(line) (space 5)
+		mit 
+		(if) (library links enabled) (then)
+			(link [undo]) UNDO
+		(else)
+			UNDO
+		(endif)
+		den letzten Zug zurück nehmen,
+	(endif)
+	(line) (space 5)
+	(if) (library links enabled) (then)
+		(link [restore]) einen Spielstand LADEN,
+	(else)
+		einen Spielstand LADEN,
+	(endif)
+	(line) (space 5)
+	(exhaust) {
+		*(game over option)
+		(line) (space 5)
+	}
+	(if) (interpreter supports quit) (then)
+		das Spiel be(no space)
+		(if) (library links enabled) (then)
+			(link [quit]) ENDE(no space)
+		(else)
+			ENDE(no space)
+		(endif)
+		n,
+		(line) (space 5)
+	(endif)
+	oder das Spiel neu
+	(if) (library links enabled) (then)
+		(link [restart]) START(no space)
+	(else)
+		START(no space)
+	(endif)
+	en?
+	(line)
+	> (get input $Words)
+	(stoppable) (parse game over $Words)
+
+(game over option)
+	(amusing enabled)
+	eine Liste mit
+	(if) (library links enabled) (then)
+		(link [amusing]) LUSTIG
+	(else)
+		LUSTIG
+	(endif)
+	en Sachen sehen,
+
+(parse game over [start/neustart])
+	(restart)
+
+(parse game over [lad/load/restore])
+	(try [restore])
+
+(parse game over [undo])
+	(if) (undo) (or) (then)
+		Failed to undo last turn.
+	(endif)
+
+(parse game over [amusing/lustig])
+	(amusing enabled)
+	(amusing)
+
+(parse game over [q/quit/ende])
+	(display quit message)
+	(line)
+	(quit)
+
+(parse game over $)
+	Bitte wähle eines der angebenen Wörter.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 33: Parser: Global variables
+
+(global variable (reported score is $))
+(global variable (last command was $))
+(global variable (implicit action is $))
+
+(global variable (player's it refers to $))
+(global variable (narrator's it refers to $))
+(global variable (her refers to $))
+(global variable (him refers to $))
+(global variable (them refers to $))
+
+(global variable (current case $))
+(global variable (current article $))
+
+(global variable (player's es refers to $))
+(global variable (narrator's es refers to $))
+(global variable (player's ihn refers to $))
+(global variable (narrator's ihn refers to $))
+(global variable (player's sie refers to $))
+(global variable (narrator's sie refers to $))
+(global variable (player's ihm refers to $))
+(global variable (narrator's ihm refers to $))
+(global variable (player's ihr refers to $))
+(global variable (narrator's ihr refers to $))
+(global variable (player's ihnen refers to $))
+(global variable (narrator's ihnen refers to $))
+
+%% (global variable (es refers to $))
+%%(global variable (ihn refers to $))
+%%(global variable (ihm refers to $))
+%%(global variable (sie refers to $))
+%%(global variable (ihr refers to $))
+%%(global variable (ihnen refers to $))
+
+(global variable (changing gender is $))
+
+#mas
+#fem
+#neu
+#plu
+
+#not
+
+(changing gender is #not)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 34: Parser: Rewrite
+
+%% TO DO: ALL REWRITES SHOULD GO HERE
+
+(rewrite [g] into [again])
+
+%% Fallback rewrite rule does nothing.
+
+(rewrite $A into $A)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 35: Parser: Directions
+
+%% Directions are treated separately from other objects for performance
+%% reasons. They are not in scope.
+
+(understand $Words as direction $Output)
+	(parse direction list $Words $ObjList)
+	(mark multi-object $ObjList into $Output)
+
+(parse direction list $Words [$Head | $Tail])
+	*(split $Words by [, und] into $Left and $Right)
+	(just)
+	*(parse direction $Left $Head)
+	*(parse direction list $Right $Tail)
+
+(parse direction list $Words [$Dir])
+	*(parse direction $Words $Dir)
+
+(parse direction [to | $Words] $Dir)
+	(just)
+	*(parse direction $Words $Dir)
+
+(parse direction [the | $Words] $Dir)
+	(just)
+	*(parse direction $Words $Dir)
+
+(parse direction $Input $Dir)
+	(nonempty $Input)
+	(determine object $Dir)
+		*(direction $Dir)
+	(from words)
+		*(dict $Dir)
+	(matching all of $Input)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chpaetr 41: Parser: Objects
+
+%% Nouns in complex actions are represented as:
+%%	an object $Obj,
+%%	a decorated object [a $Obj],
+%%	a list of objects (possibly decorated) [+ $Obj1 $Obj2 ...], or
+%%	an error code [], [,], [all]
+%% No output or other side effects are produced by the following rules.
+%% Policy/ExcludeList are ignored when there's just one matching object.
+%% Ambiguous expressions result in backtracking.
+
+(understand $Words as non-all object $Output)
+	*(parse $Words as object $Output {} [] 0)
+
+(understand $Words as single object $Object)
+	*(parse $Words as single object $Object {} [])
+
+(understand $Words as object $Output preferably $Closure)
+	*(parse $Words as object $Output $Closure [] 1)
+
+(understand $Words as single object $Output preferably $Closure)
+	*(parse $Words as single object $Output $Closure [])
+
+(understand $Words as object $Output preferably child of $Parent)
+	*(parse $Words as object $Output $Parent [] 1)
+
+(understand $Words as object $Output preferably takable)
+	*(parse $Words as object $Output {(takable $_)} [] 1)
+
+(understand $Words as object $Output preferably held)
+	(current actor $Actor)
+	*(parse $Words as object $Output {($_ is #heldby $Actor)} [] 1)
+
+(understand $Words as single object $Output preferably held)
+	(current actor $Actor)
+	*(parse $Words as single object $Output {($_ is #heldby $Actor)} [])
+
+(understand $Words as object $Output preferably held excluding $ExcludeObj)
+	(current actor $Actor)
+	*(parse $Words as object $Output {
+		($_ is #heldby $Actor)
+		~($_ = $ExcludeObj)
+	} [] 1)
+
+(understand $Words as single object $Output preferably animate)
+	*(parse $Words as single object $Output {(animate $_)} [1])
+	%% [1] produces 'someone' instead of 'something' in error responses.
+
+(understand $Words as object $Output preferably worn)
+	(current actor $Actor)
+	*(parse $Words as object $Output {($_ is #wornby $Actor)} [] 1)
+
+(understand $Words as single object $Output preferably supporter)
+	*(parse $Words as single object $Output {(supporter $_)} [])
+
+(understand $Words as single object $Output preferably container)
+	*(parse $Words as single object $Output {(container $_)} [])
+
+(takable (item $Obj))
+	~($Obj has relation #partof)
+	~{
+		($Obj is $Rel $Parent)
+		($Rel is one of [#heldby #wornby])
+		(current actor $Parent)
+	}
+
+(verify object policy (object $Policy) $Obj)
+	($Obj has parent $Policy)
+
+(verify object policy (nonempty $Policy) $Obj)
+	(query $Policy $Obj)
+
+(parse $Words as object $Output $Policy $ $AllAllowed)
+	*(split $Words by [but except] into $Left and $Right)
+	*(parse noun list $Left as $BaseList $Policy $AllAllowed)
+	*(parse negative noun $Right from $BaseList into $ObjList)
+	(mark multi-object $ObjList into $Output)
+
+(parse $Words as object $Output $Policy $ $AllAllowed)
+	*(parse noun list $Words as $ObjList $Policy $AllAllowed)
+	(mark multi-object $ObjList into $Output)
+
+(parse $ as object $Someone $Policy $Someone $)
+	(allowing parse errors)
+
+(parse $Words as single object $Output $Policy $Someone)
+	*(parse $Words as object $ObjList $Policy $Someone 0)
+	(if) ($ObjList = [+ | $]) (then)
+		(allowing parse errors)
+		($Output = [,])
+	(else)
+		($Output = $ObjList)
+	(endif)
+
+(mark multi-object [$Single] into $Single)
+	~(word $Single)
+(mark multi-object [$Head | $Tail] into [+ $Head | $Tail])
+	(object $Head)
+(mark multi-object $Other into $Other)
+
+(parse noun list $Words as $ObjList $Policy $AllAllowed)
+	(split $Words by [, und] into $Left and $Right)
+	*(parse basic noun $Left as $LeftObj $Policy $AllAllowed)
+	*(parse noun list $Right as $RightObj $Policy $AllAllowed)
+	(append $LeftObj $RightObj $ObjList)
+
+(parse noun list $Words as $ObjList $Policy $AllAllowed)
+	*(parse basic noun $Words as $ObjList $Policy $AllAllowed)
+
+(parse negative noun [$Number | $Words] from $BaseList into $Result)
+	{
+		($Number is one of [a an])
+		($N = 1)
+	(or)
+		(parse numeral $Number into $N)
+	}
+	(just)
+	(if) (empty $Words) (then)
+		(take $N from $BaseList into $NegList)
+	(else)
+		*(parse indefinite $Words as $NegList $N {($_ is one of $BaseList)})
+	(endif)
+	(remove from $BaseList matching $NegList into $Result)
+
+(parse negative noun $Words from $BaseList into $Result)
+	*(parse object name $Words as $NegList 0 $BaseList [])
+	(remove from $BaseList matching $NegList into $Result)
+
+(parse basic noun [der/die/das/den/dem/des | $Words] as $ObjList $Policy $AllAllowed)
+	(just)
+	*(parse basic noun $Words as $ObjList $Policy $AllAllowed)
+
+(parse basic noun [mich/dich/mir/dir] as [$Obj] $ $)
+	(current player $Obj)
+
+(parse basic noun [hier/raum/ort/gebiet/umgebung/wand/wände] as [$Room] $ $)
+	(current room $Room)
+
+(parse basic noun [dies raum/ort/gebiet/umgebung] as [$Room] $ $)
+	(current room $Room)
+
+(parse basic noun [es/dies] as [$Obj] $ $)
+	{
+		(player's es refers to $Obj)
+	(or)
+		(narrator's es refers to $Obj)
+	}
+
+(parse basic noun [ihn/diesen] as [$Obj] $ $)
+	{
+		(player's ihn refers to $Obj)
+	(or)
+		(narrator's ihn refers to $Obj)
+	}
+
+(parse basic noun [sie/diese] as [$Obj] $ $)
+	{
+		(player's sie refers to $Obj)
+	(or)
+		(narrator's sie refers to $Obj)
+	}
+
+(parse basic noun [ihm/diesem] as [$Obj] $ $)
+	{
+		(player's ihm refers to $Obj)
+	(or)
+		(narrator's ihm refers to $Obj)
+	}
+
+(parse basic noun [ihr/dieser] as [$Obj] $ $)
+	{
+		(player's ihr refers to $Obj)
+	(or)
+		(narrator's ihr refers to $Obj)
+	}
+
+(parse basic noun [ihnen/diesen/diese/sie] as ObjList $ $)
+	{
+		(player's ihnen refers to $ObjList)
+	(or)
+		(narrator's ihnen refers to $ObjList)
+	}
+
+(parse basic noun [alle] as [all] $ 0)
+	(allowing parse errors)
+	(just)
+
+(parse basic noun [alle] as $Result (object $Policy) 1)
+	(just)
+	(collect $Obj)
+		*($Obj has parent $Policy)
+		($Obj is in scope)
+		~($Obj is hidden)
+		~(excluded from all $Obj)
+	(into $Result)
+
+(parse basic noun [alle] as $Result (nonempty $Policy) 1)
+	(just)
+	(collect $Obj)
+		*($Obj is in scope)
+		~(excluded from all $Obj)
+		~($Obj is hidden)
+		(verify object policy $Policy $Obj)
+	(into $Result)
+
+(parse basic noun [alle/jed/jeglich | $Words] as $ObjList $Policy $)
+	*(parse object name $Words as $ObjList 1 $Policy)
+
+(parse basic noun [ein/irgendein/einige | $Words] as $ObjList $Policy $)
+	*(parse indefinite $Words as $ObjList 1 $Policy)
+
+(parse basic noun [$Number | $Words] as $ObjList $Policy $)
+	(nonempty $Words)
+	(parse numeral $Number into $N)
+	*(parse indefinite $Words as $ObjList $N $Policy)
+
+(parse basic noun $Words as $ObjList $Policy $)
+	%% This is the common case.
+	*(parse object name $Words as $ObjList 0 $Policy)
+
+(parse indefinite $Words as $Result $Limit $Policy)
+	*(parse object name $Words as $ObjList 1 $Policy)
+	(if) ($Limit = 1) ($ObjList = [$First $ | $]) (then)
+		($Result = [[a $First]]) %% Decorate the result.
+	(else)
+		(take $Limit from $ObjList into $Result)
+		(nonempty $Result)
+	(endif)
+
+(parse object name $Words as $Result $All $Policy)
+
+	(filter $Words into $Filtered)
+	(nonempty $Filtered)
+	(collect $Obj)
+		%% catch expressions like 'open the eastern window'
+		($Filtered = [$Head | $Tail])
+		(nonempty $Tail)
+		(parse direction [$Head] $Dir)
+		(current room $Room)
+		(determine object $Obj)
+			*(from $Room go $Dir to object $Obj)
+			~(direction $Obj)
+			~(relation $Obj)
+			(words $Tail sufficiently specify $Obj)
+		(from words)
+			*(dict $Obj)
+		(matching all of $Tail)
+	(or)
+		%% this is the normal case
+		(determine object $Obj)
+			*($Obj is in scope)
+			~(direction $Obj)
+			~(relation $Obj)
+			(words $Filtered sufficiently specify $Obj)
+		(from words)
+			*(dict $Obj)
+		(or)
+			*(plural dict $Obj)
+		(matching all of $Filtered)
+	(into $Candidates)
+	(nonempty $Candidates)
+	(apply policy to $Candidates $Policy $CleanList)
+	(if)
+		%% Optimize for the common case.
+		($CleanList = [$])
+	(or)
+		%% E.g. get all wooden.
+		($All = 1)
+	(or)
+		%% A plural word causes all matching objects to be returned.
+		*($PluralWord is one of $Filtered)
+		(determine object $PObj)
+			*($PObj is one of $CleanList)
+		(from words)
+			*(plural dict $PObj)
+		(matching all of [$PluralWord])
+	(then)
+		($Result = $CleanList)
+	(else)
+		%% Backtrack over each matching object, for disambiguation.
+		(if) (fungibility enabled) (then)
+			(strip-fungible $CleanList $UniqueList)
+			*($Obj is one of $UniqueList)
+			($Result = [$Obj])
+		(else)
+			*($Obj is one of $CleanList)
+			($Result = [$Obj])
+		(endif)
+	(endif)
+	%% TEST PRONOUN CHANGING GENDER
+	*($CGWord is one of $Filtered)
+	*($CG is one of $Result)
+	{
+		(collect words)
+			*(fsyn $CG)
+		(into [$CGWord])
+		%%Feminin!
+		(now) (changing gender is #fem)
+	(or)
+		(collect words)
+			*(msyn $CG)
+		(into [$CGWord])
+		%%Maskulin!
+		(now) (changing gender is #mas)
+	(or)
+		(collect words)
+			*(nsyn $CG)
+		(into [$CGWord])
+		%%Neutrum!
+		(now) (changing gender is #neu)
+	(or)
+		(collect words)
+			*(psyn $CG)
+		(into [$CGWord])
+		%%Plural!
+		(now) (changing gender is #plu)
+	(or)
+		%%CG Reset! Regular!
+		(now) (changing gender is #not)
+	}
+
+(words $ sufficiently specify $)
+	~(head noun is required)
+
+(words $Words sufficiently specify $Obj)
+	(collect words)
+		(heads $Obj)
+	(into $Heads)
+	(if) (nonempty $Heads) (then)
+		*($H is one of $Heads)
+		($H is one of $Words)
+	(endif)
+
+(filter [] into [])
+	(just)
+
+(filter [von | $MoreIn] into $MoreOut)
+	(just)
+	(filter $MoreIn into $MoreOut)
+
+(filter [aus | $MoreIn] into $MoreOut)
+	(just)
+	(filter $MoreIn into $MoreOut)
+
+(filter [$Other | $MoreIn] into [$Other | $MoreOut])
+	(filter $MoreIn into $MoreOut)
+
+(apply policy to $Input $Policy $Output)
+	(collect $Obj)
+		*($Obj is one of $Input)
+		(verify object policy $Policy $Obj)
+	(into $Output)
+	(nonempty $Output)
+
+(apply policy to $Input $ $Input)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chpater 42: Topics
+
+(describe topic $Topic)
+	($Topic = [, | $])
+	(dem full $Topic)
+
+(describe topic (object $Obj))
+	(dem full $Obj)
+
+(describe topic $)
+	einem bestimmten Thema
+
+(describe person (object $Obj))
+	(den full $Obj)
+
+(describe person $)
+	jemanden
+
+(describe dative person (object $Obj))
+	(dem full $Obj)
+
+(describe dative person $)
+	jemandem
+
+(understand $Words as topic $Obj)
+	*(understand $Words as single object $Obj)
+
+(understand $WordList as topic $Topic)
+	*($Word is one of $WordList)
+	(topic keyword $Word implies $Topic)
+
+(topic keyword $Keyword implies $Keyword)
+	(topic keyword $Keyword)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 36: Parser: Toplevel
+
+%% Parse and attempt each action in turn, and abort if one fails.
+%% That's because an action may modify the scope, which affects the parsing of
+%% subsequent actions.
+
+(global variable (current actor $))
+
+(parse commandline [])
+	Wie bitte?
+
+(parse commandline [\* | $])
+	%% By convention used by testers to put comments in a transcript.
+
+(parse commandline $Words)
+	(now) ~(allowing parse errors)
+	(rebuild scope)
+	(parse action sequence $Words)
+
+(parse action sequence $Words)
+	(if) (split $Words by [. ; then] into $Left and $Right) (then)
+		(parse action $Left)
+		(rebuild scope)
+		(parse action sequence $Right)
+	(else)
+		(parse action $Words)
+	(endif)
+
+(parse action [])
+
+(parse action $Words)
+	%% First, check for UNDO.
+
+	(if) ($Words = [undo]) (then)
+		(if) ~(interpreter supports undo) (then)
+			This interpreter doesn't support undo.
+		(elseif) (undo) (then)
+			Failed to undo last turn.
+		(else)
+			There are no more turns to undo!
+		(endif)
+		(stop)
+	(else)
+		%% The command wasn't UNDO.
+		%% Before proceeding, save the current undo state:
+
+		(if) (save undo 1) (then)
+			(roman)
+			Undoing the last turn.
+			(line)
+			(location headline)
+			(stop)
+		(endif)
+
+		%% Usually, the player is the actor.
+		(current player $Player)
+		(now) (current actor $Player)
+
+		%% Handle AGAIN and rewriting:
+
+		(if)
+			($Words = [$W])
+			($W is one of [again g])
+			(last command was $LastCmd)
+		(then)
+			(rewrite $LastCmd into $ActualWords)
+		(else)
+			(now) (last command was $Words)
+			(rewrite $Words into $ActualWords)
+		(endif)
+
+		%% Parse the action. Special treatment if we've asked for
+		%% clarification, and a noun was entered on its own:
+
+		(now) ~(head noun is required)
+		(collect $A)
+			*(understand $ActualWords as $A)
+		(into $AllCandidatesWithDup)
+
+		%% Since we may have multiple matches, do some sieving:
+
+		(remove duplicates $AllCandidatesWithDup $AllCandidates)
+		(if) ($AllCandidates = [$Single]) (then)
+			%% Optimize the common case.
+			(now) ~(implicit action is $)
+			(now) ~(implicit action wants direction)
+			(try-complex $Single)
+		(else)
+			(sieve action candidates $AllCandidates $ActualWords)
+		(endif)
+	(endif)
+
+(sieve action candidates $AllCandidates $ActualWords)
+	(if) (nonempty $AllCandidates) (then)
+		(now) ~(implicit action is $)
+		(now) ~(implicit action wants direction)
+		(collect $A)
+			*($A is one of $AllCandidates)
+			~(unlikely-complex $A)
+		(into $LikelyCandidates)
+		(if) (nonempty $LikelyCandidates) (then)
+			%% Consider only the likely candidates.
+			(consider action candidates $LikelyCandidates $ActualWords)
+		(else)
+			%% All candidates were deemed unlikely, but some
+			%% candidates are more unlikely than others. Here, we
+			%% decide that most actions that involve rooms are
+			%% very unlikely.
+			(collect $A)
+				*($A is one of $AllCandidates)
+				~(unlikely due to room $A)
+			(into $SomewhatLikely)
+			(if) (nonempty $SomewhatLikely) (then)
+				(consider action candidates $SomewhatLikely $ActualWords)
+			(else)
+				(consider action candidates $AllCandidates $ActualWords)
+			(endif)
+		(endif)
+	(elseif)
+		%% We were unable to parse the action.
+
+		%% Occasionally people like to separate actions by commas or
+		%% 'AND', but this is problematic. We can only deal with it as
+		%% a last resort, because in order to parse the part after the
+		%% separator, we need to have the right scope, and therefore we
+		%% first have to execute what's to the left of the separator.
+
+		*(split $ActualWords by [, und] into $Left and $Right)
+		*(understand $Left as $)
+	(then)
+		(parse action $Left)
+		(rebuild scope)
+		(parse action $Right)
+	(else)
+		%% Everything has failed. Can we understand a partial action,
+		%% in order to print an informative error message?
+
+		%% The multi-query inside the if-condition is unnecessary
+		%% (if-conditions are only evaluated once), but the compiler is
+		%% able to opmitize predicates better if they're consistently
+		%% queried in the same mode.
+
+		(now) (allowing parse errors)
+		(if) *(understand $ActualWords as $BadAction) (then)
+			(if) ([all] is one of $BadAction) (then)
+				\( Der Wort "alles" ist hier leider nicht erlaubt. Bitte nochmal präziser. \)
+			(elseif) ([,] is one of $BadAction) (then)
+				\( Hier kannst du nicht mehrere Objekte gleichzeitig angeben. Bitte nochmal Schritt für Schritt. \)
+			(else)
+				\( Ich habe dich nur teilweise verstanden, du willst 
+				(describe action $BadAction)
+				. \)
+			(endif)
+		(else)
+			\( Es tut mir leid, ich habe dich nicht verstanden. \)
+		(endif)
+		(stop)
+	(endif)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 37: Disambiguation
+
+(consider action candidates $List $ActualWords)
+	(if) ($List = [$Single]) (then)
+		%% Optimize the common case.
+		(try-complex $Single)
+	(else)
+		%% Eliminate options where the head noun is missing.
+		(now) (head noun is required)
+		(collect $A)
+			*(understand $ActualWords as $A)
+			($A is one of $List)
+		(into $ShortListWithDup)
+		(remove duplicates $ShortListWithDup $ShortList)
+		(if) ($ShortList = [$Single]) (then)
+			(try-complex $Single)
+		(else)
+			(if) (empty $ShortList) (then)
+				(disambiguate action $List $ComplexAction)
+			(else)
+				(disambiguate action $ShortList $ComplexAction)
+			(endif)
+			(try-complex $ComplexAction)
+		(endif)
+	(endif)
+
+(disambiguate action $List $Result)
+	(collect $Action)
+		*($Action is one of $List)
+		~{
+			*($Action recursively contains $Obj)
+			($Obj is hidden)
+		}
+	(into $NonSpoilery)
+	(if) (empty $NonSpoilery) (then)
+		($AskList = $List)
+	(else)
+		($AskList = $NonSpoilery)
+	(endif)
+	(if) ($AskList = [$Single]) (then)
+		($Result = $Single)
+	(elseif)
+		(rephrase as object disambiguation
+			$AskList
+			$ComplexAction
+			$Template
+			$ObjList)
+	(then)
+		Willst du (describe action $ComplexAction)?
+		(par)
+		> (get input $Words)
+		{
+			%% Since the player was given an explicit list of
+			%% '(the full $)' descriptions, we have to match
+			%% against those, instead of the normal dict rules.
+			%% However, we make a special case out of me/myself
+			%% (which is usually printed as 'yourself').
+
+			(current player $Player)
+			(if)
+				($Words = [$W])
+				($W is one of [mich dich mir dir])
+				($Player is one of $ObjList)
+			(then)
+				(recover implicit action $Template $Player into $Result)
+			(else)
+				(now) (head noun is required)
+				(disambiguate by object name $Words $Template $ObjList $Result)
+			(or)
+				(now) ~(head noun is required)
+				(disambiguate by object name $Words $Template $ObjList $Result)
+			(endif)
+		(or)
+			(parse commandline $Words)
+			(stop)
+		}
+	(else)
+		Willst du: (line)
+		(enumerate actions $AskList 1 $)
+		(if) ~{ (library links enabled) (interpreter supports links) } (then)
+			\( Type the corresponding number \)
+		(endif)
+		(par)
+		> (get input $Words)
+		{
+			(understand $Words as number $N)
+			($N > 0)
+			(nth $AskList $N $Result)
+		(or)
+			(parse commandline $Words)
+			(stop)
+		}
+	(endif)
+
+(disambiguate by object name $Words $Template $ObjList $Result)
+	(collect $A)
+		(determine object $Obj)
+			*($Obj is one of $ObjList)
+			~(direction $Obj)
+			~(relation $Obj)
+			(words $Words sufficiently specify $Obj)
+		(from words)
+			(den full $Obj)
+		(matching all of $Words)
+		(recover implicit action $Template $Obj into $A)
+	(into $Candidates)
+	(nonempty $Candidates)
+	{
+		($Candidates = [$Result])
+	(or)
+		(disambiguate action $Candidates $Result)
+	}
+
+(rephrase as object disambiguation [$Head | $Tail] $Complex $Template $ObjList)
+	(all identical except object $Head $Tail $Pos [] $ObjList)
+	(replace nth $Head $Pos [, | $ObjList] $Complex)
+	(replace nth $Head $Pos [] $Template)
+
+(replace nth [$ | $Tail] 1 $Element [$Element | $Tail])
+
+(replace nth [$Head | $Tail] $N $Element [$Head | $SubOutput])
+	($N minus 1 into $Nm1)
+	(replace nth $Tail $Nm1 $Element $SubOutput)
+
+(all identical except object $First [] $ObjPos $ObjIn [$LastObj | $ObjIn])
+	(number $ObjPos)
+	(nth $First $ObjPos $LastObj)
+
+(all identical except object $First [$Second | $More] $ObjPos $ObjIn $ObjOut)
+	(identical except object $First $Second 1 $ObjPos $FirstObj)
+	(all identical except object
+		$First
+		$More
+		$ObjPos
+		[$FirstObj | $ObjIn]
+		$ObjOut)
+
+(identical except object [$H1 | $T1] [$H2 | $T2] $CurrPos $TargetPos $O1)
+	(if) (object $H1) (object $H2) ~($H1 = $H2) (then)
+		($CurrPos = $TargetPos)
+		($O1 = $H2)
+		($T1 = $T2)
+	(else)
+		($H1 = $H2)
+		($CurrPos plus 1 into $NextPos)
+		(identical except object $T1 $T2 $NextPos $TargetPos $O1)
+	(endif)
+
+(enumerate action $N $Action)
+	(library links enabled)
+	$N . (link [$N]) (describe action $Action)
+
+(enumerate action $N $Action)
+	$N . (describe action $Action)
+
+(enumerate actions [$Item1 $Item2] $N $Np1)
+	(just)
+	(enumerate action $N $Item1) , or (line)
+	($N plus 1 into $Np1)
+	(enumerate action $Np1 $Item2) ? (line)
+(enumerate actions [$Item1 $Item2 | $] 9 10)
+	(just)
+	(enumerate actions [$Item1 $Item2] 9 10)
+	\(List truncated.\) (line)
+(enumerate actions [$Head | $Tail] $N $Last)
+	(enumerate action $N $Head) , (line)
+	($N plus 1 into $Np1)
+	(enumerate actions $Tail $Np1 $Last)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Asking for clarification
+
+(asking for object in $Action)
+	(now) (implicit action is $Action)
+	(now) ~(implicit action wants direction)
+	(stop)
+
+(asking for direction in $Action)
+	(now) (implicit action is $Action)
+	(now) (implicit action wants direction)
+	(stop)
+
+(recover implicit action [] $ into [])
+
+(recover implicit action [[] | $More] $Obj into [$Obj | $More])
+
+(recover implicit action [$Other | $MoreIn] $Obj into [$Other | $MoreOut])
+	(recover implicit action $MoreIn $Obj into $MoreOut)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 39: Miscellaneous input routines
+
+%% Asking a yes/no question:
+
+(yesno)
+	(space) > (get input $Words)
+	(if) ($Words = [ja]) (or) ($Words = [j]) (or) ($Words = [ok]) (or) ($Words = [jo]) (then)
+	(elseif) ($Words = [nein]) (or) ($Words = [n]) (or) ($Words = [nö]) (or) ($Words = [nee]) (then)
+		(fail)
+	(else)
+		Bitte antworte mit ja oder nein
+		(yesno)
+	(endif)
+
+%% Asking for a number:
+
+(get number from $First to $Last $N)
+	$First - $Last > (get input $Input)
+	(understand $Input as number $N)
+	~($N < $First)
+	~($N > $Last)
+
+%% Waiting for a keypress:
+
+(any key)
+	(get key $)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 40: Finding the shortest path from one room to another, using obvious exits.
+
+(shortest path from $A to $B is $Path)
+	(find paths from $A)
+	($B has distance $ from start)
+	(build path from $A to $B [] $Path)
+
+(find paths from $Start)
+	(now) ~($ has distance $ from start)
+	(now) ~($ is to be considered)
+	(now) ($Start has distance 0 from start)
+	(now) ($Start is to be considered)
+	(stoppable) {
+		*(repeat forever)
+		(find paths subroutine)
+		(fail)
+	}
+
+(find paths subroutine)
+	(if) ($First is to be considered) (then)
+		%% There's at least one room left to consider.
+
+		%% Of all the rooms left to consider, pick the one with the
+		%% shortest known distance from the starting room:
+
+		($First has distance $FirstDist from start)
+		(collect $Node)
+			*($Node is to be considered)
+		(into [$ | $Considered])
+		(find nearest $Considered $FirstDist $First into $Nearest)
+
+		%% Remove it from the set of rooms left to consider (because
+		%% we're considering it now):
+
+		(now) ~($Nearest is to be considered)
+
+		%% Obtain its shortest known distance from the starting room,
+		%% and add 1. This will be the distance to each of its
+		%% neighbours, if we go there via the room under consideration.
+
+		($Nearest has distance $D from start)
+		($D plus 1 into $Dp1)
+
+		%% Consider each neighbouring room (that the player has seen):
+
+		(exhaust) {
+			*(from $Nearest go $ to room $Dest)
+			($Dest is visited)
+
+			%% Only proceed if there is no known path to the
+			%% neighbouring room, or if the new path is shorter:
+
+			(if) ($Dest has distance $OldDist from start) (then)
+				($Dp1 < $OldDist)
+			(endif)
+
+			%% Store the new path and distance:
+
+			(now) ($Dest has distance $Dp1 from start)
+			(now) (last hop before $Dest is $Nearest)
+
+			%% We must consider the neighbours of this neighbour:
+
+			(now) ($Dest is to be considered)
+		}
+	(else)
+		(stop)
+	(endif)
+
+%% Run through the list of rooms, and return the one with the shortest distance
+%% from the starting room:
+
+(find nearest [] $ $ArgMin into $ArgMin)
+(find nearest [$Head | $Tail] $Min $ArgMin into $Output)
+	(if) ($Head has distance $D from start) ($D < $Min) (then)
+		(find nearest $Tail $D $Head into $Output)
+	(else)
+		(find nearest $Tail $Min $ArgMin into $Output)
+	(endif)
+
+%% Reconstruct the full path from the 'last hop' links:
+
+(build path from $Start to $Start $SoFar $SoFar)
+(build path from $Start to $End $SoFar $Path)
+	(last hop before $End is $Last)
+	(from $Last go $Dir to room $End)
+	(build path from $Start to $Last [$Dir | $SoFar] $Path)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 41: Updating and traversing the object tree
+
+@($Obj is $Rel $Parent)
+	%% The order of the following queries is critical when $Obj is unbound.
+	*($Obj has parent $Parent)
+	*($Obj has relation $Rel)
+
+@($Obj is nowhere)
+	~($Obj has parent $)
+
+%% Determine what room ultimately surrounds a particular object:
+
+((room $Room) is in room $Room)
+
+($Obj is in room $Room)
+	($Obj has parent $Loc)
+	($Loc is in room $Room)
+
+%% The following three predicates may be called with either parameter unbound.
+%% They will traverse the object tree in the most efficient way for each case.
+
+($Obj has ancestor $Ancestor)
+	(if) (bound $Obj) (then)
+		($Obj has parent $Parent)
+		{
+			($Parent = $Ancestor) (or)
+			*($Parent has ancestor $Ancestor)
+		}
+	(else)
+		*($Sub has parent $Ancestor)
+		{
+			($Obj = $Sub) (or)
+			*($Obj has ancestor $Sub)
+		}
+	(endif)
+
+($Obj is nested $Rel $Loc)
+	(if) (bound $Obj) (then)
+		($Obj has parent $Parent)
+		{
+			($Obj has relation $Rel)
+			($Parent = $Loc)
+		(or)
+			*($Parent is nested $Rel $Loc)
+		}
+	(else)
+		*($Sub is $Rel $Loc)
+		{
+			($Obj = $Sub) (or)
+			*($Obj has ancestor $Sub)
+		}
+	(endif)
+
+($Obj is part of $Ancestor)
+	(if) (bound $Obj) (then)
+		($Obj is #partof $Parent)
+		{
+			($Parent = $Ancestor) (or)
+			*($Parent is part of $Ancestor)
+		}
+	(else)
+		*($Sub is #partof $Ancestor)
+		{
+			($Obj = $Sub) (or)
+			*($Obj is part of $Sub)
+		}
+	(endif)
+
+($Obj is recursively worn by $Actor)
+	($Obj is #wornby $Actor)
+
+($Obj is recursively worn by $Actor)
+	($Obj is #partof $OtherObj)
+	($OtherObj is recursively worn by $Actor)
+
+%% The following predicates are useful when writing before-rules:
+
+(ensure $Obj is held)
+	(current player $Actor)
+	(if) ($Obj is recursively worn by $Actor) (then)
+		(first try [remove $Obj])
+	(elseif) (item $Obj) ~($Obj is #heldby $Actor) (then)
+		(first try [take $Obj])
+	(endif)
+
+(recursively leave non-vehicles)
+	(current player $Actor)
+	($Actor has parent $Obj)
+	~(room $Obj)
+	~(vehicle $Obj)
+	(first try [leave $Obj])
+	(recursively leave non-vehicles)
+
+(recursively leave descendants of $Obj)
+	(current player $Actor)
+	($Actor has parent $FirstObj)
+	~($FirstObj = $Obj)
+	(first try [leave $FirstObj])
+	(recursively leave descendants of $Obj)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 42: List manipulation
+
+(append [] $A $A)
+(append [$A | $MoreA] $B [$A | $C])
+	(append $MoreA $B $C)
+
+(remove from [] matching $ into [])
+	(just)
+(remove from [$In | $MoreIn] matching $Keys into $MoreOut)
+	($In is one of $Keys)
+	(just)
+	(remove from $MoreIn matching $Keys into $MoreOut)
+(remove from [$In | $MoreIn] matching $Keys into [$In | $MoreOut])
+	(remove from $MoreIn matching $Keys into $MoreOut)
+
+(remove duplicates [] [])
+	(just)
+(remove duplicates [$Head | $MoreIn] $MoreOut)
+	($Head is one of $MoreIn)
+	(just)
+	(remove duplicates $MoreIn $MoreOut)
+(remove duplicates [$Head | $MoreIn] [$Head | $MoreOut])
+	(remove duplicates $MoreIn $MoreOut)
+
+(length of [] into 0)
+(length of [$ | $More] into $Np1)
+	(length of $More into $N)
+	($N plus 1 into $Np1)
+
+(nth [$Head | $] 1 $Head)
+(nth [$ | $Tail] $N $Result)
+	($N minus 1 into $Nm1)
+	(nth $Tail $Nm1 $Result)
+
+(last [$Last] $Last)
+(last [$ | $Tail] $Last)
+	(last $Tail $Last)
+
+(take 0 from $ into [])
+(take $N from [$Head | $MoreIn] into [$Head | $MoreOut])
+	($N minus 1 into $Nm1)
+	(take $Nm1 from $MoreIn into $MoreOut)
+
+($X contains one of $Y)
+	(split $X by $Y into $ and $)
+
+($ contains sublist [])
+($List contains sublist [$Head | $Tail])
+	(split $List by [$Head] into $ and $Rest)
+	(append $Tail $ $Rest)
+
+($List recursively contains $Element)
+	*($Obj is one of $List)
+	{
+		($Obj = $Element)
+	(or)
+		(nonempty $Obj)
+		($Obj recursively contains $Element)
+	}
+
+(reverse $Input $Output)
+	(reverse-sub $Input $Output [])
+
+(reverse-sub [] $Output $Output)
+(reverse-sub [$Head | $Tail] $Output $SoFar)
+	(reverse-sub $Tail $Output [$Head | $SoFar])
+
+(split [$First $Second | $Tail] anywhere into [$First] and [$Second | $Tail])
+(split [$First | $More] anywhere into [$First | $Left] and $Right)
+	*(split $More anywhere into $Left and $Right)
+
+(split $Input by relation $Rel into $Left and $Right)
+	(nonempty $Input)
+	*(relation $Rel)
+	(collect words)
+		*(dict $Rel)
+	(into $WordSet)
+	(nonempty $WordSet)
+	*(split $Input by $WordSet into $Left and $Right)
+
+(print words $List)
+	(exhaust) {
+		*($Word is one of $List)
+		$Word
+	}
+
+(Print Words $List)
+	(exhaust) {
+		*($Word is one of $List)
+		(uppercase) $Word
+	}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 51: Get rid of some compiler warnings
+
+(plural name $)		(fail)
+(from $ go $ to $)	(fail)
+($ unlocks $)		(fail)
+(from $ through $ to $)	(fail)
+(topic keyword $)	(fail)
+(on every tick in $)	(fail)
+(scoring enabled)	(fail)
+(maximum score $)	(fail)
+(amusing enabled)	(fail)
+(amusing)		(fail)
+(library links enabled)		(fail)
+(default actions enabled)	(fail)
+(heads $)			(fail)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter 43: Fatal runtime errors
+
+(error $Code entry point)
+	(roman) \( Technische Schwierigkeiten:
+	(report fatal error $Code)
+	Versuche Wiederherstellung mit UNDO. \) (line)
+	(if) (undo) (or) (then)
+		Undo failed!
+	(endif)
+
+(report fatal error 1)	Heap space exhausted.
+(report fatal error 2)	Auxiliary heap space exhausted.
+(report fatal error 3)	Type error: Expected object.
+(report fatal error 4)	Type error: Expected bound value.
+(report fatal error 5)	Invalid dynamic operation.
+(report fatal error 6)	Long-term heap space exhausted.
+(report fatal error $)	Invalid error code!
