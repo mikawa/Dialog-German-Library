@@ -9,8 +9,8 @@ and copy the content of the repository into this folder.
 
 Compile the "Jade" example via compiler call:
 
-Z-code: "dialogc -t z8 jade.dg g_stdlib.dg"
-Aa-machine: "dialogc -t aa jade.dg g_stdlib.dg"
+Z-code: "dialogc -t z8 jade.dg stdlib_de.dg"
+Aa-machine: "dialogc -t aa jade.dg stdlib_de.dg"
 
 Replace jade.dg with your own file.
 You are ready to go.
