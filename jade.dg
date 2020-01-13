@@ -96,7 +96,8 @@
 
 #schrein
 (room *)
-(name *)	Im Schrein
+(roomheader *)	Im Schrein
+(name *)	Schrein(-s)
 (dict *)    schrein
 
 (look *)

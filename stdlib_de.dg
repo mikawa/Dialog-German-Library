@@ -61,9 +61,9 @@
 
 (name #in)		in
 (name #on)		auf
-(name #partof)		fest an
-(name #heldby)		fest im Besitz von 
-(name #wornby)		fester Teil der Kleidung von
+(name #partof)		an
+(name #heldby)		im Besitz von 
+(name #wornby)		Teil der Kleidung von
 (name #under)		unter
 (name #behind)		hinter
 
@@ -1611,7 +1611,7 @@
 	($1R is one of [[an] [auf] [aus] [ein] [auf] [hin] [weg] [um] [zu] [ab] [durch] [hoch] [fest] [locker] [fallen] [los]])
 	%%ERKANNT2
 	(nth $Right 1 $Check)
-	$Check
+	%%$Check
 	($Check is one of [mit])
 	(append [$First | $1R ] $1L $New)
 	(append $New $Right $Corrected)
@@ -2067,12 +2067,6 @@
 
 (understand [leg/setz/stell/plazier | $Words] as [put $Obj $Rel $Dest])
 	*(split $Words by relation $Rel into $Left and $Right)
-	~($Rel = #on)
-	*(understand $Right as single object $Dest)
-	*(understand $Left as object $Obj preferably held excluding $Dest)
-
-(understand [insert | $Words] as [put $Obj #in $Dest])
-	*(split $Words by [in] into $Left and $Right)
 	*(understand $Right as single object $Dest)
 	*(understand $Left as object $Obj preferably held excluding $Dest)
 
@@ -4912,7 +4906,7 @@
 			($Obj is $Rel $Loc)
 			~(room $Loc)
 		(then)
-			(name $Rel) (dem $Loc)
+			\((name $Rel) (dem $Loc)\)
 		(endif)
 	(endif)
 
