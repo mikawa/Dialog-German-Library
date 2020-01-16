@@ -623,6 +623,20 @@
 		schließt
 	}
 
+(geht $Obj)
+	{
+		($Obj is plural) gehen
+	(or)
+		geht
+	}
+
+(kommt $Obj)
+	{
+		($Obj is plural) kommen
+	(or)
+		kommt
+	}
+
 (öffnet $Obj)	(current player $Obj) öffnest 
 (öffnet $Obj)
 	{
@@ -4628,7 +4642,7 @@
 	}
 	($Action = [$Verb | $CleanList])
 	(try $Action)
-	(if) (command $Action) (then)
+	(if) ~(command $Action) (then)
 		(tick)
 	(endif)
 	(par)
@@ -4652,23 +4666,36 @@
 (expand complex objlist [$Other | $MoreIn] [$Other | $MoreOut])
 	*(expand complex objlist $MoreIn $MoreOut)
 
-(unlikely-complex [$Verb | $ComplexObjList])
+(unlikely-complex [$Verb | $ComplexObjList] $VeryLevel)
 	*(expand complex objlist $ComplexObjList $SimpleObjList)
 	(strip decorations from $SimpleObjList into $Stripped)
-	(unlikely [$Verb | $Stripped])
+	(level $VeryLevel unlikely [$Verb | $Stripped])
 
+	(level 0 unlikely $Action)
+	(unlikely $Action) (or)
+	(very unlikely $Action) (or)
+	(very very unlikely $Action)
+
+(level 1 unlikely $Action)
+	(very unlikely $Action) (or)
+	(very very unlikely $Action)
+
+(level 2 unlikely $Action)
+	(very very unlikely $Action)
+	
 %% Current and nearby rooms are in scope, but they're rarely what the player
 %% means. The following rules ensure that most actions that mention rooms
 %% directly are considered unlikely.
-%% Unrecognized topics are also very unlikely.
-
-(unlikely $Action)
-	(very unlikely $Action)
 
 (very unlikely [(room $) | $])
-(very unlikely [? | $])
 (very unlikely [$ | $More])
 	(very unlikely $More)
+
+%% Only report the unrecognized topic (@?) as a last resort.
+
+(very very unlikely [? | $])
+(very very unlikely [$ | $More])
+	(very very unlikely $More)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Daemons
