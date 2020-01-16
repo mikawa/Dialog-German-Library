@@ -630,6 +630,13 @@
 		geht
 	}
 
+(sucht $Obj)
+	{
+		($Obj is plural) suchen
+	(or)
+		sucht
+	}
+
 (kommt $Obj)
 	{
 		($Obj is plural) kommen
@@ -976,7 +983,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 15: Rooms and doors
 
-(name (room $))		location
+(name (room $))		Ort
+((room $room) is maskulin)
+	~ ($room is feminin)
+	~ ($room is neutrum)
+	~ ($room is plural)
+
 (room header $Room)	(Name $Room)
 (look (room $R))	Du bist hier.
 
@@ -4221,6 +4233,8 @@
 	(endif)
 	(if) ($Dir = #in) (then)
 		drinnen
+	(elseif) ($Dir = #out) (then)
+		draußen
 	(else)
 		(name $Dir)
 	(endif)
@@ -4794,8 +4808,17 @@
 	(endif)
 
 (narrate $Obj leaving $OldRoom $Dir to $NewRoom)
-	(Der $Obj) (geht $Obj) nach (name $Dir) 
-	(if) ($NewRoom is visited) (then) zu (dem $NewRoom) (endif).
+	(Der $Obj)
+	(if) ($NewRoom is visited) (then)
+		(sucht $Obj) (den $NewRoom)
+		(if) ~($Dir is one of [#in #out #up #down]) (then)
+			im (name $Dir)
+		(endif)
+		auf
+	(else)
+		(geht $Obj) nach (name $Dir) 
+	(endif)
+	.
 
 (narrate $Obj entering $NewRoom from $OldRoom)
 	(if) (from $NewRoom go $InDir to room $OldRoom) (then)
