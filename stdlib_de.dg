@@ -113,65 +113,99 @@
 #north
 (direction *)
 (name *)		Norden
+(to-adverb *)	
+	(name *)
+(from-adverb *)	
+	(name *)
 (dict *)		n nord norden nördlich
 (opposite of * is #south)
 
 #south
 (direction *)
 (name *)		Süden
+(to-adverb *)	
+	(name *)
+(from-adverb *)	
+	(name *)
 (dict *)		s süd süden südlich
 (opposite of * is #north)
 
 #east
 (direction *)
 (name *)		Osten
+(to-adverb *)	
+	(name *)
+(from-adverb *)	
+	(name *)
 (dict *)		o ost osten östlich
 (opposite of * is #west)
 
 #west
 (direction *)
 (name *)		Westen
+(to-adverb *)	
+	(name *)
+(from-adverb *)	
+	(name *)
 (dict *)		w west westen westlich
 (opposite of * is #east)
 
 #northeast
 (direction *)
 (name *)		Nordosten
+(to-adverb *)	
+	(name *)
+(from-adverb *)	
+	(name *)
 (dict *)		no nordost nordosten nordöstlich
 (opposite of * is #southwest)
 
 #northwest
 (direction *)
 (name *)		Nordwesten
+(to-adverb *)	
+	(name *)
+(from-adverb *)	
+	(name *)
 (dict *)		nw nordwest nordwesten nordwestlich
 (opposite of * is #southeast)
 
 #southwest
 (direction *)
 (name *)		Südwesten
+(to-adverb *)	
+	(name *)
+(from-adverb *)	
+	(name *)
 (dict *)		sw südwest südwesten südwestlich
 (opposite of * is #northeast)
 
 #southeast
 (direction *)
 (name *)		Südosten
+(to-adverb *)	
+	(name *)
+(from-adverb *)	
+	(name *)
 (dict *)		so südost südosten südöstlich
 (opposite of * is #northwest)
 
 #up
 (direction *)
-(name *)		hinauf
+(name *)		oben
 (dict *)		h hinauf rauf hoch oben
 (present-adverb *)	über
 (from-adverb *)		oben
+(to-adverb *)		hinauf
 (opposite of * is #down)
 
 #down
 (direction *)
-(name *)		hinab
+(name *)		unten
 (dict *)		r runter hinunter hinab unten
 (present-adverb *)	unter
 (from-adverb *)		unten
+(to-adverb *)		hinunter
 (opposite of * is #up)
 
 #in			%% Note: #in is also a relation
@@ -179,6 +213,7 @@
 (dict *)		rein hinein innen drinnen
 (present-adverb *)	innerhalb
 (from-adverb *)		drinnen
+(to-adverb *)		hinein
 (opposite of * is #out)
 
 #out
@@ -186,6 +221,7 @@
 (dict *)		raus hinaus außen draußen
 (present-adverb *)	außerhalb
 (from-adverb *)		draußen
+(to-adverb *)		hinaus
 (opposite of * is #in)
 
 (present-adverb $Dir)	im (name $Dir)
@@ -4810,26 +4846,45 @@
 (narrate $Obj leaving $OldRoom $Dir to $NewRoom)
 	(Der $Obj)
 	(if) ($NewRoom is visited) (then)
-		(sucht $Obj) (den $NewRoom)
-		(if) ~($Dir is one of [#in #out #up #down]) (then)
-			im (name $Dir)
+		(if) ($Dir = #in) (then)
+			(geht $Obj) in (den $NewRoom) hinein
+		(elseif) ($Dir = #out) (then)
+			(geht $Obj) zu (dem $NewRoom) hinaus
+		(elseif) ($Dir is one of [#up #down]) (then)
+			(geht $Obj) zu (dem $NewRoom) (to-adverb $Dir)
+		(else)
+			(sucht $Obj) (den $NewRoom) im (name $Dir) auf
 		(endif)
-		auf
 	(else)
-		(geht $Obj) nach (name $Dir) 
+		(geht $Obj)
+		(if) ($Dir is one of [#in #out]) (then)
+			(to-adverb $Dir)
+		(else)
+			nach (to-adverb $Dir) 
+		(endif)
 	(endif)
 	.
 
 (narrate $Obj entering $NewRoom from $OldRoom)
-	(if) (from $NewRoom go $InDir to room $OldRoom) (then)
-		(if) ($InDir = #in) (then)
-			(Der $Obj) (kommt $Obj) aus (dem $OldRoom).
+	(Der $Obj)
+	(if) (from $NewRoom go $Dir to room $OldRoom) (then)
+		(if) ($OldRoom is visited) (then)
+			(if) ($Dir = #out) (then)
+				(kommt $Obj) von (dem $OldRoom) herein
+			(elseif) ($Dir = #in) (then)
+				(kommt $Obj) aus (dem $OldRoom) heraus
+			(elseif) ($Dir is one of [#up #down]) (then)
+				(kommt $Obj) von (dem $OldRoom) (to-adverb $Dir)
+			(else)
+				(kommt $Obj) von (dem $OldRoom) im (name $Dir)
+			(endif)
 		(else)
-			(Der $Obj) (kommt $Obj) von (name $InDir).
+			(kommt $Obj) von (from-adverb $Dir) 
 		(endif)
 	(else)
-		(Der $Obj) (kommt $Obj) aus (dem $OldRoom).
+		(Der $Obj) (kommt $Obj) aus (dem $OldRoom)
 	(endif)
+	.
 
 (let $NPC leave $Obj)
 	(if) (player can see $Obj) (then)
