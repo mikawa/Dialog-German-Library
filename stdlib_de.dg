@@ -2853,6 +2853,9 @@
 
 %% BITE <obj>
 
+(describe action [bite $Obj])
+	in (den $Obj) beißen
+
 (understand infinitive [kauen/beißen] as Verb [beiß])
 
 (rewrite [kau | $Words] into [beiß | $Words])
@@ -3072,9 +3075,6 @@
 (unlikely [consult $Obj about $])
 	~(consultable $Obj)
 
-(very unlikely [consult $Obj about $Topic])
-	(just) ($Topic = @?)
-
 (refuse [consult $Obj about $])
 	(just) {
 		(when $Obj is not here)
@@ -3133,16 +3133,13 @@
 	*(understand $Words as single object $Obj preferably animate)
 
 (describe action [ask $Person])
-	(describe person $Person) nach etwas fragen
+	(den full $Person) nach etwas fragen
 
 (describe action [tell $Person])
-	(describe person $Person) etwas erzählen
+	(der full $Person) etwas erzählen
 
-(unlikely [tell $Obj to | $])
+(unlikely [ask/tell $Obj about $])
 	~(animate $Obj)
-
-(very unlikely [tell $ to tell $ about $Topic])
-	(just) ($Topic = @?)
 
 %% Don't require reachability:
 
@@ -3155,18 +3152,13 @@
 (refuse [tell $Obj])
 	(just) (when $Obj is not here)
 
-(perform [ask $Person about $])
-	(try [talk to $Person])
+(perform [ask/tell $Person about $Topic])
+	(try [talk to $Person about $Topic])
 
-(perform [tell $Person about $])
-	(try [talk to $Person])
-
-(perform [ask $Obj])
+(perform [ask/tell $Obj])
 	(try [talk to $Obj])
 
-(perform [tell $Obj])
-	(try [talk to $Obj])
-
+%% TALK TO <obj> ABOUT <topic>
 %% TALK TO <obj>
 %% TALK
 
@@ -3184,6 +3176,9 @@
 
 (understand [red] as [talk])
 
+(describe action [talk to $Person about $Topic])
+	mit (dem full $Person) über (describe topic $Topic) reden
+
 (unlikely [talk to $Obj])
 	~(animate $Obj)
 
@@ -3193,8 +3188,11 @@
 
 %% Don't require reachability:
 
-(refuse [talk to $Obj])
+(refuse [talk to $Obj | $])
 	(just) (when $Obj is not here)
+
+(perform [talk to $Obj about $])
+	(try [talk to $Obj])
 
 (perform [talk to (current player $)])
 	Du sprichst dir wenige ausgewählte Worte zu.
@@ -3351,26 +3349,29 @@
 
 %% The rule for "name comma action" is further down in the file.
 
-(unlikely [tell $Obj to | $])
-	~(animate $Obj)
-
-(very unlikely [tell $ to tell $ about $Topic])
-	(just) ($Topic = @?)
-
-(unlikely [tell $NPC to | $])
-	~(animate $NPC)
+(unlikely [tell $Addressee to | $])
+	~(animate $Addressee)
 
 (describe action [tell $Actor to give $Obj to (current player $)])
 	(describe person $Actor) um (den full $Obj) bitten
 
+(describe action [tell $Actor to tell (current player $) about $Topic])
+	(dem full $Actor) über (describe topic $Topic) erzählen
+
 (describe action [tell $Actor to | $Action])
-	(describe person $Actor) sagen, (er $Actor) (soll $Actor) (describe action $Action)
+	(dem full $Actor) sagen, (er $Actor) (soll $Actor) (describe action $Action)
+
+(unlikely [tell $Obj to | $])
+	~(animate $Obj)
 
 (refuse [tell $NPC to | $])
 	(just) (when $NPC is not here)
 
 (instead of [tell $NPC to greet])
 	(try [greet $NPC])
+
+(instead of [tell $NPC to tell (current player $) about $Topic])
+	(try [ask $NPC about $Topic])
 
 (perform [tell $Actor to | $])
 	(if) (animate $Actor) (then)
@@ -3813,6 +3814,8 @@
 
 (understand [kletter nach | $Words] as [go $Dir])
 	*(understand $Words as direction $Dir)
+	*($Dir is one of [#up #down])
+	(from $Room go $Dir to $)
 
 (understand [beweg dich nach | $Words] as [go $Dir])
 	*(understand $Words as direction $Dir)
@@ -3832,7 +3835,7 @@
 (understand [geh runter] as [go #down])
 (understand [runter] as [go #down])
 
-(unlikely-complex [go $DirList])
+(unlikely-complex [go $DirList] 0)
 	(just)
 	(if) (direction $DirList) (then)
 		($Dir = $DirList)
@@ -4168,6 +4171,9 @@
 %% ATTACK <obj> WITH <obj>
 %% ATTACK <obj>
 
+(describe action [attack $Obj])
+	(den full $Obj) angreifen
+
 (describe action [attack $Obj with $Weapon])
 	(den full $Obj) mit (dem $Weapon) angreifen
 
@@ -4180,10 +4186,10 @@
 (understand infinitive [zerstören] as Verb [zerstör])
 (understand infinitive [töten] as Verb [töt])
 (understand infinitive [ermorden] as Verb [ermord])
-(understand infinitive [kämppfen] as Verb [kämpf])
+(understand infinitive [kämpfen] as Verb [kämpf])
 
-(rewrite [brech/zerbrech/brich/zerbrich/zerschlag/hau/tret/quäl/zerstör/töt/ermord | $Words] into [schlag | $Words])
-(rewrite [kämpf mit | $Words] into [brich | $Words])
+(understand [schlag/brech/zerbrech/brich/zerbrich/zerschlag/hau/tret/quäl/zerstör/töt/ermord | $Words] as [attack $Obj])
+	*(understand $Words as non-all object $Obj)
 
 (understand [brich | $Words] as [attack $A with $B])
 	*(split $Words by [mit] into $Left and $Right)
@@ -4721,7 +4727,7 @@
 	(strip decorations from $SimpleObjList into $Stripped)
 	(level $VeryLevel unlikely [$Verb | $Stripped])
 
-	(level 0 unlikely $Action)
+(level 0 unlikely $Action)
 	(unlikely $Action) (or)
 	(very unlikely $Action) (or)
 	(very very unlikely $Action)
@@ -6300,7 +6306,7 @@
 %% Chpater 42: Topics
 
 (describe topic @?)
-	darüber
+	etwas
 
 (describe topic $Topic)
 	($Topic = [, | $])
@@ -6422,8 +6428,7 @@
 			(rewrite $Words into $ActualWords)
 		(endif)
 
-		%% Parse the action. Special treatment if we've asked for
-		%% clarification, and a noun was entered on its own:
+		%% Parse the action:
 
 		(now) ~(head noun is required)
 		(collect $A)
@@ -6438,80 +6443,85 @@
 			(now) ~(implicit action is $)
 			(now) ~(implicit action wants direction)
 			(try-complex $Single)
+		(elseif) (empty $AllCandidates) (then)
+			%% We were unable to parse the action.
+
+			%% Occasionally people like to separate actions by
+			%% commas or 'AND', but this is problematic. We can
+			%% only deal with it as a last resort, because in order
+			%% to parse the part after the separator, we need to
+			%% have the right scope, and therefore we first have to
+			%% execute what's to the left of the separator.
+
+			(if)
+				*(split $ActualWords by [, and]
+					into $Left and $Right)
+				*(understand $Left as $)
+			(then)
+				(parse action $Left)
+				(rebuild scope)
+				(parse action $Right)
+			(else)
+				%% Everything has failed. Can we understand a
+				%% partial action, in order to print an
+				%% informative error message?
+
+				(parse partial action $ActualWords)
+			(endif)
 		(else)
-			(sieve action candidates $AllCandidates $ActualWords)
+			(now) ~(implicit action is $)
+			(now) ~(implicit action wants direction)
+			(sieve action candidates $AllCandidates $ActualWords 0)
 		(endif)
 	(endif)
 
-(sieve action candidates $AllCandidates $ActualWords)
-	(if) (nonempty $AllCandidates) (then)
-		(now) ~(implicit action is $)
-		(now) ~(implicit action wants direction)
+(parse partial action $Words)
+	%% The multi-query inside the if-condition is unnecessary
+	%% (if-conditions are only evaluated once), but the compiler is able to
+	%% opmitize predicates better if they're consistently queried in the
+	%% same mode.
+
+	(now) (allowing parse errors)
+	(if) *(understand $Words as $BadAction) (then)
+		(if) ([all] is one of $BadAction) (then)
+			\( The word "all" is not allowed in that context.
+			Please be more specific. \)
+		(elseif) ([,] is one of $BadAction) (then)
+			\( You're not allowed to use multiple objects in that
+			context. Please do it step by step. \)
+		(else)
+			\( I only understood you as far as wanting to
+			(describe action $BadAction)
+			. \)
+		(endif)
+	(else)
+		\( I'm sorry, I didn't understand what you wanted to do. \)
+	(endif)
+	(stop)
+
+(sieve action candidates $AllCandidates $Words $VeryLevel)
+	(if) ($VeryLevel = 3) (then)
+		($LikelyCandidates = $AllCandidates)
+	(else)
 		(collect $A)
 			*($A is one of $AllCandidates)
-			~(unlikely-complex $A)
+			~(unlikely-complex $A $VeryLevel)
 		(into $LikelyCandidates)
-		(if) (nonempty $LikelyCandidates) (then)
-			%% Consider only the likely candidates.
-			(consider action candidates $LikelyCandidates $ActualWords)
-		(else)
-			%% All candidates were deemed unlikely, but some
-			%% candidates are more unlikely than others.			
-			(collect $A)
-				*($A is one of $AllCandidates)
-				~(very unlikely $A)
-			(into $SomewhatLikely)
-			(if) (nonempty $SomewhatLikely) (then)
-				(consider action candidates $SomewhatLikely $ActualWords)
-			(else)
-				(consider action candidates $AllCandidates $ActualWords)
-			(endif)
-		(endif)
-	(elseif)
-		%% We were unable to parse the action.
-
-		%% Occasionally people like to separate actions by commas or
-		%% 'AND', but this is problematic. We can only deal with it as
-		%% a last resort, because in order to parse the part after the
-		%% separator, we need to have the right scope, and therefore we
-		%% first have to execute what's to the left of the separator.
-
-		*(split $ActualWords by [, und] into $Left and $Right)
-		*(understand $Left as $)
-	(then)
-		(parse action $Left)
-		(rebuild scope)
-		(parse action $Right)
+	(endif)
+	(if) (nonempty $LikelyCandidates) (then)
+		%% Consider only the likely candidates.
+		(consider action candidates $LikelyCandidates $Words)
 	(else)
-		%% Everything has failed. Can we understand a partial action,
-		%% in order to print an informative error message?
-
-		%% The multi-query inside the if-condition is unnecessary
-		%% (if-conditions are only evaluated once), but the compiler is
-		%% able to opmitize predicates better if they're consistently
-		%% queried in the same mode.
-
-		(now) (allowing parse errors)
-		(if) *(understand $ActualWords as $BadAction) (then)
-			(if) ([all] is one of $BadAction) (then)
-				\( Der Wort "alles" ist hier leider nicht erlaubt. Bitte nochmal präziser. \)
-			(elseif) ([,] is one of $BadAction) (then)
-				\( Hier kannst du nicht mehrere Objekte gleichzeitig angeben. Bitte nochmal Schritt für Schritt. \)
-			(else)
-				\( Ich habe dich nur teilweise verstanden, du willst 
-				(describe action $BadAction)
-				. \)
-			(endif)
-		(else)
-			\( Es tut mir leid, ich habe dich nicht verstanden. \)
-		(endif)
-		(stop)
+		%% All candidates were deemed unlikely, but some candidates
+		%% could be more unlikely than the others.
+		($VeryLevel plus 1 into $NextLevel)
+		(sieve action candidates $AllCandidates $Words $NextLevel)
 	(endif)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 37: Disambiguation
 
-(consider action candidates $List $ActualWords)
+(consider action candidates $List $Words)
 	(if) ($List = [$Single]) (then)
 		%% Optimize the common case.
 		(try-complex $Single)
@@ -6519,7 +6529,7 @@
 		%% Eliminate options where the head noun is missing.
 		(now) (head noun is required)
 		(collect $A)
-			*(understand $ActualWords as $A)
+			*(understand $Words as $A)
 			($A is one of $List)
 		(into $ShortListWithDup)
 		(remove duplicates $ShortListWithDup $ShortList)
@@ -6574,7 +6584,7 @@
 		Willst du: (line)
 		(enumerate actions $AskList 1 $)
 		(if) ~{ (library links enabled) (interpreter supports links) } (then)
-			\( Type the corresponding number \)
+			\( Gib die entsprechende Nummer ein\)
 		(endif)
 		(par)
 		> (get input $Words)
