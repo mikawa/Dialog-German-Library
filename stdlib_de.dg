@@ -1,6 +1,6 @@
 
 (library version)
-	Bibliothek 0.33. DE
+	Bibliothek 0.34. DE
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 1: Global variables
@@ -1026,7 +1026,7 @@
 	~ ($room is plural)
 
 (room header $Room)	(Name $Room)
-(look (room $R))	Du bist hier.
+(look (room $R))	
 
 %% Given a room and a direction, what room (if any) is reachable that way?
 %% Given a room and a target room, what direction (if any) leads there?
@@ -1107,16 +1107,20 @@
 	*($Obj provides light)
 	(visibility ceiling of $Obj is $Ceil)
 
-(visibility ceiling of (room $R) is $R)
-
-(visibility ceiling of $Obj is $Parent)
-	($Obj is #in $Parent)
-	($Parent is opaque)
-	($Parent is closed)
-
 (visibility ceiling of $Obj is $Ceil)
-	($Obj has parent $Parent)
-	(visibility ceiling of $Parent is $Ceil)
+	(if) ($Obj has parent $Parent) (then)
+		(if)
+			($Obj has relation #in)
+			($Parent is opaque)
+			($Parent is closed)
+		(then)
+			($Ceil = $Parent)
+		(else)
+			(visibility ceiling of $Parent is $Ceil)
+		(endif)
+	(else)
+		($Ceil = $Obj)
+	(endif)
 
 (player can see $Obj)
 	(current visibility ceiling $Ceil)
@@ -1665,7 +1669,7 @@
 	%%ERKANNT
 	(append [$First | $Right] $Left $Corrected)
 	%%KORRIGIERT
-	[$Corrected]
+	%%[$Corrected]
 
 (rewrite [$First | $Last] into $Corrected)
 	*(split $Last anywhere into $Left and $Right)
@@ -1678,7 +1682,7 @@
 	(append [$First | $1R ] $1L $New)
 	(append $New $Right $Corrected)
 	%%KORRIGIERT2
-	[$Corrected]
+	%%[$Corrected]
 
 %% FEEL <obj>
 
@@ -6490,12 +6494,12 @@
 			\( You're not allowed to use multiple objects in that
 			context. Please do it step by step. \)
 		(else)
-			\( I only understood you as far as wanting to
+			\( Ich habe dich nur soweit verstanden, dass du
 			(describe action $BadAction)
 			. \)
 		(endif)
 	(else)
-		\( I'm sorry, I didn't understand what you wanted to do. \)
+		\( Ich habe ich dich leider nicht verstanden. \)
 	(endif)
 	(stop)
 
