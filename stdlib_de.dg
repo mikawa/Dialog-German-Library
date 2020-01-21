@@ -380,6 +380,10 @@
 (den [+ | $List])		(den-listing $List)
 (den (list $List))		(den-listing $List)
 
+(des (list $List))		(des-listing $List)
+(der (list $List))		(der-listing $List)
+(dem (list $List))		(dem-listing $List)
+
 (den full [einen $Obj])		(einen full $Obj)
 (den full [+ | $List])		(den-full-listing $List)
 (den full [, | $List])		(den-full-oder-listing $List)
@@ -5092,8 +5096,16 @@
 
 (einen-listing $List)
 	(listing $List {(einen $_)} @und 0)
+
+(der-listing $List)
+	(listing $List {(der $_)} @und 0)
+(des-listing $List)
+	(listing $List {(des $_)} @und 0)
+(dem-listing $List)
+	(listing $List {(dem $_)} @und 0)
 (den-listing $List)
 	(listing $List {(den $_)} @und 0)
+
 (den-full-listing $List)
 	(listing $List {(den full $_)} @und 0)
 (den-full-oder-listing $List)
@@ -5118,7 +5130,7 @@
 	(else)
 		(length of $Rest into $len)
 		(if) ($NPrinted > 0) (then)
-			(if) ($len > 1) (then)
+			(if) ($len > 0) (then)
 				,
 			(endif) 
 		(endif)
