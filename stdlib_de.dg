@@ -937,7 +937,7 @@
 		(elseif) ($Case = #Dativ) (then)
 			(no space)en
 		(else) 
-			(no space)en
+			(no space)er
 		(endif)
 
 (es)
