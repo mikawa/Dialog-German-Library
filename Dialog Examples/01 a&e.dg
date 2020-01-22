@@ -1,0 +1,84 @@
+%% Beispiel Nr. 101 der Inform Dokumentation
+%% Erschaffe eine Region (von Räumen), die den Zugang des Spielers blockieren, es sei denn er trägt den Pass bei sich. 
+
+(current player #player)
+(#player is #in #winding_street)
+
+(room *(film-set $))
+
+#winding_street
+(room *)
+(name *)    sich windend(e) Straße
+(room header *) Sich windende Straße
+(from * go #east to #duck_pond)
+(from * go #north to #sloping_street)
+(* is feminin)
+
+#sloping_street
+(room *)
+(name *)    Straße
+(room header *) Ansteigende Straße
+(from * go #south to #winding_street)
+(from * go #southeast to #duck_pond)
+(from * go #east to #stately_lawn)
+(from * go #northeast to #stately_home)
+(* is feminin)
+
+#duck_pond
+(film-set *)
+(name *)    Ententeich(-s)
+(room header *) Am Ententeich
+(from * go #west to #winding_street)
+(from * go #northwest to #sloping_street)
+(* is maskulin)
+
+#stately_lawn
+(film-set *)
+(name *)    Rasenfläche
+(room header *) Imposante Rasenfläche
+(from * go #west to #sloping_street)
+(from * go #north to #stately_home)
+(* is feminin)
+
+#stately_home
+(film-set *)
+(name *)    Haus(-es)
+(room header *) Imposantes Haus
+(from * go #southwest to #sloping_street)
+(from * go #south to #stately_lawn)
+(* is neutrum)
+
+#garbage_can
+(name *)    Mülltonne
+(dict *)    tonne mülltonne
+(container *)
+(item *)
+(* is feminin)
+(* is #in #sloping_street)
+(* is handled)
+(fine where it is *)
+
+#pass
+(item *)
+(name *)    Pass(-es)
+(dict *)    pass
+(* is #in #garbage_can)
+(* is maskulin)
+(* is handled)
+
+(prevent [leave $Room $Dir])
+    (from $Room go $Dir to $Dest)
+    (film-set $Dest)
+    (current player $Player)
+    ~(#pass is #heldby $Player)
+    Ein bulliger Studioangestellter blockiert deinen Weg und überzeugt dich, dass du dich besser woanders herumtreibst.
+
+(after [leave $Room $Dir])
+    (from $Room go $Dir to $Dest)
+    (film-set $Dest)
+    (par)
+    (space 5)
+    (bold)\*\*\* Erfolg! Du bist nun am Set von "Prouder and More Prejudiced" \*\*\*(unstyle)
+    (game over)
+
+%% Testen: "o / n / nimm pass / s / o". 

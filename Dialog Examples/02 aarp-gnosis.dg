@@ -1,0 +1,179 @@
+%% Beispiel Nr. 335 der Inform Dokumentation
+%% Nehmen wir an, wir hätten eine Ezyklopädie in unserem Spiel. 
+%% Der Spieler kann das vollständige Werk mitnehmen, aber auch
+%% nur Teile davon; legt er einen Teil davon auf denselben Platz
+%% wie der Rest der Enzyklopädie, wird diese automatisch komplettiert;
+%% Ist die Anzahl der Teile der Enzyklopädie kleiner als 2, wird diese
+%% entfernt und falls sich wieder mindestens 2 Exemplare am gleichen
+%% Platz befinden, dort wieder verortet.
+
+(current player #player)
+(#player is #in #library)
+
+#library
+(room *)
+(name *)    Boise Memorial Bibliothek
+(dict *)    bibliothek
+(* is feminin)
+(look *)
+        Eine Betonschachtel, ungefähr zweinhalb mal viereinhalb Meter, 
+        die das letzte bißchen Unterhaltung in dieser post-nuklearen 
+        Notunterkunft beherbergt. Jemand mit makabrem Humor hat einen
+        "LESE!"-Sticker an die Tür geheftet, als ob es noch andere Dinge
+        zu tun gäbe, während man auf das Sinken der Geiger-Zähler wartet.
+
+#shelf
+(supporter *)
+(item *)
+(name *)    Regal(-s)
+(dict *)    regal
+(is fine where it is *)
+(* is neutrum)
+(* is handled)
+(descr *)
+    	Ein abgenutztes Regal lehnt an der Südwand.
+(* is #in #library)
+
+(item $Obj)     *(collective $Obj)
+
+(item $Obj)     *(volume $Obj)
+       
+($Obj is handled)       *(volume $Obj)
+($Obj is maskulin)      *(volume $Obj)
+(proper $Obj)           *(volume $Obj)
+
+($ fits $)      (fail)
+
+#encyclopedia
+(name *)        
+        (collect $Obj)
+                *(volume $Obj)
+                ($Obj fits *)
+                ($Obj is #partof *)
+        (into $List)
+        (collect $Missing)
+                *(volume $Missing)
+                ($Missing fits *)
+                ~($Missing is #partof *)
+        (into $MissingList)
+        (length of $List into $Here)
+        (length of $MissingList into $Miss)
+        (if) ($Miss = 0) (then)
+                komplett(es)
+        (endif)
+        Werk der New Idahoan Enzyklopädie mit (dem $List)
+        (if) ($Miss > 0) (then)
+                \(ohne (der $MissingList)\)
+        (endif)              
+
+(dict *)        werk new idahoan lexikon 
+(fsyn *)        enzyklopädie 
+(collective *)
+(* is neutrum)
+(* is #on #shelf)
+(* is handled)
+
+(descr (collective $Obj))
+
+(on every tick)
+        *(collective $Obj)
+        ($Obj has parent $Par)
+        (exhaust) {
+                *(volume $ShouldBePart)
+                ($ShouldBePart has parent $Par)
+                (now) ($ShouldBePart is #partof $Obj)
+        }
+        (collect $PartVol)
+                *(volume $PartVol)
+                ($PartVol has parent $Obj)
+        (into $PartList)
+        (length of $PartList into $Part)
+        (if) ($Part = 1) (then)
+                (nth $PartList 1 $Element)
+                ($Obj has parent $Parent)
+                (move $Element to $Parent)
+                (now) ($Obj is nowhere)
+                (locate new position of $Obj)
+        (elseif) ($Part = 0) (then)
+                (now) ($Obj is nowhere)
+                (locate new position of $Obj)
+        (endif)
+
+(locate new position of $Collect)
+        *(volume $Vol)
+        ($Vol fits $Collect)
+        ($Vol has parent $NewPar)
+        (collect $Single)
+                *(volume $Single)
+                ($Single has parent $NewPar)
+        (into $SameList)
+        (length of $SameList into $Same)
+        ($Same > 1)
+        (move $Collect to $NewPar)
+        (exhaust) {
+                *(volume $NewVol)
+                ($NewVol fits $Collect)
+                ($NewVol has parent $NewPar)
+                (now) ($NewVol is #partof $Collect)
+        }
+           
+(move $Item to $Dest)
+        {
+                (supporter $Dest)
+                (now) ($Item is #on $Dest)
+        (or)
+                (current player $Dest)
+                (now) ($Item is #heldby $Dest)
+        (or)
+                (now) ($Item is #in $Dest)
+        }
+
+#a-aalto
+(volume *)
+(name *)        Teil(-s) A-Aalto
+(dict *)        teil a-aalto
+(* is #partof #encyclopedia)
+(* fits #encyclopedia)
+
+#aam-aardvark
+(volume *)
+(name *)        Teil(-s) AAM-Aardvark
+(dict *)        teil aam-aardvark
+(* is #partof #encyclopedia)
+(* fits #encyclopedia)
+
+#aarhus-aaron
+(volume *)
+(name *)        Teil(-s) Aarhus-Aaron
+(dict *)        teil aarhus-aaron
+(* is #partof #encyclopedia)
+(* fits #encyclopedia)
+
+#aarp-gnosis
+(volume *)
+(name *)        Teil(-s) AARP-Gnosis
+(dict *)        teil aarp-gnosis
+(* is #partof #encyclopedia)
+(* fits #encyclopedia)
+
+#gnu-zygote
+(volume *)
+(name *)        Teil(-s) Gnu-Zygote
+(dict *)        teil gnu-zygote
+(* is #partof #encyclopedia)
+(* fits #encyclopedia)
+
+(before [take/drop/remove $Obj])
+        (volume $Obj)
+        ($Obj has parent $Parent)
+        {
+                ($Obj is #partof $Parent)
+                ($Parent has parent $Grandparent)
+                (now) ($Obj is #in $Grandparent)
+                (move $Obj to $Grandparent)
+        (or)
+                (now) ($Obj is #in $Parent)
+                (move $Obj to $Parent)
+        }
+
+%% Testen: "nimm aarhus-aaron / schau auf regal / i / nimm aam-aardvark / schau auf regal / nimm gnu-zygote / schau auf regal / nimm aarp-gnosis / schau auf regal / i / leg werk ab / schau / nimm werk / nimm a-aalto / i"
