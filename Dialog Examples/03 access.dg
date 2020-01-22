@@ -1,0 +1,46 @@
+%% Beispiel Nr. 338 der Inform Dokumentation
+%% Es gibt eine extrem kniffelige Tür zu der der Schlüssel fehlt
+%% Der Spieler kann sie passieren, wenn er den Hut trägt
+
+(singleton *(room $))
+
+(current player #player)
+(#player is #in #standing_room)
+
+#standing_room
+(room *)
+(name *)    stehend(er) Raum
+(* is maskulin)
+(from * go #north through #door to #room_of_walking_upside_down)
+
+#room_of_walking_upside_down
+(room *)
+(name *)    verkehrt(er) Raum
+(* is maskulin)
+(from * go #south through #door to #standing_room)
+
+#door
+(door *)
+(lockable *)
+(name *)	extrem kniffelig(e) Tür
+(dict *)    extrem kniffelig tür
+(* is feminin)
+
+#hat
+(item *)
+(wearable *)
+(name *)    gepunktet(er) Hut(-es) der kaum wahrnehmbaren Grenzüberschreitung
+(dict *)    gepunktet hut kaum wahrnehmbar grenzüberschreitung
+(* is #heldby #player)
+(* is maskulin)
+(singleton *)
+
+(before [go $Dir])
+    (#hat is #wornby #player)
+    (just)
+
+(#door blocks passage)
+    (#hat is #wornby #player)
+    (just) (fail)
+
+%% Testen: "n / zieh hut an / n"
