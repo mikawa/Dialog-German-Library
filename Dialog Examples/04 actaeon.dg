@@ -1,0 +1,124 @@
+%% Beispiel Nr. 302 der Inform Dokumentation
+%% Nehmen wir an, wir möchten in der Lage sein, einem NPC 
+%% zu folgen, wenn er sich auf der Karte bewegt. Der Trick
+%% ist, dass wir ihn referieren müssen, obwohl er nicht in
+%% Sichtweite ist.
+
+(global variable (last location of artemis was $))
+
+(proper *(room $))
+
+(current player #player)
+(#player is #in #corinth)
+
+#artemis
+(female actor *)
+(name *)    Artemis
+(dict *)    frau dame artemis
+(proper *)
+(appearance * $ $)
+    Artemis ist hier und überlegt, wohin sie als nächstes 
+    gehen soll.
+(* is #in #corinth)
+
+#corinth
+(room *)    
+(name *)    Corinth
+(from * go #south to #mycenae)
+(from * go #east to #athens)
+(from * go #southeast to #epidaurus)
+
+#athens
+(room *)   
+(name *)    Athen
+(from * go #northwest to #thebes)
+(from * go #west to #corinth)
+
+#epidaurus
+(room *)
+(name *)    Epidaurus
+(from * go #northwest to #corinth)
+(from * go #west to #mycenae)
+
+#mycenae
+(room *)
+(name *)    Mycenae
+(from * go #north to #corinth)
+(from * go #south to #argos)
+(from * go #east to #epidaurus)
+(from * go #west to #olympia)
+
+#olympia
+(room *)
+(name *)    Olympia
+(from * go #east to #mycenae)
+(from * go #south to #pylos)
+
+#argos
+(room *)
+(name *)    Argos
+(from * go #north to #mycenae)
+(from * go #south to #sparta)
+
+#thebes
+(room *)
+(name *)    Thebes
+(from * go #southeast to #athens)
+(from * go #northwest to #delphi)
+
+#pylos
+(room *)
+(name *)    Pylos
+(from * go #north to #olympia)
+(from * go #east to #sparta)
+
+#sparta
+(room *)
+(name *)    Sparta
+(from * go #north to #argos)
+(from * go #west to #pylos)
+
+#delphi
+(room *)
+(name *)    Delphi
+(from * go #southeast to #thebes)
+
+(add #artemis to scope)
+
+(on every tick)
+    (#artemis is #in $Loc)
+    (now) (last location of artemis was $Loc)
+    (collect $Exit)
+        *(from $Loc go $Exit to $)
+    (into $ExitList)
+    (randomly select $Chosen from $ExitList)
+    (let #artemis go $Chosen)
+
+(describe action [follow $Obj])
+	(dem $Obj) folgen
+
+(understand infinitive [folgen/verfolgen] as Verb [folg])
+
+(understand [folg/verfolg | $Words] as [follow $Obj])
+    *(understand $Words as single object $Obj)
+    (animate $Obj)
+
+(refuse [follow $NPC])
+    (current room $Room)
+    (just)
+    {
+        ($NPC is #in $Room)
+        (Der $NPC) steht direkt vor dir.
+    (or)
+        ~(last location of artemis was $Room)
+        Du bist ahnungslos, wo sich (der $NPC) 
+        gerade befindet.
+    }
+    
+(perform [follow $NPC])
+    (current room $Room)
+    (#artemis is #in $NextRoom)
+    (from $Room go $Dir to $NextRoom)
+    (try [go $Dir])
+
+%% Testen: "z / folge artemis / g / g"
