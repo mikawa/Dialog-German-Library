@@ -2305,6 +2305,7 @@
 	In dieser Dunkelheit bist du nicht sicher, wo sich die Ausgänge genau befinden.
 
 (perform [exits])
+	($Count = 1)
 	(current room $Room)
 	(if)
 		~{
@@ -2313,15 +2314,19 @@
 			{ (room $Target) (or) (door $Target) }
 		}
 	(then)
-		Es gibt keine sichtbaren Ausgänge.
+		Es gibt keine erkennbaren Ausgänge.
 	(else)
-		Sichtbare Ausgänge sind: (line)
+		Ausgänge: (uppercase)
 		(exhaust) {
 			*(from $Room go $Dir to $Target)
+			(select) 
+			(or)
+				,
+			(stopping)
 			(direction $Dir)
 			(if) (door $Target) (then)
 				(Name $Dir)
-				Durch (den $Target)
+				durch (den $Target)
 				(if) ($Target is closed) (then)
 					\(momentan geschlossen\)
 				(elseif)
@@ -2335,9 +2340,8 @@
 						, zu (dem $R)
 					(endif)
 				(endif)
-				. (line)
 			(elseif) (room $Target) (then)
-				Nach
+				nach
 				(if) ($Dir = #in) (then)
 					drinnen
 				(else)
@@ -2345,14 +2349,14 @@
 				(endif)
 				(if) ($Target is visited) (then)
 					(if) (inherently dark $Target) (then)
-						, in die Dunkelheit
+						, in völlige Dunkelheit
 					(else)
 						, zu (dem $Target)
 					(endif)
 				(endif)
-				. (line)
 			(endif)
 		}
+		.
 	(endif)
 
 %% EXIST (misspelled EXITS, just for the giggles)
