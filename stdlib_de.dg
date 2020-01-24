@@ -6514,7 +6514,7 @@
 			\( You're not allowed to use multiple objects in that
 			context. Please do it step by step. \)
 		(else)
-			\( Ich habe dich nur soweit verstanden, du
+			\( Ich habe dich nur soweit verstanden, du willst
 			(describe action $BadAction)
 			. \)
 		(endif)
