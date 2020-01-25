@@ -5613,16 +5613,14 @@
 		(current score $Score)
 		(if) ($Score < $Reported) (then)
 			($Reported minus $Score into $Diff)
-			\( Your score has gone down by (spell out $Diff)
-			point (if) ~(1 = $Diff) (then) (no space) s (endif)
-			. \)
+			\( Dein Punktestand hat sich um (spell out $Diff)
+			verringert. \)
 			(par)
 			(now) (reported score is $Score)
 		(elseif) ($Score > $Reported) (then)
 			($Score minus $Reported into $Diff)
-			\( Your score has gone up by (spell out $Diff)
-			point (if) ~(1 = $Diff) (then) (no space) s (endif)
-			. \)
+			\( Dein Punktestand hat sich um (spell out $Diff)
+			erhöht. \)
 			(par)
 			(now) (reported score is $Score)
 		(endif)
@@ -5683,7 +5681,7 @@
 		(div @score) {
 			Score: $Score
 			(if) (maximum score $Max) (then)
-				of $Max
+				von $Max
 			(endif)
 		}
 	(endif)
