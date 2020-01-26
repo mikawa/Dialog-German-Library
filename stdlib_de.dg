@@ -3345,17 +3345,18 @@
 (understand infinitive [bitten] as Verb [bitt])
 
 (understand [sag/bitt | $Words] as [tell $Actor to | $Action])
-	*(split $Words by [er sie es] into $Left and $Right)
+	*(split $Words by [, er sie es] into $Left and $Right)
 	*(understand $Left as single object $Actor preferably animate)
 	*(split $Right by [soll möchte sollte könnte kann] into $ and $Order)
+	(current actor $OldActor)
+	(now) (current actor $Actor)
 	(rewrite $Order into $Simplified)
-	*(understand $Simplified as $Action)
-
-(understand [bitt | $Words] as [tell $Actor to | $Action])
-	*(split $Words by [,] into $Left and $Right)
-	*(understand $Left as single object $Actor preferably animate)
-	(rewrite $Right into $Simplified)
-	*(understand $Simplified as $Action)
+	(collect $A)
+		*(understand $Simplified as $A)
+	(into $List)
+	(now) (current actor $OldActor)
+	$List
+	*($Action is one of $List)
 
 (understand [bitt | $Words] as [tell $Actor to give $Obj to $Player])
 	*(split $Words by [um] into $Left and $Right)
@@ -4953,7 +4954,7 @@
 	(now) ($Obj is #heldby $NPC)
 
 (narrate $NPC taking $Obj)
-	(Der $NPC nimmt) (den $Obj).
+	(Der $NPC) (nimmt $NPC) (den $Obj).
 
 (let $NPC wear $Obj)
 	(if) (player can see $NPC) (then)
@@ -6476,7 +6477,7 @@
 			%% execute what's to the left of the separator.
 
 			(if)
-				*(split $ActualWords by [, and]
+				*(split $ActualWords by [, und]
 					into $Left and $Right)
 				*(understand $Left as $)
 			(then)
@@ -6506,11 +6507,11 @@
 	(now) (allowing parse errors)
 	(if) *(understand $Words as $BadAction) (then)
 		(if) ([all] is one of $BadAction) (then)
-			\( The word "all" is not allowed in that context.
-			Please be more specific. \)
+			\( "Alles" ist hier nicht möglich.
+			Bitte genauer angeben. \)
 		(elseif) ([,] is one of $BadAction) (then)
-			\( You're not allowed to use multiple objects in that
-			context. Please do it step by step. \)
+			\( Hier sind mehrere Objekte nicht möglich, bitte
+			Schritt für Schritt angeben. \)
 		(else)
 			\( Ich habe dich nur soweit verstanden, du willst
 			(describe action $BadAction)
