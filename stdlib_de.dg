@@ -1319,7 +1319,7 @@
 %% LOOK <dir>
 
 (describe action [look $Dir])
-	nach (den $Dir) schauen
+	nach (den $Dir) (zu) schauen
 
 (understand infinitive [schauen/blicken/sehen] as Verb [schau])
 
@@ -1381,7 +1381,7 @@
 %% LOOK <rel> <obj>
 
 (describe action [look $Rel $Obj])
-	(name $Rel) (den full $Obj) schauen
+	(name $Rel) (den full $Obj) (zu) schauen
 
 (understand [schau/blick/sieh/seh | $Words] as [look $Rel $Obj])
 	*(split $Words by relation $Rel into [] and $MoreWords)
@@ -1469,7 +1469,7 @@
 %% side of doors.
 
 (describe action [find $Obj])
-	(den full $Obj) finden
+	(den full $Obj) (zu) finden
 
 (understand infinitive [finden] as Verb [find])
 (understand infinitive [suchen] as Verb [such])
@@ -1519,7 +1519,7 @@
 %% EXAMINE <obj>
 
 (describe action [examine $Obj])
-	(den full $Obj) untersuchen
+	(den full $Obj) (zu) untersuchen
 
 (understand infinitive [beobachten/untersuchen/betrachten/beschreiben/anschauen/ansehen] as Verb [untersuch])
 
@@ -1595,7 +1595,7 @@
 (understand [wo bin ich] as [look])
 
 (describe action [look])
-	umschauen
+	um(no space)(zu)(no space)schauen
 
 (perform [look])
 	(current player $Player)
@@ -1615,7 +1615,7 @@
 (understand infinitive [durchsuchen/durchwühlen/durchforsten] as Verb [durchsuch])
 
 (describe action [search $Obj])
-	(den full $Obj) durchsuchen
+	(den full $Obj) (zu) durchsuchen
 
 (understand [durchsuch/durchwühl/durchforst | $Words] as [search $Obj])
 	*(understand $Words as non-all object $Obj)
@@ -1691,7 +1691,7 @@
 %% FEEL <obj>
 
 (describe action [feel $Obj])
-	(den full $Obj) anfühlen
+	(den full $Obj) an(no space)(zu)(no space)fühlen
 
 (understand infinitive [betasten/berühren/fühlen/tasten/antasten] as Verb [fühl])
 
@@ -1708,10 +1708,10 @@
 %% LISTEN
 
 (describe action [listen to $Obj])
-	(dem full $Obj) zuhören
+	(dem full $Obj) zu(no space)(zu)(no space)hören
 
 (describe action [listen])
-	zuhören
+	zu(no space)(zu)(no space)hören
 
 (understand infinitive [lauschen/zuhören/anhören] as Verb [hör])
 
@@ -1751,7 +1751,7 @@
 %% KISS <obj>
 
 (describe action [kiss $Obj])
-	(den full $Obj) küssen
+	(den full $Obj) (zu) küssen
 
 (understand infinitive [umarmen/küssen/lieben] as Verb [küss])
 
@@ -1775,7 +1775,7 @@
 %% JUMP
 
 (describe action [jump])
-	springen
+	(zu) springen
 
 (understand infinitive [hüpfen/springen] as Verb [spring])
 
@@ -1787,7 +1787,7 @@
 %% DANCE
 
 (describe action [dance])
-	tanzen
+	(zu) tanzen
 
 (understand infinitive [tanzen] as Verb [tanz])
 (understand infinitive [drehen] as Verb [dreh])
@@ -1805,10 +1805,10 @@
 %% WAVE
 
 (describe action [wave $Obj])
-	mit (dem $Obj) winken
+	mit (dem $Obj) (zu) winken
 
 (describe action [wave])
-	winken
+	(zu) winken
 
 (understand infinitive [schütteln] as Verb [schüttel])
 (understand infinitive [winken] as Verb [wink])
@@ -1841,7 +1841,7 @@
 %% SING
 
 (describe action [sing])
-	singen
+	(zu) singen
 
 (understand infinitive [summen/singen] as Verb [sing])
 
@@ -1855,13 +1855,13 @@
 %% THROW <obj> <dir>
 
 (describe action [throw $Obj at $Dest])
-	(den full $Obj) auf (den $Dest) werfen
+	(den full $Obj) auf (den $Dest) (zu) werfen
 
 (describe action [throw $Obj])
-	(den full $Obj) werfen
+	(den full $Obj) (zu) werfen
 
 (describe action [throw $Obj $Dir])
-	(den full $Obj) nach (dem $Dir) werfen
+	(den full $Obj) nach (dem $Dir) (zu) werfen
 
 (understand infinitive [werfen] as Verb [werf])
 
@@ -1923,7 +1923,7 @@
 %% THINK
 
 (describe action [think])
-	nachdenken
+	nach(no space)(zu)(no space)denken
 
 (understand infinitive [denken/überlegen/nachdenken] as Verb [denk])
 
@@ -1938,7 +1938,7 @@
 %% SLEEP
 
 (describe action [sleep])
-	schlafen
+	(zu) schlafen
 
 (understand infinitive [schlafen/träumen/einschlafen] as Verb [schlaf])
 
@@ -1954,10 +1954,10 @@
 %% TAKE <obj> FROM <obj>
 
 (describe action [take $Obj])
-	(den full $Obj) nehmen
+	(den full $Obj) (zu) nehmen
 
 (describe action [take $Obj $Rel $Holder])
-	(den full $Obj) (reverse-name $Rel) (dem $Holder) nehmen
+	(den full $Obj) (reverse-name $Rel) (dem $Holder) (zu) nehmen
 
 (understand infinitive [nehmen/aufheben/mitnehmen/schnappen/greifen] as Verb [nimm])
 
@@ -2034,7 +2034,7 @@
 %% REMOVE <obj>
 
 (describe action [remove $Obj])
-	(den full $Obj) entfernen
+	(den full $Obj) (zu) entfernen
 
 (understand infinitive [lassen] as Verb [lass])
 (understand infinitive [ziehen] as Verb [zieh])
@@ -2086,7 +2086,7 @@
 %% WEAR <obj>
 
 (describe action [wear $Obj])
-	(den full $Obj) anziehen
+	(den full $Obj) an(no space)(zu)(no space)ziehen
 
 (understand infinitive [tragen/anziehen/anlegen] as Verb [trag])
 
@@ -2135,7 +2135,7 @@
 %% PUT <obj> <rel> <obj>
 
 (describe action [put $Obj $Rel $Dest])
-	(den full $Obj) (name $Rel) (den $Dest) legen
+	(den full $Obj) (name $Rel) (den $Dest) (zu) legen
 
 (understand infinitive [legen/plazieren] as Verb [leg])
 
@@ -2212,7 +2212,7 @@
 %% DROP <obj>
 
 (describe action [drop $Obj])
-	(den full $Obj) hinlegen
+	(den full $Obj) hin(no space)(zu)(no space)legen
 
 (understand infinitive [ablegen/hinstellen/weglegen/hinlegen] as Verb [lass])
 
@@ -2259,7 +2259,7 @@
 %% INVENTORY
 
 (describe action [inventory])
-	das Inventar betrachten
+	das Inventar (zu) betrachten
 
 (understand [inventar/i/inv] as [inventory])
 (understand [was hab ich] as [inventory])
@@ -2291,7 +2291,7 @@
 %% EXITS
 
 (describe action [exits])
-	die Äusgänge anzeigen
+	die Äusgänge an(no space)(zu)(no space)zeigen
 
 (understand [ausgänge/ausgang] as [exits])
 (understand [zeig mir den ausgang] as [exits])
@@ -2370,7 +2370,7 @@
 %% WAIT
 
 (describe action [wait])
-	warten
+	(zu) warten
 
 (understand infinitive [warten/chillen] as Verb [wart])
 
@@ -2385,10 +2385,10 @@
 %% GIVE <obj>
 
 (describe action [give $Obj to $Dest])
-	(den full $Obj) (dem $Dest) geben
+	(den full $Obj) (dem $Dest) (zu) geben
 
 (describe action [give $Obj])
-	(den full $Obj) weggeben
+	(den full $Obj) weg(no space)(zu)(no space)geben
 
 (understand infinitive [geben/übergeben] as Verb [gib])
 
@@ -2443,10 +2443,10 @@
 %% SHOW <obj>
 
 (describe action [show $Obj to $Dest])
-	(den full $Obj) (dem $Dest) zeigen
+	(den full $Obj) (dem $Dest) (zu) zeigen
 
 (describe action [show $Obj])
-	(den full $Obj) herzeigen
+	(den full $Obj) her(no space)(zu)(no space)zeigen
 
 (understand infinitive [zeigen] as Verb [zeig])
 
@@ -2501,7 +2501,7 @@
 %% OPEN <obj>
 
 (describe action [open $Obj])
-	(den full $Obj) öffnen
+	(den full $Obj) (zu) öffnen
 
 (understand infinitive [öffnen/aufmachen] as Verb [öffne])
 
@@ -2557,7 +2557,7 @@
 %% CLOSE <obj>
 
 (describe action [close $Obj])
-	(den full $Obj) schließen
+	(den full $Obj) (zu) schließen
 
 (understand infinitive [schließen/zumachen] as Verb [schließ])
 
@@ -2594,10 +2594,10 @@
 %% UNLOCK <obj>
 
 (describe action [unlock $Obj with $Key])
-	(den full $Obj) mit (dem $Key) aufschließen
+	(den full $Obj) mit (dem $Key) auf(no space)(zu)(no space)schließen
 
 (describe action [unlock $Obj])
-	(den full $Obj) aufschließen
+	(den full $Obj) auf(no space)(zu)(no space)schließen
 
 (understand infinitive [aufschließen/aufsperren] as Verb [öffne])
 
@@ -2655,10 +2655,10 @@
 %% LOCK <obj>
 
 (describe action [lock $Obj with $Key])
-	(den full $Obj) mit (dem $Key) abschließen
+	(den full $Obj) mit (dem $Key) ab(no space)(zu)(no space)schließen
 
 (describe action [lock $Obj])
-	(den full $Obj) abschließen
+	(den full $Obj) abs(no space)(zu)(no space)chließen
 
 (understand infinitive [verspererren/verschließen/absperren/abschließen] as Verb [verschließ])
 
@@ -2721,7 +2721,7 @@
 %% SWITCH ON <obj>
 
 (describe action [switch on $Obj])
-	(den full $Obj) anschalten
+	(den full $Obj) an(no space)(zu)(no space)schalten
 
 (understand infinitive [einschalten/anschalten/aktivieren] as Verb [aktivier])
 
@@ -2740,7 +2740,7 @@
 	~(switchable $Obj) (or) ($Obj is on)
 
 (describe action [switch on $Obj])
-	(den full $Obj) anzuschalten
+	(den full $Obj) an(no space)(zu)(no space)zuschalten
 
 (prevent [switch on $Obj])
 	~(switchable $Obj)
@@ -2760,7 +2760,7 @@
 %% SWITCH OFF <obj>
 
 (describe action [switch off $Obj])
-	(den full $Obj) abschalten
+	(den full $Obj) ab(no space)(zu)(no space)schalten
 
 (understand infinitive [abschalten/ausschalten/deaktivieren] as Verb [deaktivier])
 
@@ -2779,7 +2779,7 @@
 	~(switchable $Obj) (or) ($Obj is off)
 
 (describe action [switch off $Obj])
-	(den full $Obj) auszuschalten
+	(den full $Obj) aus(no space)(zu)(no space)schalten
 
 (prevent [switch off $Obj])
 	($Obj is off)
@@ -2799,7 +2799,7 @@
 %% SQUEEZE <obj>
 
 (describe action [squeeze $Obj])
-	(den full $Obj) zerdrücken
+	(den full $Obj) (zu) zerdrücken
 
 (understand infinitive [zerdrücken/zerquetschen/quetschen/ausquetschen/ausdrücken] as Verb [quetsch])
 
@@ -2815,7 +2815,7 @@
 %% FIX <obj>
 
 (describe action [fix $Obj])
-	(den full $Obj) reparieren
+	(den full $Obj) (zu) reparieren
 
 (understand infinitive [reparieren/restaurieren] as Verb [reparier])
 
@@ -2836,7 +2836,7 @@
 %% TASTE <obj>
 
 (describe action [taste $Obj])
-	(den full $Obj) probieren
+	(den full $Obj) (zu) probieren
 
 (understand infinitive [lecken/schlecken/probieren] as Verb [probier])
 
@@ -2858,7 +2858,7 @@
 %% FLY
 
 (describe action [fly])
-	fliegen
+	(zu) fliegen
 
 (understand infinitive [fliegen/schweben] as Verb [schweb])
 
@@ -2870,7 +2870,7 @@
 %% BITE <obj>
 
 (describe action [bite $Obj])
-	in (den $Obj) beißen
+	in (den $Obj) (zu) beißen
 
 (understand infinitive [kauen/beißen] as Verb [beiß])
 
@@ -2890,7 +2890,7 @@
 %% EAT <obj>
 
 (describe action [eat $Obj])
-	(den full $Obj) essen
+	(den full $Obj) (zu) essen
 
 (understand infinitive [essen/verschlingen/aufessen] as Verb [iss])
 
@@ -2941,7 +2941,7 @@
 %% DRINK <obj>
 
 (describe action [drink $Obj])
-	(den full $Obj) trinken
+	(den full $Obj) (zu) trinken
 
 (understand infinitive [trinken/schlucken/verschlucken/nippen/schlürfen] as Verb [trink])
 
@@ -2978,10 +2978,10 @@
 %% CUT <obj>
 
 (describe action [cut $Obj with $Tool])
-	(den full $Obj) mit (dem $Tool) abschneiden
+	(den full $Obj) mit (dem $Tool) ab(no space)(zu)(no space)schneiden
 
 (describe action [lock $Obj])
-	(den full $Obj) abschneiden
+	(den full $Obj) ab(no space)(zu)(no space)schneiden
 
 (understand infinitive [trennen/durchtrennen/durchschneiden/kürzen/abschneiden] as Verb [schneid])
 
@@ -3026,7 +3026,7 @@
 %% USE <obj>
 
 (describe action [use $Obj])
-	(den full $Obj) benutzen
+	(den full $Obj) (zu) benutzen
 
 (understand infinitive [benutzen] as Verb [benutz])
 
@@ -3051,7 +3051,7 @@
 %% CONSULT <obj> ABOUT <topic>
 
 (describe action [consult $Obj about $Topic])
-	in (dem $Obj) nach (describe topic $Topic) suchen
+	in (dem $Obj) nach (describe topic $Topic) (zu) suchen
 
 (understand infinitive [nachschlagen/nachschauen/konsultieren] as Verb [konsultier])
 
@@ -3086,7 +3086,7 @@
 	*(understand $Right as topic $Topic)
 
 (describe action [consult $Obj about $Topic])
-	in (dem full $Obj) (describe topic $Topic) nachzuschlagen
+	in (dem full $Obj) (describe topic $Topic) nach(no space)(zu)(no space)schlagen
 
 (unlikely [consult $Obj about $])
 	~(consultable $Obj)
@@ -3107,10 +3107,10 @@
 %% ASK/TELL <obj> ABOUT <topic> (redirected to TALK TO by default)
 
 (describe action [ask $Obj about $Topic])
-	(describe person $Obj) nach (describe topic $Topic) fragen
+	(describe person $Obj) nach (describe topic $Topic) (zu) fragen
 
 (describe action [tell $Obj about $Topic])
-	(describe dative person $Obj) von (describe topic $Topic) erzählen
+	(describe dative person $Obj) von (describe topic $Topic) (zu) erzählen
 
 (understand infinitive [fragen/befragen] as Verb [frag])
 (understand infinitive [sagen] as Verb [sag])
@@ -3137,10 +3137,10 @@
 	*(understand $Right as topic $Topic)
 
 (describe action [ask $Person about $Topic])
-	(describe person $Person) nach (describe topic $Topic) fragen
+	(describe person $Person) nach (describe topic $Topic) (zu) fragen
 
 (describe action [tell $Person about $Topic])
-	(describe person $Person) von (describe topic $Topic) erzählen
+	(describe person $Person) von (describe topic $Topic) (zu) erzählen
 
 (understand [frag | $Words] as [ask $Obj])
 	*(understand $Words as single object $Obj preferably animate)
@@ -3149,10 +3149,10 @@
 	*(understand $Words as single object $Obj preferably animate)
 
 (describe action [ask $Person])
-	(den full $Person) nach etwas fragen
+	(den full $Person) nach etwas (zu) fragen
 
 (describe action [tell $Person])
-	(der full $Person) etwas erzählen
+	(der full $Person) etwas (zu) erzählen
 
 (unlikely [ask/tell $Obj about $])
 	~(animate $Obj)
@@ -3179,10 +3179,10 @@
 %% TALK
 
 (describe action [talk to $Obj])
-	mit (describe dative person $Obj) reden
+	mit (describe dative person $Obj) (zu) reden
 
 (describe action [talk])
-	reden
+	(zu) reden
 
 (understand infinitive [reden] as Verb [red])
 (understand infinitive [sprechen] as Verb [sprech])
@@ -3193,7 +3193,7 @@
 (understand [red] as [talk])
 
 (describe action [talk to $Person about $Topic])
-	mit (dem full $Person) über (describe topic $Topic) reden
+	mit (dem full $Person) über (describe topic $Topic) (zu) reden
 
 (unlikely [talk to $Obj])
 	~(animate $Obj)
@@ -3229,10 +3229,10 @@
 %% SHOUT (redirected to TALK by default)
 
 (describe action [shout to $Obj])
-	(describe dative person $Obj) schreien
+	(describe dative person $Obj) (zu) schreien
 
 (describe action [shout])
-	schreien
+	(zu) schreien
 
 (understand [brüll/schrei an | $Words] as [shout to $Obj])
 	*(understand $Words as single object $Obj preferably animate)
@@ -3255,7 +3255,7 @@
 %% PRAY
 
 (describe action [pray])
-	beten
+	(zu) beten
 
 (understand infinitive [beten] as Verb [bet])
 
@@ -3268,7 +3268,7 @@
 %% SHRUG
 
 (describe action [shrug])
-	die Schultern zucken
+	die Schultern (zu) zucken
 
 (understand [zuck mit der schulter/achsel] as [shrug])
 
@@ -3280,10 +3280,10 @@
 %% Stories containing a phone would override these.
 
 (describe action [call $Obj])
-	(den full $Obj) rufen
+	(den full $Obj) (zu) rufen
 
 (describe action [call])
-	rufen
+	(zu) rufen
 
 (understand infinitive [rufen] as Verb [ruf])
 
@@ -3312,10 +3312,10 @@
 %% GREET
 
 (describe action [greet $Obj])
-	(den full $Obj) grüßen
+	(den full $Obj) (zu) grüßen
 
 (describe action [greet])
-	grüßen
+	(zu) grüßen
 
 (understand infinitive [begrüßen/grüßen] as Verb [begrüß])
 
@@ -3370,13 +3370,13 @@
 	~(animate $Addressee)
 
 (describe action [tell $Actor to give $Obj to (current player $)])
-	(describe person $Actor) um (den full $Obj) bitten
+	(describe person $Actor) um (den full $Obj) (zu) bitten
 
 (describe action [tell $Actor to tell (current player $) about $Topic])
-	(dem full $Actor) über (describe topic $Topic) erzählen
+	(dem full $Actor) über (describe topic $Topic) (zu) erzählen
 
 (describe action [tell $Actor to | $Action])
-	(dem full $Actor) sagen, (er $Actor) (soll $Actor) (describe action $Action)
+	(dem full $Actor) (zu) sagen, (er $Actor) (soll $Actor) (describe action $Action)
 
 (unlikely [tell $Obj to | $])
 	~(animate $Obj)
@@ -3400,7 +3400,7 @@
 %% SMELL <obj>
 
 (describe action [smell $Obj])
-	an (dem $Obj) riechen
+	an (dem $Obj) (zu) riechen
 
 (understand infinitive [schnüffeln] as Verb [schnüffel])
 (understand infinitive [riechen] as Verb [riech])
@@ -3424,7 +3424,7 @@
 %% WAKE UP
 
 (describe action [wake up])
-	aufwachen
+	auf(no space)(zu)(no space)wachen
 
 (understand infinitive [erwachen/aufwachen/zwicken] as Verb [wach auf])
 
@@ -3471,7 +3471,7 @@
 	($Actor is nested #on $Obj)
 
 (describe action [climb $Obj])
-	auf (den full $Obj) zu klettern
+	auf (den full $Obj) (zu) klettern
 
 (instead of [climb (room $Room)])
 	~(actor supporter $Room)
@@ -3539,7 +3539,7 @@
 ~(very unlikely [enter $])
 
 (describe action [enter $Obj])
-	in (den full $Obj) steigen
+	in (den full $Obj) (zu) steigen
 
 ~(refuse [enter (room $)])
 
@@ -3593,7 +3593,7 @@
 %% SIT
 
 (describe action [sit])
-	hinsetzen
+	hin(no space)(zu)(no space)setzen
 
 (understand [setz dich] as [sit])
 (understand [sitz] as [sit])
@@ -3611,7 +3611,7 @@
 (understand [steh] as [stand])
 
 (describe action [stand])
-	aufzustehen
+	auf(no space)(zu)(no space)stehen
 
 (instead of [stand])
 	(current player $Player)
@@ -3627,10 +3627,10 @@
 %% LEAVE
 
 (describe action [leave])
-	weggehen
+	weg(no space)(zu)(no space)gehen
 
 (describe action [leave $Obj])
-	(den full $Obj) verlassen
+	(den full $Obj) (zu) verlassen
 
 (understand infinitive [verlassen] as Verb [verlass])
 (understand infinitive [fliehen] as Verb [flieh])
@@ -3658,13 +3658,13 @@
 (describe action [leave $Obj])
 	(current player $Player)
 	($Player is $Rel $Obj)
-	(reverse-name $Rel) (den full $Obj) zu verlassen
+	(reverse-name $Rel) (den full $Obj) (zu) verlassen
 
 (describe action [leave])
 	(current player $Player)
 	($Player is $Rel $Obj)
 	~(room $Obj)
-	(reverse-name $Rel) (den full $Obj) zu verlassen
+	(reverse-name $Rel) (den full $Obj) (zu) verlassen
 
 (unlikely [leave $Obj])
 	(current player $Actor)
@@ -3731,7 +3731,7 @@
 %% way.
 
 (describe action [go to $Room])
-	(den $Room) aufsuchen
+	(den $Room) auf(no space)(zu)(no space)suchen
 
 (understand infinitive [nähern] as Verb [näher])
 
@@ -3808,7 +3808,7 @@
 %% GO <direction>
 
 (describe action [go $Dir])
-	nach (den $Dir) gehen
+	nach (den $Dir) (zu) gehen
 
 %% The rule for just typing a list of directions (without a verb) is further
 %% down in the file.
@@ -3920,7 +3920,7 @@
 %% PUSH <obj> <dir>
 
 (describe action [push $Obj $Dest])
-	(den full $Obj) nach (name $Dest) schieben
+	(den full $Obj) nach (name $Dest) (zu) schieben
 
 (understand infinitive [schieben] as Verb [schieb])
 (understand infinitive [verschieben] as Verb [verschieb])
@@ -3967,7 +3967,7 @@
 %% PUSH <obj>
 
 (describe action [push $Obj])
-	(den full $Obj) schieben
+	(den full $Obj) (zu) schieben
 
 (understand [schieb/verschieb/beweg/drück/hiev | $Words] as [push $Obj])
 	*(understand $Words as non-all object $Obj)
@@ -3991,7 +3991,7 @@
 %% PULL <obj>
 
 (describe action [pull $Obj])
-	(den full $Obj) ziehen
+	(den full $Obj) (zu) ziehen
 
 (understand infinitive [zerren] as Verb [zerr])
 
@@ -4011,7 +4011,7 @@
 %% TURN <obj>
 
 (describe action [turn $Obj])
-	(den full $Obj) drehen
+	(den full $Obj) (zu) drehen
 
 (understand infinitive [wenden] as Verb [wend])
 
@@ -4030,7 +4030,7 @@
 %% READ <obj>
 
 (describe action [read $Obj])
-	(den full $Obj) lesen
+	(den full $Obj) (zu) lesen
 
 (understand infinitive [lesen] as Verb [les])
 
@@ -4048,7 +4048,7 @@
 %% FLUSH
 
 (describe action [flush $Obj])
-	(den full $Obj) spülen
+	(den full $Obj) (zu) spülen
 
 (understand infinitive [spülen] as Verb [spül])
 
@@ -4073,7 +4073,7 @@
 %% SWIM
 
 (describe action [swim $Obj])
-	(den full $Obj) spülen
+	in (dem full $Obj) (zu) schwimmen
 
 (understand infinitive [schwimmen] as Verb [schwimm])
 (understand infinitive [baden] as Verb [bad])
@@ -4096,7 +4096,7 @@
 %% CLEAN <obj>
 
 (describe action [clean $Obj])
-	(den full $Obj) reinigen
+	(den full $Obj) (zu) reinigen
 
 (understand infinitive [reinigen] as Verb [reinig])
 (understand infinitive [bürsten] as Verb [bürst])
@@ -4116,7 +4116,7 @@
 %% TIE <obj>
 
 (describe action [tie $Obj to $Dest])
-	(den full $Obj) an (den $Dest) binden
+	(den full $Obj) an (den $Dest) (zu) binden
 
 (understand infinitive [binden] as Verb [bind])
 (understand infinitive [verbinden] as Verb [verbind])
@@ -4153,7 +4153,7 @@
 %% UNTIE <obj>
 
 (describe action [untie $Obj from $Dest])
-	(den full $Obj) von (dem $Dest) lösen
+	(den full $Obj) von (dem $Dest) (zu) lösen
 
 (understand infinitive [lockern] as Verb [locker])
 (understand infinitive [lösen] as Verb [lös])
@@ -4189,10 +4189,10 @@
 %% ATTACK <obj>
 
 (describe action [attack $Obj])
-	(den full $Obj) angreifen
+	(den full $Obj) an(no space)(zu)(no space)greifen
 
 (describe action [attack $Obj with $Weapon])
-	(den full $Obj) mit (dem $Weapon) angreifen
+	(den full $Obj) mit (dem $Weapon) an(no space)(zu)(no space)greifen
 
 (understand infinitive [brechen] as Verb [brech])
 (understand infinitive [zerbrechen] as Verb [zerbrech])
@@ -4245,13 +4245,13 @@
 %% LEAVE <room> <dir> WITH <object>
 
 (describe action [leave $Room $Dest])
-	(den $Room) nach (name $Dest) verlassen
+	(den $Room) nach (name $Dest) (zu) verlassen
 
 (describe action [leave $Room $Dest with $Obj])
-	(den $Room) nach (name $Dest) mit (dem $Obj) verlassen
+	(den $Room) nach (name $Dest) mit (dem $Obj)(zu) verlassen
 
 (describe action [leave $Room $Dest by $Obj])
-	(den $Room) nach (name $Dest) mit (dem $Obj) verlassen
+	(den $Room) nach (name $Dest) mit (dem $Obj) (zu) verlassen
 
 (instead of [leave $Room $Dir])
 	(from $Room go $Dir to $Target)
@@ -5883,6 +5883,24 @@
 %%(global variable (sie refers to $))
 %%(global variable (ihr refers to $))
 %%(global variable (ihnen refers to $))
+
+%% we offer a second way to print out action reports
+%% in infinitive context in all describe action traits
+
+%% (describe action [take $Obj])
+%%	  (den full $Obj) (zu) nehmen
+
+(describe infinitive action $Action)
+	(now) (infinitive context)
+	(describe action $Action)
+	(now) ~(infinitive context)
+
+~(infinitve context)
+
+(zu)
+	(if) (infinitive context) (then)
+		zu
+	(endif)
 
 (global variable (changing gender is $))
 
