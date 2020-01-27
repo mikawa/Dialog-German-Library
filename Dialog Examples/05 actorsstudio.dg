@@ -1,0 +1,198 @@
+%% Beispiel Nr. 221 der Inform Dokumentation
+%% Eine Videokamera, die Ereignisse aufzeichnet und sie dann
+%% mit einem Zeitstempel wieder abspielt.
+
+(global variable (videostream []))
+(global variable (time $))
+~(memory is empty)
+
+(global variable (camera mode $))
+
+(setting $) (fail)
+
+#idle 
+(name *) Ruhemodus 
+(dict *) ruhemodus ruhe
+(setting *)
+(* is #partof #camera)
+
+#recording 
+(name *) Aufnahme 
+(dict *) aufnahme
+(setting *)
+(* is #partof #camera)
+
+#replaying 
+(name *) Wiedergabe 
+(dict *) wiedergabe
+(setting *)
+(* is #partof #camera)
+
+(style class @score)
+	width: 20ch;
+	float: right;
+
+(intro)
+    (now) (time 542)
+    (now) (camera mode #idle)
+    (try [look])
+    
+(redraw status bar)
+	(status bar @status) {
+        (time headline)
+        (location headline)
+	}
+
+(time headline)
+    (div @score) {
+        (time $Time)
+        Zeit: 
+        (say time $Time)
+    }
+
+(say time $A)
+    ($A divided by 60 into $C)
+    ($A modulo 60 into $D)
+    $C:(no space)
+    (if) ($D < 10) (then)
+        0(no space)
+    (endif)
+    $D
+
+(after $Action)
+    (camera mode #recording)
+    ~($Action = [wait])
+    ~($Action = [$ #camera $ $])
+    (videostream $Video)
+    (length of $Video into $Len)
+    (if) ($Len < 48) (then)
+        (time $T)
+        (append [$T | [$Action]] $Video $New)
+        (now) (videostream $New)
+    (else)
+        (now) (camera mode #idle)
+        Der Speicher der Videokamera ist voll 
+        und sie schaltet in den Ruhemodus.
+    (endif)
+
+(on every tick)
+    (time $A)
+    ($A plus 1 into $B)
+    (now) (time $B)
+
+(on every tick)
+    (camera mode #replaying)
+    (if) ~(memory is empty) (then)
+        (videostream $Video)
+        (reverse $Video $List)
+        (now) (memory is empty)
+        (report actions from list $List)
+    (else)
+        Du siehst nur Rauschen auf der Videokamera.
+    (endif)
+
+(report actions from list [$Action $Time | $Tail])
+    (line)Um (say time $Time) Uhr hat die Kamera aufgezeichnet, als du dabei warst,
+    (describe infinitive action $Action).
+	(report actions from list $Tail)
+
+(current player #player)
+(#player is #in #actor_studio)
+
+#actor_studio
+(room *)
+(name *)    Filmstudio(-s)
+(* is maskulin)
+
+#lucas
+(male actor *)
+(name *)    Lucas
+(proper *)
+(dict *)    lucas mann typ
+(* is #in #actor_studio)
+(appearance #lucas $ $)
+    Lucas ist hier.
+
+(prevent [tell #lucas to take $Obj])
+    {
+        ($Obj is #heldby $NPC)
+        (Der $NPC) (hat $NPC) (den $Obj) schon.
+    (or)
+        ~(item $Obj)
+        (Der $NPC) (kann $NPC) (den $Obj) nicht nehmen.
+    }
+
+(perform [tell #lucas to take $Obj])
+    (let #lucas take $Obj)
+
+(perform [tell #lucas to eat $Obj])
+    (let #lucas eat $Obj)
+
+(let $NPC eat $Obj)
+    (if) ~(edible $Obj) (then)
+        (fail)
+    (endif)
+    (if) (player can see $Obj) (then)
+        (if) ~($Obj is #heldby $NPC) (then)
+            \(Erst nimmt Lucas (den $Obj)\)(line)
+            (now) ($Obj is #heldby $NPC)
+        (endif)
+		(narrate $NPC eating $Obj)
+	(endif)
+	(now) ($Obj is nowhere)
+
+(narrate $NPC eating $Obj)
+	(Der $NPC) (isst $NPC) (den $Obj).
+
+#croissant
+(item *)
+(name *)    Croissant(-s)
+(dict *)    croissant
+(edible *)
+(* is handled)
+(* is neutrum)
+(* is #in #actor_studio)
+
+#camera
+(item *)
+(name *)    Videokamera
+(dict *)    video kamera videokamera
+(descr *)
+        Die Videokamera ist momentan auf 
+        (camera mode $Mode)
+        (name $Mode) eingestellt.
+(* is feminin)
+(* is #in #actor_studio)
+(* is handled)
+
+(describe action [set $Obj to $Setting])
+	(den $Obj) auf (name $Setting) einstellen
+
+(understand infinitive [einstellen/stellen] as Verb [stell])
+
+(unlikely [put $Obj #on $Dest])
+	($Obj = #camera)
+
+(understand [stell | $Words] as [set $Obj to $Setting])
+    *(split $Words by [auf] into $Left and $Right)
+    *(understand $Left as single object $Obj)
+    *(understand $Right as single object $Setting)
+
+(understand [stell ein | $Words] as [set $Obj to $Setting])
+    *(split $Words by [auf] into $Left and $Right)
+    *(understand $Left as single object $Obj)
+    *(understand $Right as single object $Setting)
+
+(refuse [set $Obj to $Setting])
+    (just)
+    ~($Setting is one of [#idle #recording #replaying])
+    Das ist keine gültige Einstellung für (den $Obj).
+
+(perform [set $Obj to $Setting])
+    (now) (camera mode $Setting)
+    Die Videokamera ist nun auf (name $Setting) eingestellt.
+    (if) ($Setting is one of [#recording #idle]) (then)
+        (now) ~(memory is empty)
+    (endif)
+
+%% Testen: "stell kamera auf aufnahme / x lucas / winke / lucas, iss croissant / stell kamera auf wiedergabe / z"
