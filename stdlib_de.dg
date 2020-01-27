@@ -663,6 +663,13 @@
 		schließt
 	}
 
+(isst $Obj)
+	{
+		($Obj is plural) essen
+	(or)
+		isst
+	}
+
 (geht $Obj)
 	{
 		($Obj is plural) gehen
@@ -3376,7 +3383,9 @@
 	(dem full $Actor) über (describe topic $Topic) (zu) erzählen
 
 (describe action [tell $Actor to | $Action])
-	(dem full $Actor) (zu) sagen, (er $Actor) (soll $Actor) (describe action $Action)
+	(dem full $Actor) (zu) sagen, (er $Actor) (soll $Actor) 
+	(now) ~(infinitive context) 
+	(describe action $Action)
 
 (unlikely [tell $Obj to | $])
 	~(animate $Obj)
@@ -6639,7 +6648,7 @@
 		}
 	(endif)
 
-(disambiguate by object name [me/myself] $Template $ObjList $Result)
+(disambiguate by object name [mich/mir/dich/dir] $Template $ObjList $Result)
 	(current player $Player)
 	($Player is one of $ObjList)
 	(recover implicit action $Template $Player into $Result)
