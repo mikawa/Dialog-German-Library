@@ -1,0 +1,67 @@
+(intro)
+	(now) (scenetime 0)
+	(now) (time 539) %%08:59 Uhr
+	(banner)
+	(try [look])
+
+(current player #player)
+(#player is #in #station)
+
+(global variable (time $))
+(global variable (scenetime $))
+(global variable (arrival $))
+
+#station
+(room *)
+(name *)	Bahnstation
+(look *)
+		Der Halt "Eynforme" ist eine erhöhte Plattform, gesäumt von Dotterblumen, eine Bedarfshaltestelle mit einem Signal und einem Wassertank.
+(* is feminin)
+
+(on every tick in *)
+    (scenetime $A)
+    ($A plus 1 into $B)
+    (now) (scenetime $B)
+	(if) ($B = 3) (then)
+		(now) (#flying_scotsman is #in *)
+		(time $time) 
+		(now) (arrival $time)
+		Der Flying Scotsman zieht sich stampfend die Platform hinauf, umgeben von dichten Rauchschwaden.
+	(elseif) ($B = 6) (then)
+		(now) (#flying_scotsman is nowhere)
+		 Der Flying Scotsman setzt sich wieder in Bewegung und nimmt nach dem Kreischen der gelösten Bremsen unglaublich schnell Fahrt auf, bis er schließlich hinter dem Hügel verschwindet. Alles ist plötzlich wieder still.
+	(endif)
+
+#flying_scotsman
+(item *)
+(name *)	Flying Scotsman
+(dict *)	flying scotsman zug
+(* is handled)
+(* is maskulin)
+(fine where it is *)
+
+(appearance * in $)
+		Der Flying Scotsman, der schnellste Zug der Welt, ist zum
+		völligen Stillstand gekommen.
+
+(instead of [enter *])
+		Leider tankt der
+		(arrival $time)
+		(say time $time)
+		Zug nur Wasser und nimmt niemand mit.
+
+(on every tick)
+    (time $A)
+    ($A plus 1 into $B)
+    (now) (time $B)
+
+(say time $A)
+    ($A divided by 60 into $C)
+    ($A modulo 60 into $D)
+    $C:(no space)
+    (if) ($D < 10) (then)
+        0(no space)
+    (endif)
+    $D
+
+%% Testen: "z / z / z / steig in zug / z / z"
