@@ -5665,7 +5665,7 @@
 	In völliger Dunkelheit
 
 (narrate darkness)
-	You are surrounded by darkness.
+	Du bist von Dunkelheit umgeben.
 	(current visibility ceiling $Ceil)
 	(notice $Ceil)
 
@@ -5842,7 +5842,7 @@
 
 (parse game over [undo])
 	(if) (undo) (or) (then)
-		Failed to undo last turn.
+		Letzter Undo-Versuch fehlgeschlagen.
 	(endif)
 
 (parse game over [amusing/lustig])
