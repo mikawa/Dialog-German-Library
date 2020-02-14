@@ -1,0 +1,67 @@
+%% Angenommen wir möchten es dem Spieler ermöglichen, sich frei in
+%% jeglicher Richtung zu bewegen, aber gleichzeitig zu kontrollieren, 
+%% in welcher Reihenfolge er die Räume besucht. Das Erzählen der 
+%% Geschichte steht eher im Mittelpunkt, als die genaue Abbildung
+%% einer Karte.
+
+%% Hier wird die Problematik über eine Liste gelöst, in der die 
+%% Verbindungen der Räume abgelegt werden, wenn diese noch nicht 
+%% besucht wurden. Getestet wird außerdem, ob die Verbindung bereits
+%% zwischen zwei anderen Räumen besteht.
+
+(global variable (connector []))
+
+($ is connected) 
+	(fail)
+
+(nextroom from $ is $)
+	(fail)
+
+(current player #player)
+(#player is #in #open_plain)
+
+#open_plain
+(room *)
+(name *)	weite(e) Ebene
+(room header *)	Weite Ebene
+(look *)
+		Eine weite Ebene, offen in jeder Richtung.
+(* is feminin)
+(nextroom from * is #hilly_place)
+
+%% (from * go $ to #hilly_place)
+
+#hilly_place
+(room *)
+(name *)	hügelig(er) Ort(-es)
+(room header *)	Hügeliger Ort
+(look *)
+		Das flache Grasland wird hier zu einer hügeligen Gegend, die
+		dir aber gleichfalls alle Wege offen lässt.
+(* is maskulin)
+(nextroom from * is #stream)
+
+#stream
+(room *)
+(name *)	Strom(-es)
+(room header *)	Am Strom
+(look *)
+		Das ist der dritte Ort, den du heute besuchst und der Strom ist dir sehr willkommen. Wie erfrischend!
+(* is maskulin)
+
+(before [leave $Room $Dir])
+	(nextroom from $Room is $NextRoom)
+	~($NextRoom is visited)
+	~(from $Room go $Dir to $)
+	(connector $List)
+	(append $List [[$Room $Dir $NextRoom]] $New)
+	(now) (connector $New)
+	(opposite of $Dir is $Opp)
+	(append $New [[$NextRoom $Opp $Room]] $Reverse)
+	(now) (connector $Reverse)
+
+(from $Room go $Dir to $NextRoom)
+	(connector $List)
+	([$Room $Dir $NextRoom] is one of $List)
+
+%% Testen mit "n / s / o / o". 
