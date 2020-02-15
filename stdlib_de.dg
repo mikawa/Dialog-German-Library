@@ -210,6 +210,7 @@
 
 #in			%% Note: #in is also a relation
 (direction *)
+(name *)		drinnen
 (dict *)		rein hinein innen drinnen
 (present-adverb *)	innerhalb
 (from-adverb *)		drinnen
@@ -218,6 +219,7 @@
 
 #out
 (direction *)
+(name *)		draußen
 (dict *)		raus hinaus außen draußen
 (present-adverb *)	außerhalb
 (from-adverb *)		draußen
