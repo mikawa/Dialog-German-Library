@@ -3529,10 +3529,6 @@
 (understand [setz dich in | $Words] as [enter $Obj])
 	*(understand $Words as single object $Obj preferably container)
 
-(understand [geh | $Words] as [enter $Obj])
-	*(understand $Words as single object $Obj)
-	{ (door $Obj) (or) ~(room $Obj) (actor container $Obj) }
-
 (unlikely [enter $Obj])
 	~(actor container $Obj)
 	~(door $Obj)
@@ -3653,7 +3649,6 @@
 (understand [geh/flieh/spring von | $Words] as [leave $Obj])
 	*(understand $Words as single object $Obj preferably supporter)
 
-(understand [geh] as [leave])
 (understand [geh raus/hinaus] as [leave])
 
 (understand [geh runter] as [leave])
