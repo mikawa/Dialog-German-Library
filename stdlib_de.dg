@@ -5044,7 +5044,7 @@
 		(endif)
 	(endif)
 
-(clarify location of $Obj)
+(clarify location of (door $Obj))
 	~(singleton $Obj)
 
 (ein ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
