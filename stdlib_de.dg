@@ -945,8 +945,8 @@
 			(no space)en
 		(elseif) ($Case = #Dativ) (then)
 			(no space)en
-		(else) 
-			(no space)er
+		(else)
+			(no space)en
 		(endif)
 
 (es)
@@ -1538,7 +1538,7 @@
 (understand [schau/sieh/seh/blick an | $Words] as [examine $Obj])
 	*(understand $Words as non-all object $Obj)
 
-(understand [wer bin ich] as [untersuch $Player])
+(understand [wer bin ich] as [examine $Player])
 	(current player $Player)
 
 ~(refuse [examine $]) %% No need for reachability.
