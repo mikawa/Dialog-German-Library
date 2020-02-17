@@ -1,0 +1,108 @@
+%% Im ovalen Büro soll die Größe geschätzt werden. Dazu ist ein wenig
+%% Anpassung im Bereich der Grammatikschablonen notwenig und auch das
+%% Abfangen unvollständiger Eingabe wie "schätze (person)"
+
+(current player #player)
+(#player is #in #room)
+(height of #player is 1 m 75 cm)
+
+(height of $ is $ m $ cm)
+	(fail)
+
+#room
+(room *)
+(name *)	Ovales Büro
+(* is neutrum)
+
+#josh
+(male actor *)
+(name *)	Josh(-s)
+(dict *)	josh
+(* is #in #room)
+(proper *)
+(appearance * $ $)	Josh und Toby sind hier.
+(height of * is 1 m 85 cm)
+
+#toby
+(male actor *)
+(name *)	Toby(-s)
+(dict *)	toby
+(* is #in #room)
+(proper *)
+(height of * is 1 m 70 cm)
+
+(describe action [guess $NPC to $Meter and $Zentimeter])
+	jemanden auf m und cm (zu) schätzen
+
+(understand infinitve [schätzen] as [schätz])
+
+(understand [schätz | $Words] as [guess $NPC to $Meter and $Zentimeter])
+	*(split $Words by [auf] into $Left and $Right)
+	*(understand $Left as single object $NPC)
+	*(split $Right by [m meter] into $First and $Rest)
+	*(understand $First as number $Meter)
+	*(split $Rest by [cm zentimeter] into $Second and $Unused)
+	*(understand $Second as number $Zentimeter)
+
+(describe action [guess $NPC to $Meter])
+	jemanden auf m (zu) schätzen
+
+(unlikely [guess $NPC to $Meter])
+
+(understand [schätz | $Words] as [guess $NPC to $Meter])
+	*(split $Words by [auf] into $Left and $Rest)
+	*(understand $Left as single object $NPC)
+	*(split $Rest by [m meter] into $First and $Unused)
+	*(understand $First as number $Meter)
+
+(understand [schätz | $Words] as [guess $Object])
+	*(understand $Words as single object $Object)
+
+(understand [schätz] as [guess])
+
+(describe action [guess $NPC])
+	jemanden (zu) schätzen
+
+(very unlikely [guess $NPC])
+
+(perform [guess])
+	Wen?
+	(asking for object in [guess []])
+
+(perform [guess $NPC])
+	Auf wieviele m?
+	(get input $Input)
+	(understand $Input as number $Meter)
+	Und wieviele cm?
+	(get input $Input2)
+	(understand $Input2 as number $Zentimeter)
+	(try [guess $NPC to $Meter and $Zentimeter])
+
+(perform [guess $NPC to $Meter])
+	Und wieviele cm?
+	(get input $Input)
+	(understand $Input as number $Zentimeter)
+	(try [guess $NPC to $Meter and $Zentimeter])
+
+(perform [guess $NPC to $Meter and $Zentimeter])
+	(height of $NPC is $isMeter m $isZentimeter cm)
+	(if) ($Meter > $isMeter) (then)
+		(kleiner $NPC).
+		(stop)
+	(elseif) ($Meter < $isMeter) (then)
+		(größer $NPC).
+		(stop)
+	(elseif) ($Zentimeter > $isZentimeter) (then)
+		(kleiner $NPC).
+		(stop)
+	(elseif) ($Zentimeter < $isZentimeter) (then)
+		(größer $NPC).
+		(stop)
+	(endif)
+	Du liegst goldrichtig.
+
+(kleiner $NPC)
+	Du liegst daneben, (der $NPC) (ist $NPC) kleiner
+
+(größer $NPC)
+	Du liegst daneben, (der $NPC) (ist $NPC) größer
