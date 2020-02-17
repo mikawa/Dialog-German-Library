@@ -1,0 +1,60 @@
+%% Manchmal ist es besser, eine Zahl eher vage als exakt zu
+%% bezeichnen, beispielsweise dem Spieler zu erzählen, dass 
+%% sich viele Menschen in dem Saal befinden, als exakt 42.
+
+%% Die Idee ist, sich durch eine Liste zu arbeiten, die hier 
+%% als globale Variable definiert wird, und den Text in der 
+%% Liste auszugeben, sobald die Zahl höher ist als der 
+%% Eintrag.
+
+(current player #player)
+(#player is #in #stadium)
+
+(global variable (round_numbers [[1 keine] [2 einen] [3 ein paar] [6 einige wenige] [11 einige] [21 viele] [1000 sehr sehr viele]]))
+
+(population of $ is $)
+	(fail)
+
+#stadium
+(room *)
+(name *)	Stadion
+(from * go #west to #hotdogstand)
+(from * go #south to #restroom)
+(population of * is 500)
+
+#hotdogstand
+(room *)
+(name *)	Hot Dog Stand
+(population of * is )
+(from * go #east to #stadium)
+(population of * is 3)
+
+#restroom
+(room *)
+(name *)	Stadion
+(population of * is )
+(from * go #north to #stadium)
+(population of * is 750)
+
+(look (room $Room))
+	(population of $Room is $Number)
+	Hier siehst du
+	(round_numbers $List)
+	(get best entry of $Number in $List)
+
+(get best entry of $N in [$Check | $Rest])
+	([$F | $Else] = $Check)
+	(if) ($N < $F) (then)
+		(display $Else) 
+	(endif)
+	(get best entry of $N in $Rest)
+
+(display [$First | $Rest])
+	$First
+	(display $Rest)
+
+(display [])
+	Menschen.
+	(stop)
+
+%% Testen mit w / o / s

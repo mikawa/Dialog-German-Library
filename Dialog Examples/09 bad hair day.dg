@@ -1,0 +1,13 @@
+(current player #player)
+(#player is #in #room)
+
+#room
+(room *)
+(name *)	Raum
+(look *)
+		Ein Spiegel hängt über dem Tisch, eine verlockende Möglichkeit, dich zu betrachten, bevor du zu den anderen hineingehst.
+
+(instead of [examine #player])
+	Ok, du siehst prima aus.
+
+%% Testen mit betrachte dich
