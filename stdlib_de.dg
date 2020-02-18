@@ -3461,10 +3461,7 @@
 (understand [kletter hoch an | $Words] as [climb $Obj])
 	*(understand $Words as single object $Obj preferably supporter)
 
-(understand [kletter/sitz/steh/geh/steig auf | $Words] as [climb $Obj])
-	*(understand $Words as single object $Obj preferably supporter)
-
-(understand [setz dich auf | $Words] as [climb $Obj])
+(understand [kletter/geh/steig auf | $Words] as [climb $Obj])
 	*(understand $Words as single object $Obj preferably supporter)
 
 (understand [erkletter/erklimm/ersteig | $Words] as [climb $Obj])
@@ -6736,7 +6733,7 @@
 
 (enumerate actions [$Item1 $Item2] $N $Np1)
 	(just)
-	(enumerate action $N $Item1) , or (line)
+	(enumerate action $N $Item1) oder (line)
 	($N plus 1 into $Np1)
 	(enumerate action $Np1 $Item2) ? (line)
 (enumerate actions [$Item1 $Item2 | $] 9 10)
