@@ -166,14 +166,6 @@
 
 (reverse-name #in)	aus
 (reverse-name #on)	von
-(reverse-name #partof)	weg von
-(reverse-name #heldby)	weg von
-(reverse-name #wornby)	ausgezogen
-(reverse-name #under)	heraus
-(reverse-name #behind)	heraus
-
-(reverse-name #in)	aus
-(reverse-name #on)	von
 (reverse-name #partof)	von
 (reverse-name #heldby)	von
 (reverse-name #wornby)	von
@@ -184,7 +176,6 @@
 (die (relation $Rel))	(name $Rel)
 (den (relation $Rel))	(name $Rel)
 (dem (relation $Rel))	(name $Rel)
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 3: German Directions
@@ -529,6 +520,20 @@
 (einem (uncountable $Obj))	(name $Obj)
 (einen (uncountable $Obj))	(name $Obj)
 
+(ein (your $Obj))		
+	(now) (current case #Nominativ)
+	(now) (current article #Indefinite)
+	(if) ($Obj is maskulin) (then)
+		dein
+	(elseif) ($Obj is feminin) (then)
+		deine
+	(elseif) ($Obj is neutrum) (then)
+		dein
+	(else)
+		deine
+	(endif)
+	(name $Obj)	
+
 (ein $Obj)		
 	(now) (current case #Nominativ)
 	(now) (current article #Indefinite)
@@ -540,6 +545,20 @@
 		ein
 	(else)
 		einige	
+	(endif)
+	(name $Obj)	
+
+(eines (your $Obj))		
+	(now) (current case #Genitiv)
+	(now) (current article #Indefinite)
+	(if) ($Obj is maskulin) (then)
+		deines
+	(elseif) ($Obj is feminin) (then)
+		deiner
+	(elseif) ($Obj is neutrum) (then)
+		deines
+	(else)
+		deiner
 	(endif)
 	(name $Obj)	
 
@@ -557,6 +576,20 @@
 	(endif)
 	(name $Obj)
 
+(einem (your $Obj))		
+	(now) (current case #Dativ)
+	(now) (current article #Indefinite)
+	(if) ($Obj is maskulin) (then)
+		deinem
+	(elseif) ($Obj is feminin) (then)
+		deiner
+	(elseif) ($Obj is neutrum) (then)
+		deinem
+	(else)
+		deinen
+	(endif)
+	(name $Obj)	
+
 (einem $Obj)		
 	(now) (current case #Dativ)
 	(now) (current article #Indefinite)
@@ -570,7 +603,21 @@
 		einigen
 	(endif)
 	(name $Obj)
-	
+
+(einen (your $Obj))		
+	(now) (current case #Akkusativ)
+	(now) (current article #Indefinite)
+	(if) ($Obj is maskulin) (then)
+		deinen
+	(elseif) ($Obj is feminin) (then)
+		deine
+	(elseif) ($Obj is neutrum) (then)
+		dein
+	(else)
+		deine
+	(endif)
+	(name $Obj)	
+
 (einen $Obj)		
 	(now) (current case #Akkusativ)
 	(now) (current article #Indefinite)
@@ -584,7 +631,12 @@
 		einige
 	(endif)
 	(name $Obj)
-	
+
+(der (your $Obj))	(ein $Obj)
+(des (your $Obj))	(eines $Obj)
+(dem (your $Obj))	(einem $Obj)
+(den (your $Obj))	(einen $Obj)
+
 (Ein $Obj)		(uppercase) (ein $Obj)
 (Eines $Obj)	(uppercase) (eines $Obj)
 (Einem $Obj)	(uppercase) (einem $Obj)
@@ -1430,10 +1482,10 @@
 (narrate entering (supporter $Obj))
 	Du steigst auf (den $Obj).
 
-(narrate entering (in-seat $Ob)j)
+(narrate entering (in-seat $Obj))
 	Du setzt dich in (den $Obj).
 
-(narrate entering (on-seat $Ob)j)
+(narrate entering (on-seat $Obj))
 	Du setzt dich auf (den $Obj).
 
 (interface (prevent entering $<Obj))
@@ -2445,7 +2497,6 @@
 	In dieser Dunkelheit bist du nicht sicher, wo sich die Ausgänge genau befinden.
 
 (perform [exits])
-	($Count = 1)
 	(current room $Room)
 	(if)
 		~{
@@ -3966,7 +4017,6 @@
 (understand [kletter nach | $Words] as [go $Dir])
 	*(understand $Words as direction $Dir)
 	*($Dir is one of [#up #down])
-	(from $Room go $Dir to $)
 
 (understand [beweg dich nach | $Words] as [go $Dir])
 	*(understand $Words as direction $Dir)
