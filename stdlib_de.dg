@@ -2417,6 +2417,10 @@
 (understand [lass fallen | $Words] as [drop $Obj])
 	*(understand $Words as object $Obj preferably held)
 
+(very unlikely [drop $Obj])
+	(current player $Actor)
+	~($Obj is #heldby $Actor)
+
 (unlikely [drop $Obj])
 	(current player $Actor)
 	~($Obj has ancestor $Actor)
@@ -2802,7 +2806,7 @@
 	*(understand $Left as non-all object $Obj)
 	*(understand $Right as single object $Key preferably held)
 
-(understand [schließ/mach/sperr auf | $Words] as [unlock $Obj])
+(understand [schließ/sperr auf | $Words] as [unlock $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (unlikely [unlock $Obj | $])
@@ -2922,11 +2926,6 @@
 (understand [aktivier | $Words] as [switch on $Obj])
 	*(understand $Words as non-all object $Obj)
 
-(understand [schalt | $Words] as [switch on $Obj])
-	*(understand $Words as single object $Obj)
-	(switchable $Obj)
-	($Obj is off)
-
 (unlikely [switch on $Obj])
 	~(switchable $Obj) (or) ($Obj is on)
 
@@ -2960,11 +2959,6 @@
 
 (understand [deaktivier | $Words] as [switch off $Obj])
 	*(understand $Words as non-all object $Obj)
-
-(understand [schalt | $Words] as [switch off $Obj])
-	*(understand $Words as single object $Obj)
-	(switchable $Obj)
-	($Obj is on)
 
 (unlikely [switch off $Obj])
 	~(switchable $Obj) (or) ($Obj is off)
@@ -4282,6 +4276,7 @@
 (describe action [clean $Obj])
 	(den full $Obj) (zu) reinigen
 
+(understand infinitive [waschen] as Verb [wasch])
 (understand infinitive [reinigen] as Verb [reinig])
 (understand infinitive [bürsten] as Verb [bürst])
 (understand infinitive [wischen] as Verb [wisch])
@@ -4290,7 +4285,7 @@
 (understand infinitive [entstauben] as Verb [entstaub])
 (understand infinitive [schrubben] as Verb [schrubb])
 
-(understand [reinig/bürst/wisch/polier/feg/entstaub/schrubb | $Words] as [clean $Obj])
+(understand [wasch/reinig/bürst/wisch/polier/feg/entstaub/schrubb | $Words] as [clean $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (perform [clean $Obj])
