@@ -4443,19 +4443,19 @@
 	(if) ($Dir is one of [#up #down]) (then)
 		kletterst
 	(elseif) (player can see) (then)
-		gehst nach
+		gehst
 	(else)
-		fühlst den Weg nach
-	(endif)
-	(if) ($Dir = #in) (then)
-		drinnen
-	(elseif) ($Dir = #out) (then)
-		draußen
-	(else)
-		(name $Dir)
+		fühlst den Weg
 	(endif)
 	(if) (from $Room go $Dir to $Target) (door $Target) (then)
 		durch (den $Target)
+	(endif)
+	(if) ($Dir = #in) (then)
+		hinein
+	(elseif) ($Dir = #out) (then)
+		hinaus
+	(else)
+		nach (name $Dir)
 	(endif)
 	.
 
