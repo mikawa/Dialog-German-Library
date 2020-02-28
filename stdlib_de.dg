@@ -960,14 +960,14 @@
 	([soll | $Command] = $n1)
 	([er | $n1] = $n2)
 	(append $Actor $n2 $n3)
-	%% Understood: $1 $n3!
+	(now) (current verb $1)
 
 (rewrite [$1 | $2] into [$Last | $Rest] )
 	*(understand infinitive $Inf as Verb $Verb)
 	*(split $2 by $Inf into $Left and $)
 	([$Last | $] = $Verb)
 	($Rest = [$1 | $Left])
-	%% Understood: $Last $Rest
+	(now) (current verb $Last)
 	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 10: Filter for German articles
@@ -1857,29 +1857,6 @@
 		Du findest nichts interessantes.
 	(endif)
 
-%% TEST NEW MECHANISM
-
-(rewrite [$First | $Last] into $Corrected)
-	*(split $Last anywhere into $Left and $Right)
-	($Right is one of [[an] [auf] [aus] [ein] [auf] [hin] [weg] [um] [mit] [zu] [ab] [durch] [hoch] [fest] [locker] [fallen] [los]])
-	%%ERKANNT
-	(append [$First | $Right] $Left $Corrected)
-	%%KORRIGIERT
-	%%[$Corrected]
-
-(rewrite [$First | $Last] into $Corrected)
-	*(split $Last anywhere into $Left and $Right)
-	*(split $Left anywhere into $1L and $1R)
-	($1R is one of [[an] [auf] [aus] [ein] [auf] [hin] [weg] [um] [zu] [ab] [durch] [hoch] [fest] [locker] [fallen] [los]])
-	%%ERKANNT2
-	(nth $Right 1 $Check)
-	%%$Check
-	($Check is one of [mit])
-	(append [$First | $1R ] $1L $New)
-	(append $New $Right $Corrected)
-	%%KORRIGIERT2
-	%%[$Corrected]
-
 %% FEEL <obj>
 
 (describe action [feel $Obj])
@@ -2327,7 +2304,7 @@
 %% PUT <obj> <rel> <obj>
 
 (describe action [put $Obj $Rel $Dest])
-	(den full $Obj) (name $Rel) (den $Dest) (zu) legen
+	(den full $Obj) (name $Rel) (den $Dest) (zu) (verb)
 
 (understand infinitive [legen/plazieren] as Verb [leg])
 
@@ -3692,6 +3669,7 @@
 (understand infinitive [steigen] as Verb [steig])
 (understand infinitive [klettern] as Verb [kletter])
 (understand infinitive [setzen] as Verb [setz])
+(understand infinitive [stellen] as Verb [stell])
 (understand infinitive [liegen] as Verb [lieg])
 (understand infinitive [gelangen] as Verb [gelang])
 
@@ -3699,9 +3677,6 @@
 	*(understand $Words as single object $Obj preferably container)
 
 (understand [geh/spring/gelang/sitz/kletter/lieg/sitz/steig in/durch | $Words] as [enter $Obj])
-	*(understand $Words as single object $Obj preferably container)
-
-(understand [setz dich in | $Words] as [enter $Obj])
 	*(understand $Words as single object $Obj preferably container)
 
 (unlikely [enter $Obj])
@@ -3722,6 +3697,9 @@
 	in (den full $Obj) (zu) steigen
 
 ~(refuse [enter (room $)])
+
+(instead of [enter (actor supporter $Obj)])
+	(try [climb $Obj])
 
 (instead of [enter (room $Room)])
 	(current room $Here)
@@ -4536,8 +4514,6 @@
 
 %% AGAIN and UNDO are treated as a special cases in the toplevel parser.
 
-%% (rewrite [g] into [again]) NOT NECESSARY??
-
 %% QUIT
 
 (command [quit])
@@ -4802,11 +4778,13 @@
 
 (describe self-describing action [])
 
+%%TEST VERB
+
 (describe self-describing action [(word $W) | $More])
 	(just)
-	$W(no space)en
 	(describe self-describing action $More)
-	
+	(verb)
+
 (describe self-describing action [$Obj | $More])
 	(den $Obj)
 	(describe self-describing action $More)
@@ -5274,8 +5252,6 @@
 (interface (Den $<Obj))
 
 (interface (Der full $<Obj))
-
-%% to do einen obj usw. go here
 
 (interface (add location information for $<Obj))
 
@@ -6175,6 +6151,48 @@
 %% (describe action [take $Obj])
 %%	  (den full $Obj) (zu) nehmen
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% some hooks for describing actions "from scratch"
+%% the library relies heavily on the "describe action" predicate so normally
+%% all different verbs result in the same parser question in uncmplete actions
+
+%% This design decision was made to simplify the output process (the parser doesn't
+%% have to assume anything about objects in dative case).
+
+%% However, in some rare cases the parser queston must extract the verb from
+%% the players input, not to sound strange. This is the case for all "put"
+%% action, so in put $obj $rel $dest uses the (verb) predicate to display
+%% the verb typed by the player. This can be also adopted to new actions
+%% if the desired.
+
+%% Note, that in this case, the author must define any irregular verb (as
+%% "nimm" must lead to infinitve "nehmen") to ensure the correct output.
+
+(global variable (current verb $))
+
+(irregular $ as $) (fail)
+(irregular [nimm] as [nehmen])
+
+(set verb [$Verb | $])
+	(now) (current verb $Verb)
+
+(verb)
+	(current verb $Verb)
+	(irregular [$Verb] as [$Regular])
+	$Regular
+
+(verb)
+	(current verb $Verb)
+	(split word $Verb into $Letters)
+	(if) (last $Letters @e) (then)
+		$Verb(no space)n
+	(else)
+		$Verb(no space)en
+	(endif)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 (describe infinitive action $Action)
 	(now) (infinitive context)
 	(describe action $Action)
@@ -6186,6 +6204,10 @@
 	(if) (infinitive context) (then)
 		zu
 	(endif)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% German chaniging gender
 
 (global variable (changing gender is $))
 
@@ -6201,8 +6223,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 34: Parser: Rewrite
 
-%% TO DO: ALL REWRITES SHOULD GO HERE
-
 (interface (rewrite $<WordsIn into $>WordsOut))
 
 (rewrite [g] into [again])
@@ -6210,6 +6230,28 @@
 %% Fallback rewrite rule does nothing.
 
 (rewrite $A into $A)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% rewrite sentences with prep in last slot as
+%% verb prep rest
+
+(rewrite [$First | $Last] into $Corrected)
+	*(split $Last anywhere into $Left and $Right)
+	($Right is one of [[an] [auf] [aus] [ein] [auf] [hin] [weg] [um] [mit] [zu] [ab] [durch] [hoch] [fest] [locker] [fallen] [los]])
+	(append [$First | $Right] $Left $Corrected)
+	(set verb $Corrected)
+
+(rewrite [$First | $Last] into $Corrected)
+	*(split $Last anywhere into $Left and $Right)
+	*(split $Left anywhere into $1L and $1R)
+	($1R is one of [[an] [auf] [aus] [ein] [auf] [hin] [weg] [um] [zu] [ab] [durch] [hoch] [fest] [locker] [fallen] [los]])
+	ERKANNT2
+	(nth $Right 1 $Check)
+	($Check is one of [mit])
+	(append [$First | $1R ] $1L $New)
+	(append $New $Right $Corrected)
+	(set verb $Corrected)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 35: Parser: Directions
@@ -6770,6 +6812,13 @@
 (parse action [])
 
 (parse action $Words)
+
+	%%VERB TEST
+	%% Very First, try to get the verb
+
+	($Words = [$Verb | $])
+	(now) (current verb $Verb)
+
 	%% First, check for UNDO.
 
 	(if) ($Words = [undo]) (then)
