@@ -290,7 +290,7 @@
 (direction *)
 (name *)		drinnen
 (dict *)		rein hinein innen drinnen
-(present-adverb *)	innerhalb
+(present-adverb *)	innen
 (from-adverb *)		drinnen
 (to-adverb *)		hinein
 (opposite of * is #out)
@@ -299,7 +299,7 @@
 (direction *)
 (name *)		draußen
 (dict *)		raus hinaus außen draußen
-(present-adverb *)	außerhalb
+(present-adverb *)	außen
 (from-adverb *)		draußen
 (to-adverb *)		hinaus
 (opposite of * is #in)
@@ -2817,7 +2817,7 @@
 	(Der $Obj) (lässt sich $Obj) nicht mit (dem $Key) öffnen.
 
 (narrate unlocking $Obj with $Key)
-	Du öffnest (den $Obj) mit (dem $Key).
+	Du schließt (den $Obj) mit (dem $Key) auf.
 
 (perform [unlock $Obj with $Key])
 	(narrate unlocking $Obj with $Key)
@@ -4401,6 +4401,11 @@
 %% LEAVE <room> <dir> BY <vehicle>
 %% LEAVE <room> <dir> WITH <object>
 
+%% In a story written in German, we can set (leaving silently)
+%% which oppresses all "Du gehst nach Norden." messages
+
+~(leaving silently)
+
 (describe action [leave $Room $Dest])
 	(den $Room) nach (name $Dest) (zu) verlassen
 
@@ -4438,7 +4443,10 @@
 		(endif)
 	(endif)
 
+(narrate leaving $ $)
+
 (narrate leaving $Room $Dir)
+	~(leaving silently)
 	Du
 	(if) ($Dir is one of [#up #down]) (then)
 		kletterst
@@ -5262,7 +5270,7 @@
 			(from $Room go $Dir to $Obj)
 			(direction $Dir)
 		(then)
-			(present-adverb $Dir)
+			nach (present-adverb $Dir)
 		(elseif)
 			($Obj is $Rel $Loc)
 			~(room $Loc)
