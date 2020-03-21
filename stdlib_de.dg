@@ -6235,10 +6235,6 @@
 
 (rewrite [g] into [again])
 
-%% Fallback rewrite rule does nothing.
-
-(rewrite $A into $A)
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% rewrite sentences with prep in last slot as
@@ -6254,12 +6250,16 @@
 	*(split $Last anywhere into $Left and $Right)
 	*(split $Left anywhere into $1L and $1R)
 	($1R is one of [[an] [auf] [aus] [ein] [auf] [hin] [weg] [um] [zu] [ab] [durch] [hoch] [fest] [locker] [fallen] [los]])
-	ERKANNT2
+	%%ERKANNT2
 	(nth $Right 1 $Check)
 	($Check is one of [mit])
 	(append [$First | $1R ] $1L $New)
 	(append $New $Right $Corrected)
 	(set verb $Corrected)
+
+%% Fallback rewrite rule does nothing.
+
+(rewrite $A into $A)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 35: Parser: Directions
