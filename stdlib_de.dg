@@ -195,7 +195,7 @@
 	(name *)
 (from-adverb *)	
 	(name *)
-(dict *)		n nord norden nördlich
+(dict *)		n nord norden noerdlich
 (opposite of * is #south)
 
 #south
@@ -205,7 +205,7 @@
 	(name *)
 (from-adverb *)	
 	(name *)
-(dict *)		s süd süden südlich
+(dict *)		s sued sueden suedlich
 (opposite of * is #north)
 
 #east
@@ -215,7 +215,7 @@
 	(name *)
 (from-adverb *)	
 	(name *)
-(dict *)		o ost osten östlich
+(dict *)		o ost osten oestlich
 (opposite of * is #west)
 
 #west
@@ -235,7 +235,7 @@
 	(name *)
 (from-adverb *)	
 	(name *)
-(dict *)		no nordost nordosten nordöstlich
+(dict *)		no nordost nordosten nordoestlich
 (opposite of * is #southwest)
 
 #northwest
@@ -255,7 +255,7 @@
 	(name *)
 (from-adverb *)	
 	(name *)
-(dict *)		sw südwest südwesten südwestlich
+(dict *)		sw suedwest suedwesten suedwestlich
 (opposite of * is #northeast)
 
 #southeast
@@ -265,7 +265,7 @@
 	(name *)
 (from-adverb *)	
 	(name *)
-(dict *)		so südost südosten südöstlich
+(dict *)		so suedost suedosten suedoestlich
 (opposite of * is #northwest)
 
 #up
@@ -298,7 +298,7 @@
 #out
 (direction *)
 (name *)		draußen
-(dict *)		raus hinaus außen draußen
+(dict *)		raus hinaus aussen draussen
 (present-adverb *)	außen
 (from-adverb *)		draußen
 (to-adverb *)		hinaus
@@ -952,7 +952,7 @@
 
 (rewrite [$1 | $Words] into [$1 | $n3] )
 	*(split $Words by [er sie es] into $Actor and $Right)
-	*(split $Right by [soll möchte sollte könnte kann] into $ and $Order)
+	*(split $Right by [soll moechte sollte koennte kann] into $ and $Order)
 	*(understand infinitive $Inf as Verb $Verb)
 	*(split $Order by $Inf into $Left and $)
 	([$Last | $] = $Verb)
@@ -1804,12 +1804,12 @@
 
 %% SEARCH <obj>
 
-(understand infinitive [durchsuchen/durchwühlen/durchforsten] as Verb [durchsuch])
+(understand infinitive [durchsuchen/durchwuehlen/durchforsten] as Verb [durchsuch])
 
 (describe action [search $Obj])
 	(den full $Obj) (zu) durchsuchen
 
-(understand [durchsuch/durchwühl/durchforst | $Words] as [search $Obj])
+(understand [durchsuch/durchwuehl/durchforst | $Words] as [search $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (instead of [search (current room $R)])
@@ -1862,12 +1862,12 @@
 (describe action [feel $Obj])
 	(den full $Obj) an(no space)(zu)(no space)fühlen
 
-(understand infinitive [betasten/berühren/fühlen/tasten/antasten] as Verb [fühl])
+(understand infinitive [betasten/beruehren/fuehlen/tasten/antasten] as Verb [fuehl])
 
-(understand [fühl/reib/tast/rühr an | $Words] as [feel $Obj])
+(understand [fuehl/reib/tast/ruehr an | $Words] as [feel $Obj])
 	*(understand $Words as non-all object $Obj)
 
-(understand [fühl/reib/tast/betast/berühr | $Words] as [feel $Obj])
+(understand [fuehl/reib/tast/betast/beruehr | $Words] as [feel $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (perform [feel $Obj])
@@ -1882,15 +1882,15 @@
 (describe action [listen])
 	zu(no space)(zu)(no space)hören
 
-(understand infinitive [lauschen/zuhören/anhören] as Verb [hör])
+(understand infinitive [lauschen/zuhoeren/anhoeren] as Verb [hoer])
 
-(understand [hör] as [listen])
-(understand [hör zu] as [listen])
+(understand [hoer] as [listen])
+(understand [hoer zu] as [listen])
 
-(understand [hör/lausch/horch | $Words] as [listen to $Obj])
+(understand [hoer/lausch/horch | $Words] as [listen to $Obj])
 	*(understand $Words as single object $Obj)
 
-(understand [hör/lausch/horch an/zu | $Words] as [listen to $Obj])
+(understand [hoer/lausch/horch an/zu | $Words] as [listen to $Obj])
 	*(understand $Words as single object $Obj)
 
 %% Don't require reachability:
@@ -1910,8 +1910,8 @@
 		Du hörst nichts Ungewöhnliches von (dem $Obj).
 	(endif)
 
-(understand [lausch/horch/hör] as [listen])
-(understand [hör zu] as [listen])
+(understand [lausch/horch/hoer] as [listen])
+(understand [hoer zu] as [listen])
 
 (instead of [listen])
 	(current room $Room)
@@ -1922,11 +1922,9 @@
 (describe action [kiss $Obj])
 	(den full $Obj) (zu) küssen
 
-(understand infinitive [umarmen/küssen/lieben] as Verb [küss])
+(understand infinitive [umarmen/kuessen/lieben] as Verb [kuess])
 
-(rewrite [umarm/lieb | $Words] into [küss | $Words])
-
-(understand [küss | $Words] as [kiss $Obj])
+(understand [küss/umarm/lieb | $Words] as [kiss $Obj])
 	*(understand $Words as single object $Obj preferably animate)
 
 (prevent [kiss $Obj])
@@ -1946,9 +1944,9 @@
 (describe action [jump])
 	(zu) springen
 
-(understand infinitive [hüpfen/springen] as Verb [spring])
+(understand infinitive [huepfen/springen] as Verb [spring])
 
-(understand [spring/übe/hüpf] as [jump])
+(understand [spring/uebe/huepf] as [jump])
 
 (perform [jump])
 	Du springst ein wenig auf der Stelle.
@@ -1979,10 +1977,13 @@
 (describe action [wave])
 	(zu) winken
 
-(understand infinitive [schütteln] as Verb [schüttel])
+(understand infinitive [schuetteln] as Verb [schuettel])
 (understand infinitive [winken] as Verb [wink])
 
-(understand [schüttl | $Words] as [schüttel $Obj])
+(understand [schuettl | $Words] as [wave $Obj])
+	*(understand $Words as object $Obj preferably held)
+
+(understand [wink mit | $Words] as [wave $Obj])
 	*(understand $Words as object $Obj preferably held)
 
 (unlikely [wave $Obj])
@@ -2001,7 +2002,7 @@
 (perform [wave $Obj])
 	Du schüttelst (den $Obj), ohne erkennbare Veränderung.
 
-(understand [schüttel dich] as [wave])
+(understand [schuettel dich] as [wave])
 (understand [wink] as [wave])
 
 (perform [wave])
@@ -2094,10 +2095,10 @@
 (describe action [think])
 	nach(no space)(zu)(no space)denken
 
-(understand infinitive [denken/überlegen/nachdenken] as Verb [denk])
+(understand infinitive [denken/ueberlegen/nachdenken] as Verb [denk])
 
 (understand [denk] as [think])
-(understand [überleg] as [think])
+(understand [ueberleg] as [think])
 (understand [denk nach] as [think])
 
 (perform [think])
@@ -2114,7 +2115,7 @@
 (understand [schlaf] as [sleep])
 (understand [mach ein nickerchen] as [sleep])
 (understand [schlaf ein] as [sleep])
-(understand [träum] as [sleep])
+(understand [traeum] as [sleep])
 
 (perform [sleep])
 	Du bist nicht müde.
@@ -2464,13 +2465,13 @@
 %% EXITS
 
 (describe action [exits])
-	die Äusgänge an(no space)(zu)(no space)zeigen
+	die Ausgänge an(no space)(zu)(no space)zeigen
 
-(understand [ausgänge/ausgang] as [exits])
+(understand [ausgaenge/ausgang] as [exits])
 (understand [zeig mir den ausgang] as [exits])
-(understand [zeig mir die ausgänge] as [exits])
+(understand [zeig mir die ausgaenge] as [exits])
 (understand [zeig ausgang] as [exits])
-(understand [zeig ausgänge] as [exits])
+(understand [zeig ausgaenge] as [exits])
 (understand [map/karte] as [exits])
 
 (prevent [exits])
@@ -2562,24 +2563,24 @@
 (describe action [give $Obj])
 	(den full $Obj) weg(no space)(zu)(no space)geben
 
-(understand infinitive [geben/übergeben] as Verb [gib])
+(understand infinitive [geben/uebergeben] as Verb [gib])
 
-(understand [übergib/übergeb/geb/gib | $Words] as [give $Obj to $Dest])
+(understand [uebergib/uebergeb/geb/gib | $Words] as [give $Obj to $Dest])
 	*(split $Words by [an dem der] into $Left and $Right)
 	*(understand $Right as single object $Dest preferably animate)
 	*(understand $Left as object $Obj preferably held excluding $Dest)
 
-(understand [übergib/übergeb/geb/gib | $Words] as [give $Obj to $Dest])
+(understand [uebergib/uebergeb/geb/gib | $Words] as [give $Obj to $Dest])
 	*(split $Words anywhere into $Left and $Right)
 	*(understand $Left as single object $Dest preferably animate)
 	*(understand $Right as object $Obj preferably held excluding $Dest)
 
-(understand [übergib/übergeb/geb/gib | $Words] as [give $Obj to $Dest])
+(understand [uebergib/uebergeb/geb/gib | $Words] as [give $Obj to $Dest])
 	*(split $Words anywhere into $Left and $Right)
 	*(understand $Right as single object $Dest preferably animate)
 	*(understand $Left as object $Obj preferably held excluding $Dest)
 
-(understand [übergib/übergeb/geb/gib | $Words] as [give $Obj])
+(understand [uebergib/uebergeb/geb/gib | $Words] as [give $Obj])
 	*(understand $Words as object $Obj preferably held)
 
 (unlikely [give $Obj to $Obj])
@@ -2675,9 +2676,9 @@
 (describe action [open $Obj])
 	(den full $Obj) (zu) öffnen
 
-(understand infinitive [öffnen/aufmachen] as Verb [öffne])
+(understand infinitive [oeffnen/aufmachen] as Verb [oeffne])
 
-(understand [öffne | $Words] as [open $Obj])
+(understand [oeffne | $Words] as [open $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (understand [mach auf | $Words] as [open $Obj])
@@ -2731,7 +2732,7 @@
 (describe action [close $Obj])
 	(den full $Obj) (zu) schließen
 
-(understand infinitive [schließen/zumachen] as Verb [schließ])
+(understand infinitive [schliessen/zumachen] as Verb [schliess])
 
 (understand [mach zu | $Words] as [close $Obj])
 	*(understand $Words as non-all object $Obj)
@@ -2739,7 +2740,7 @@
 (understand [pack ein | $Words] as [close $Obj])
 	*(understand $Words as non-all object $Obj)
 
-(understand [schließ | $Words] as [close $Obj])
+(understand [schliess | $Words] as [close $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (unlikely [close $Obj])
@@ -2771,19 +2772,19 @@
 (describe action [unlock $Obj])
 	(den full $Obj) auf(no space)(zu)(no space)schließen
 
-(understand infinitive [aufschließen/aufsperren] as Verb [öffne])
+(understand infinitive [aufschliessen/aufsperren] as Verb [oeffne])
 
-(understand [öffne | $Words] as [unlock $Obj with $Key])
+(understand [oeffne | $Words] as [unlock $Obj with $Key])
 	*(split $Words by [mit] into $Left and $Right)
 	*(understand $Left as non-all object $Obj)
 	*(understand $Right as single object $Key preferably held)
 
-(understand [schließ/mach/sperr auf | $Words] as [unlock $Obj with $Key])
+(understand [schliess/mach/sperr auf | $Words] as [unlock $Obj with $Key])
 	*(split $Words by [mit] into $Left and $Right)
 	*(understand $Left as non-all object $Obj)
 	*(understand $Right as single object $Key preferably held)
 
-(understand [schließ/sperr auf | $Words] as [unlock $Obj])
+(understand [schliess/sperr auf | $Words] as [unlock $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (unlikely [unlock $Obj | $])
@@ -2832,24 +2833,22 @@
 (describe action [lock $Obj])
 	(den full $Obj) abs(no space)(zu)(no space)chließen
 
-(understand infinitive [verspererren/verschließen/absperren/abschließen] as Verb [verschließ])
+(understand infinitive [verspererren/verschliessen/absperren/abschliessen] as Verb [verschliess])
 
-(rewrite [versperr | $Words] into [verschließ | $Words])
-
-(understand [schließ/mach/sperr ab/zu | $Words] as [lock $Obj with $Key])
+(understand [schliess/mach/sperr ab/zu | $Words] as [lock $Obj with $Key])
 	*(split $Words by [mit] into $Left and $Right)
 	*(understand $Left as non-all object $Obj)
 	*(understand $Right as single object $Key preferably held)
 
-(understand [schließ | $Words] as [lock $Obj with $Key])
+(understand [schliess | $Words] as [lock $Obj with $Key])
 	*(split $Words by [mit] into $Left and $Right)
 	*(understand $Left as non-all object $Obj)
 	*(understand $Right as single object $Key preferably held)
 
-(understand [verschließ/versperr | $Words] as [lock $Obj])
+(understand [verschliess/versperr | $Words] as [lock $Obj])
 	*(understand $Words as non-all object $Obj)
 
-(understand [schließ/mach/sperr ab/zu | $Words] as [lock $Obj])
+(understand [schliess/mach/sperr ab/zu | $Words] as [lock $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (unlikely [lock $Obj | $])
@@ -2963,12 +2962,12 @@
 (describe action [squeeze $Obj])
 	(den full $Obj) (zu) zerdrücken
 
-(understand infinitive [zerdrücken/zerquetschen/quetschen/ausquetschen/ausdrücken] as Verb [quetsch])
+(understand infinitive [zerdruecken/zerquetschen/quetschen/ausquetschen/ausdruecken] as Verb [quetsch])
 
-(understand [zerdrück/quetsch | $Words] as [squeeze $Obj])
+(understand [zerdrueck/quetsch | $Words] as [squeeze $Obj])
 	*(understand $Words as non-all object $Obj)
 
-(understand [drück/quetsch aus| $Words] as [squeeze $Obj])
+(understand [drueck/quetsch aus| $Words] as [squeeze $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (perform [squeeze $Obj])
@@ -3034,13 +3033,15 @@
 (describe action [bite $Obj])
 	in (den $Obj) (zu) beißen
 
-(understand infinitive [kauen/beißen] as Verb [beiß])
+(understand infinitive [kauen/beissen] as Verb [beiss])
 
-(rewrite [kau | $Words] into [beiß | $Words])
-(rewrite [kau an | $Words] into [beiß | $Words])
-(rewrite [beiß in | $Words] into [beiß | $Words])
+(understand [beiss | $Words] as [bite $Obj])
+	*(understand $Words as single object $Obj)
 
-(understand [beiß | $Words] as [bite $Obj])
+(understand [beiss in | $Words] as [bite $Obj])
+	*(understand $Words as single object $Obj)
+
+(understand [kau an | $Words] as [bite $Obj])
 	*(understand $Words as single object $Obj)
 
 (perform [bite (animate $Obj)])
@@ -3105,11 +3106,9 @@
 (describe action [drink $Obj])
 	(den full $Obj) (zu) trinken
 
-(understand infinitive [trinken/schlucken/verschlucken/nippen/schlürfen] as Verb [trink])
+(understand infinitive [trinken/schlucken/verschlucken/nippen/schluerfen] as Verb [trink])
 
-(rewrite [nipp/schluck/verschluck/schlürf | $Words] into [trink | $Words])
-
-(understand [nipp/schluck/verschluck/schlürf/trink | $Words] as [drink $Obj])
+(understand [nipp/schluck/verschluck/schluerf/trink | $Words] as [drink $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (understand [nipp/trink an | $Words] as [drink $Obj])
@@ -3145,21 +3144,21 @@
 (describe action [lock $Obj])
 	(den full $Obj) ab(no space)(zu)(no space)schneiden
 
-(understand infinitive [trennen/durchtrennen/durchschneiden/kürzen/abschneiden] as Verb [schneid])
+(understand infinitive [trennen/durchtrennen/durchschneiden/kuerzen/abschneiden] as Verb [schneid])
 
-(rewrite [trenn/durchtrenn/durchschneid/kürz | $Words] into [schneid | $Words])
+(rewrite [trenn/durchtrenn/durchschneid/kuerz | $Words] into [schneid | $Words])
 
 (understand [schneid/trenn durch/ab | $Words] as [cut $A with $B])
 	*(split $Words by [mit] into $Left and $Right)
 	*(understand $Left as non-all object $A)
 	*(understand $Right as single object $B)
 
-(understand [trenn/durchtrenn/durchschneid/kürz/schneid | $Words] as [cut $A with $B])
+(understand [trenn/durchtrenn/durchschneid/kuerz/schneid | $Words] as [cut $A with $B])
 	*(split $Words by [mit] into $Left and $Right)
 	*(understand $Left as non-all object $A)
 	*(understand $Right as single object $B)
 
-(understand [trenn/durchtrenn/durchschneid/kürz/schneid | $Words] as [cut $Obj])
+(understand [trenn/durchtrenn/durchschneid/kuerz/schneid | $Words] as [cut $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (understand [trenn/schneid durch/ab | $Words] as [cut $Obj])
@@ -3243,7 +3242,7 @@
 	*(understand $Right as topic $Topic)
 
 (understand [konsultier | $Words] as [consult $Obj about $Topic])
-	*(split $Words by [über] into $Left and $Right)
+	*(split $Words by [ueber] into $Left and $Right)
 	*(understand $Left as single object $Obj)
 	*(understand $Right as topic $Topic)
 
@@ -3276,15 +3275,15 @@
 
 (understand infinitive [fragen/befragen] as Verb [frag])
 (understand infinitive [sagen] as Verb [sag])
-(understand infinitive [erzählen] as Verb [erzähl])
+(understand infinitive [erzaehlen] as Verb [erzaehl])
 
 (understand [frag/befrag | $Words] as [ask $Person about $Topic])
-	*(split $Words by [nach über] into $Left and $Right)
+	*(split $Words by [nach ueber] into $Left and $Right)
 	*(understand $Left as single object $Person preferably animate)
 	*(understand $Right as topic $Topic)
 
-(understand [erzähl | $Words] as [tell $Person about $Topic])
-	*(split $Words by [über von] into $Left and $Right)
+(understand [erzaehl | $Words] as [tell $Person about $Topic])
+	*(split $Words by [ueber von] into $Left and $Right)
 	*(understand $Left as single object $Person preferably animate)
 	*(understand $Right as topic $Topic)
 
@@ -3294,7 +3293,7 @@
 	*(understand $Right as single object $Person preferably animate)
 
 (understand [red/sprech/sprich mit | $Words] as [tell $Person about $Topic])
-	*(split $Words by [über] into $Left and $Right)
+	*(split $Words by [ueber] into $Left and $Right)
 	*(understand $Left as single object $Person preferably animate)
 	*(understand $Right as topic $Topic)
 
@@ -3307,7 +3306,7 @@
 (understand [frag | $Words] as [ask $Obj])
 	*(understand $Words as single object $Obj preferably animate)
 
-(understand [erzähl | $Words] as [tell $Obj])
+(understand [erzaehl | $Words] as [tell $Obj])
 	*(understand $Words as single object $Obj preferably animate)
 
 (describe action [ask $Person])
@@ -3382,7 +3381,7 @@
 
 (understand infinitive [fluchen/schimpfen] as Verb [fluch])
 
-(understand [fluch/schmipf/mist/kacke/shit/fuck/scheiße] as [curse])
+(understand [fluch/schmipf/mist/kacke/shit/fuck/scheisse] as [curse])
 
 (perform [curse])
 	Du sprichst wenige ausgewählte Worte laut aus.
@@ -3396,7 +3395,7 @@
 (describe action [shout])
 	(zu) schreien
 
-(understand [brüll/schrei an | $Words] as [shout to $Obj])
+(understand [bruell/schrei an | $Words] as [shout to $Obj])
 	*(understand $Words as single object $Obj preferably animate)
 	
 (unlikely [shout to $Obj])
@@ -3479,9 +3478,9 @@
 (describe action [greet])
 	(zu) grüßen
 
-(understand infinitive [begrüßen/grüßen] as Verb [begrüß])
+(understand infinitive [begruessen/gruessen] as Verb [begruess])
 
-(understand [begrüß/grüß/hallo/hi | $Words] as [greet $Obj])
+(understand [begruess/gruess/hallo/hi | $Words] as [greet $Obj])
 	*(understand $Words as single object $Obj preferably animate)
 
 (understand [sag hallo/hi zu | $Words] as [greet $Obj])
@@ -3509,7 +3508,7 @@
 (understand [sag/bitt | $Words] as [tell $Actor to | $Action])
 	*(split $Words by [, er sie es] into $Left and $Right)
 	*(understand $Left as single object $Actor preferably animate)
-	*(split $Right by [soll möchte sollte könnte kann] into $ and $Order)
+	*(split $Right by [soll moechte sollte koennte kann] into $ and $Order)
 	(current actor $OldActor)
 	(now) (current actor $Actor)
 	(rewrite $Order into $Simplified)
@@ -3566,12 +3565,12 @@
 (describe action [smell $Obj])
 	an (dem $Obj) (zu) riechen
 
-(understand infinitive [schnüffeln] as Verb [schnüffel])
+(understand infinitive [schnueffeln] as Verb [schnueffel])
 (understand infinitive [riechen] as Verb [riech])
 
-(rewrite [schnüffel/riech an | $Words] into [riech | $Words])
+(rewrite [schnueffel/riech an | $Words] into [riech | $Words])
 
-(understand [riech/schnüffel | $Words] as [smell $Obj])
+(understand [riech/schnueffel | $Words] as [smell $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (refuse [smell $Obj])
@@ -3890,7 +3889,7 @@
 (describe action [go to $Room])
 	(den $Room) auf(no space)(zu)(no space)suchen
 
-(understand infinitive [nähern] as Verb [näher])
+(understand infinitive [naehern] as Verb [naeher])
 
 (understand [geh in/zu | $Words] as [go to $Room])
 	(filter $Words into $Filtered)
@@ -3902,7 +3901,7 @@
 		*(dict $Room)
 	(matching all of $Filtered)
 
-(understand [näher dich | $Words] as [go to $Room])
+(understand [naeher dich | $Words] as [go to $Room])
 	(filter $Words into $Filtered)
 	(nonempty $Filtered)
 	(determine object $Room)
@@ -4080,15 +4079,15 @@
 
 (understand infinitive [schieben] as Verb [schieb])
 (understand infinitive [verschieben] as Verb [verschieb])
-(understand infinitive [drücken] as Verb [drück])
+(understand infinitive [druecken] as Verb [drueck])
 (understand infinitive [hieven] as Verb [hiev])
 
-(understand [schieb/verschieb/beweg/drück/hiev/zieh | $Words] as [push $Obj $Dir])
+(understand [schieb/verschieb/beweg/drueck/hiev/zieh | $Words] as [push $Obj $Dir])
 	*(split $Words by [nach] into $Left and $Right)
 	*(understand $Right as direction $Dir)
 	*(understand $Left as single object $Obj)
 
-(understand [schieb/verschieb/beweg/drück/hiev/zieh | $Words] as [push $Obj $Dir])
+(understand [schieb/verschieb/beweg/drueck/hiev/zieh | $Words] as [push $Obj $Dir])
 	*(split $Words anywhere into $Left and $Right)
 	*(understand $Right as direction $Dir)
 	*(understand $Left as single object $Obj)
@@ -4125,7 +4124,7 @@
 (describe action [push $Obj])
 	(den full $Obj) (zu) schieben
 
-(understand [schieb/verschieb/beweg/drück/hiev | $Words] as [push $Obj])
+(understand [schieb/verschieb/beweg/drueck/hiev | $Words] as [push $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (understand [schieb an | $Words] as [push $Obj])
@@ -4206,9 +4205,9 @@
 (describe action [flush $Obj])
 	(den full $Obj) (zu) spülen
 
-(understand infinitive [spülen] as Verb [spül])
+(understand infinitive [spuelen] as Verb [spuel])
 
-(understand [spül | $Words] as [flush $Obj])
+(understand [spuel | $Words] as [flush $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (perform [flush $Obj])
@@ -4219,7 +4218,7 @@
 	(current player $Obj)
 	Wirklich?
 
-(understand [spül] as [flush])
+(understand [spuel] as [flush])
 
 (perform [flush])
 	Was willst du spülen?
@@ -4256,14 +4255,14 @@
 
 (understand infinitive [waschen] as Verb [wasch])
 (understand infinitive [reinigen] as Verb [reinig])
-(understand infinitive [bürsten] as Verb [bürst])
+(understand infinitive [buersten] as Verb [buerst])
 (understand infinitive [wischen] as Verb [wisch])
 (understand infinitive [polieren] as Verb [polier])
 (understand infinitive [fegen] as Verb [feg])
 (understand infinitive [entstauben] as Verb [entstaub])
 (understand infinitive [schrubben] as Verb [schrubb])
 
-(understand [wasch/reinig/bürst/wisch/polier/feg/entstaub/schrubb | $Words] as [clean $Obj])
+(understand [wasch/reinig/buerst/wisch/polier/feg/entstaub/schrubb | $Words] as [clean $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (perform [clean $Obj])
@@ -4313,14 +4312,14 @@
 	(den full $Obj) von (dem $Dest) (zu) lösen
 
 (understand infinitive [lockern] as Verb [locker])
-(understand infinitive [lösen] as Verb [lös])
+(understand infinitive [loesen] as Verb [loes])
 
 (understand [mach locker/ab/los | $Words] as [untie $A from $B])
 	*(split $Words by [von] into $Left and $Right)
 	*(understand $Left as single object $A)
 	*(understand $Right as single object $B)
 
-(understand [lös | $Words] as [untie $A from $B])
+(understand [loes | $Words] as [untie $A from $B])
 	*(split $Words by [von] into $Left and $Right)
 	*(understand $Left as single object $A)
 	*(understand $Right as single object $B)
@@ -4328,7 +4327,7 @@
 (unlikely [untie $Obj from $])
 	(unlikely [untie $Obj])
 
-(understand [lös/locker | $Words] as [untie $Obj])
+(understand [loes/locker | $Words] as [untie $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (understand [mach locker/ab/los | $Words] as [untie $Obj])
@@ -4356,13 +4355,13 @@
 (understand infinitive [zerschlagen] as Verb [zerschlag])
 (understand infinitive [hauen] as Verb [hau])
 (understand infinitive [treten] as Verb [tret])
-(understand infinitive [quälen] as Verb [quäl])
-(understand infinitive [zerstören] as Verb [zerstör])
-(understand infinitive [töten] as Verb [töt])
+(understand infinitive [quaelen] as Verb [quael])
+(understand infinitive [zerstoeren] as Verb [zerstoer])
+(understand infinitive [toeten] as Verb [toet])
 (understand infinitive [ermorden] as Verb [ermord])
-(understand infinitive [kämpfen] as Verb [kämpf])
+(understand infinitive [kaempfen] as Verb [kaempf])
 
-(understand [schlag/brech/zerbrech/brich/zerbrich/zerschlag/hau/tret/quäl/zerstör/töt/ermord | $Words] as [attack $Obj])
+(understand [schlag/brech/zerbrech/brich/zerbrich/zerschlag/hau/tret/quael/zerstoer/toet/ermord | $Words] as [attack $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (understand [brich | $Words] as [attack $A with $B])
@@ -5187,17 +5186,17 @@
 (parse numeral @zwei into 2)
 (parse numeral @drei into 3)
 (parse numeral @vier into 4)
-(parse numeral @fünf into 5)
+(parse numeral @fuenf into 5)
 (parse numeral @sechs into 6)
 (parse numeral @sieben into 7)
 (parse numeral @acht into 8)
 (parse numeral @neun into 9)
 (parse numeral @zehn into 10)
 (parse numeral @elf into 11)
-(parse numeral @zwölf into 12)
+(parse numeral @zwoelf into 12)
 (parse numeral @dreizehn into 13)
 (parse numeral @vierzehn into 14)
-(parse numeral @fünfzehn into 15)
+(parse numeral @fuenfzehn into 15)
 (parse numeral @sechzehn into 16)
 (parse numeral @siebzehn into 17)
 (parse numeral @achtzehn into 18)
@@ -6495,7 +6494,7 @@
 (parse basic noun [mich/dich/mir/dir] as [$Obj] $ $)
 	(current player $Obj)
 
-(parse basic noun [hier/raum/ort/gebiet/umgebung/wand/wände] as [$Room] $ $)
+(parse basic noun [hier/raum/ort/gebiet/umgebung/wand/waende] as [$Room] $ $)
 	(current room $Room)
 
 (parse basic noun [dies raum/ort/gebiet/umgebung] as [$Room] $ $)
@@ -6808,12 +6807,73 @@
 
 (parse action sequence $Words)
 	(if) (split $Words by [. ; dann] into $Left and $Right) (then)
-		(parse action $Left)
+		(preparse action $Left)
 		(rebuild scope)
 		(parse action sequence $Right)
 	(else)
-		(parse action $Words)
+		(preparse action $Words)
 	(endif)
+
+
+%%BEGIN1
+
+(parse action sequence $Words)
+	(if) (split $Words by [. ; dann] into $Left and $Right) (then)
+		(preparse action $Left)
+		(rebuild scope)
+		(preparse action sequence $Right)
+	(else)
+		(preparse action $Words)
+	(endif)
+
+(global variable (corrected words $))
+
+(correct umlauts in [$Check | $Rest])
+	(split word $Check into $List)
+	(correct letters in $List)
+	(correct umlauts in $Rest)
+
+(correct umlauts in [])
+
+(correct letters in $List)
+	(corrected words $Words)
+	{
+		(split $List by [ö] into $Left and $Right)
+		(append $Left [o e] $New)
+		(append $New $Right $New2)
+		(correct letters in $New2)
+	(or)
+		(split $List by [ä] into $Left and $Right)
+		(append $Left [a e] $New)
+		(append $New $Right $New2)
+		(correct letters in $New2)
+	(or)
+		(split $List by [ü] into $Left and $Right)
+		(append $Left [u e] $New)
+		(append $New $Right $New2)
+		(correct letters in $New2)
+	(or)
+		(split $List by [ß] into $Left and $Right)
+		(append $Left [s s] $New)
+		(append $New $Right $New2)
+		(correct letters in $New2)
+	(or)
+		(join words $List into $Corr)
+		%%$Corr
+		(append $Words [$Corr] $CorrWords)
+		(now) (corrected words $CorrWords)
+		%%WWW:$CorrWords
+	}
+
+(preparse action $Words)
+	(now) (corrected words [])
+	(correct umlauts in $Words)
+	(corrected words $Corrected)
+	(parse action $Corrected)
+
+%%END1
+
+
 
 (interface (parse action $<Words))
 
@@ -6862,7 +6922,7 @@
 			(last command was $LastCmd)
 		(then)
 			(rewrite $LastCmd into $ActualWords)
-		(elseif) ($Words = [äh $GoodWord]) (then)
+		(elseif) ($Words = [aeh $GoodWord]) (then)
 			(if)
 				(last command was $LastCmd)
 				(correct $LastCmd with $GoodWord into $GoodCmd)
@@ -7188,7 +7248,7 @@
 (yesno)
 	(space) > (get input $Words)
 	(if) ($Words = [ja]) (or) ($Words = [j]) (or) ($Words = [ok]) (or) ($Words = [jo]) (then)
-	(elseif) ($Words = [nein]) (or) ($Words = [n]) (or) ($Words = [nö]) (or) ($Words = [nee]) (then)
+	(elseif) ($Words = [nein]) (or) ($Words = [n]) (or) ($Words = [noe]) (or) ($Words = [nee]) (then)
 		(fail)
 	(else)
 		Bitte antworte mit ja oder nein
