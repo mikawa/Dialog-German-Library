@@ -1924,7 +1924,7 @@
 
 (understand infinitive [umarmen/kuessen/lieben] as Verb [kuess])
 
-(understand [küss/umarm/lieb | $Words] as [kiss $Obj])
+(understand [kuess/umarm/lieb | $Words] as [kiss $Obj])
 	*(understand $Words as single object $Obj preferably animate)
 
 (prevent [kiss $Obj])
