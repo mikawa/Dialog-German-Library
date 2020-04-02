@@ -3613,6 +3613,9 @@
 (understand [kletter hoch an | $Words] as [climb $Obj])
 	*(understand $Words as single object $Obj preferably supporter)
 
+(understand [kletter hoch | $Words] as [climb $Obj])
+	*(understand $Words as single object $Obj preferably supporter)
+
 (understand [kletter/geh/steig auf | $Words] as [climb $Obj])
 	*(understand $Words as single object $Obj preferably supporter)
 
