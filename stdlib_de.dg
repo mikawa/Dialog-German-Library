@@ -145,12 +145,12 @@
 (name #under)		unter
 (name #behind)		hinter
 
-(Name #partof)		Als fester Teil von
+(name #partof)		Als fester Teil von
 
 (dict #in)		in durch
 (dict #on)		auf
-(dict #under)		unter unterm
-(dict #behind)		hinter hinterm
+(dict #under)		unter
+(dict #behind)		hinter
 
 (dict #partof)		(just) (fail)
 (dict #heldby)		(just) (fail)
@@ -889,6 +889,14 @@
 		fällt
 	}
 
+(bewegt (current player $Obj)) bewegst 
+(bewegt $Obj)
+	{
+		($Obj is plural) bewegen
+	(or)
+		bewegt
+	}
+
 (Der (current player $Obj) ist) Du bist
 (Der $Obj ist)
 	{
@@ -988,6 +996,10 @@
 	(just)
 	(filter $MoreIn into $MoreOut)
 	
+(filter [dem | $MoreIn] into $MoreOut)
+	(just)
+	(filter $MoreIn into $MoreOut)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 11: Additional German dictionary queries
 
@@ -3680,6 +3692,7 @@
 
 (understand [geh/spring/gelang/sitz/kletter/lieg/sitz/steig in/durch | $Words] as [enter $Obj])
 	*(understand $Words as single object $Obj preferably container)
+	~(room $Obj)
 
 (unlikely [enter $Obj])
 	~(actor container $Obj)
@@ -4144,7 +4157,7 @@
 	Du gibst (dem $Obj) einen kleinen Schubs.
 
 (perform [push $Obj])
-	Du versuchst, (den $Obj) zu schieben, aber (er $Obj) bewegt sich nicht.
+	Du versuchst, (den $Obj) zu schieben, aber (er $Obj) (bewegt $Obj) sich nicht.
 
 %% PULL <obj>
 
@@ -4363,8 +4376,12 @@
 (understand infinitive [toeten] as Verb [toet])
 (understand infinitive [ermorden] as Verb [ermord])
 (understand infinitive [kaempfen] as Verb [kaempf])
+(understand infinitive [attackieren] as Verb [attackier])
 
-(understand [schlag/brech/zerbrech/brich/zerbrich/zerschlag/hau/tret/quael/zerstoer/toet/ermord | $Words] as [attack $Obj])
+(understand [attackier/schlag/brech/zerbrech/brich/zerbrich/zerschlag/hau/tret/quael/zerstoer/toet/ermord | $Words] as [attack $Obj])
+	*(understand $Words as non-all object $Obj)
+
+(understand [greif an | $Words] as [attack $Obj])
 	*(understand $Words as non-all object $Obj)
 
 (understand [brich | $Words] as [attack $A with $B])
@@ -5419,7 +5436,7 @@
 %% Chapter 28: Generating dictionary words for objects
 
 (dict (your $))
-	mein dein
+	mein dein deine deinen deines deinem
 
 (dict (openable $Obj))
 	(if) ($Obj is open) (then)
@@ -5795,7 +5812,7 @@
 	(if) ($Rel is one of [#under #behind]) (then)
 		Dinge (name $Rel) (den $O) zu legen, wird dich nicht weiter bringen.
 	(else)
-		Du kannt nichts (name $Rel) (den $O) legen.
+		Du kannst nichts (name $Rel) (den $O) legen.
 	(endif)
 
 ~(when (actor supporter $O) won't accept actor #on)
@@ -6818,7 +6835,8 @@
 	(endif)
 
 
-%%BEGIN1
+%% We use split/join predicate and new peparse predicate to
+%% extract ä ö ü ß and replace them with ae usw.
 
 (parse action sequence $Words)
 	(if) (split $Words by [. ; dann] into $Left and $Right) (then)
@@ -6868,11 +6886,46 @@
 		%%WWW:$CorrWords
 	}
 
+%% Preparsing does also convert some prepositions in its
+%% root forms
+%% zum -> zu
+%% zur -> zu
+%% vom -> von
+%% im -> in
+%% am -> an
+
 (preparse action $Words)
-	(now) (corrected words [])
-	(correct umlauts in $Words)
-	(corrected words $Corrected)
-	(parse action $Corrected)
+	{
+		(split $Words by [zum] into $Left and $Right)
+		(append $Left [zu] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [zur] into $Left and $Right)
+		(append $Left [zu] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [vom] into $Left and $Right)
+		(append $Left [von] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [am] into $Left and $Right)
+		(append $Left [an] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [im] into $Left and $Right)
+		(append $Left [in] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(now) (corrected words [])
+		(correct umlauts in $Words)
+		(corrected words $Corrected)
+		(parse action $Corrected)
+	}
 
 %%END1
 
