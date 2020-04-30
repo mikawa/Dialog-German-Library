@@ -1,6 +1,6 @@
 
 (library version)
-	Bibliothek 0.36. DE
+	Bibliothek 0.38. DE
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 1: Global variables
@@ -1711,7 +1711,7 @@
 	($Obj is in room $Room)
 	(current room $Here)
 	~(shortest path from $Here to $Room is $)
-	Du weißt nicht, wie man von hier zu (dem $Obj) gelangt.
+	Du weißt nicht, wie man von hier zu (dem $Obj) kommt.
 
 (perform [find $Obj])
 	(if) ($Obj is in room $Room) (then)
@@ -3647,7 +3647,7 @@
 	($Actor is nested #on $Obj)
 
 (describe action [climb $Obj])
-	auf (den full $Obj) (zu) klettern
+	auf (den full $Obj) (zu) (verb)
 
 (instead of [climb (room $Room)])
 	~(actor supporter $Room)
@@ -3686,12 +3686,11 @@
 (understand infinitive [setzen] as Verb [setz])
 (understand infinitive [stellen] as Verb [stell])
 (understand infinitive [liegen] as Verb [lieg])
-(understand infinitive [gelangen] as Verb [gelang])
 
 (understand [betritt/betret | $Words] as [enter $Obj])
 	*(understand $Words as single object $Obj preferably container)
 
-(understand [geh/spring/gelang/sitz/kletter/lieg/sitz/steig in/durch | $Words] as [enter $Obj])
+(understand [geh/spring/sitz/kletter/lieg/sitz/steig in/durch | $Words] as [enter $Obj])
 	*(understand $Words as single object $Obj preferably container)
 	~(room $Obj)
 
@@ -3711,12 +3710,15 @@
 
 (describe action [enter $Obj])
 	{
+		(current verb $Verb)
+		($Verb is one of [betritt betret])
+	(or)
 		(supporter $Obj)
 		auf
 	(or)
 		in
 	}
-	(den full $Obj) (zu) steigen
+	(den full $Obj) (zu) (verb)
 
 ~(refuse [enter (room $)])
 
@@ -3969,7 +3971,7 @@
 		}
 		(inhibit next tick)
 	(else)
-		Du weißt nicht, wie du von hier zu (dem $Room) gelangst.
+		Du weißt nicht, wie du von hier zu (dem $Room) kommst.
 		(tick) (stop)
 	(endif)
 
@@ -3997,7 +3999,6 @@
 %% down in the file.
 
 (understand infinitive [gehen] as Verb [geh])
-(understand infinitive [gelangen] as Verb [gelang])
 (understand infinitive [kriechen] as Verb [kriech])
 
 (understand [geh/kriech weiter nach | $Words] as [go $Dir])
@@ -4007,9 +4008,6 @@
 	*(understand $Words as direction $Dir)
 
 (understand [geh/kriech | $Words] as [go $Dir])
-	*(understand $Words as direction $Dir)
-
-(understand [gelang nach | $Words] as [go $Dir])
 	*(understand $Words as direction $Dir)
 
 (understand [kletter nach | $Words] as [go $Dir])
@@ -4530,7 +4528,7 @@
 	(prevent [leave $Room $Dir])
 
 (narrate leaving $ $Dir by $Obj)
-	Du gelangst mit (dem $Obj) nach (name $Dir).
+	Du reist mit (dem $Obj) nach (name $Dir).
 	(par)
 
 (perform [leave $Room $Dir by $Vehicle])
@@ -4609,6 +4607,24 @@
 	(restore)
 	Das Laden ist fehlgeschlagen.
 	(stop)
+
+%% UNDO
+
+(command [undo])
+(perform [undo])
+	(if) ~(interpreter supports undo) (then)
+		This interpreter doesn't support undo.
+	(elseif) (undo) (then)
+		Failed to undo last turn.
+	(else)
+		There are no more turns to undo!
+	(endif)
+	(stop)
+
+(narrate undoing)
+	Der letzte Zug wurde zurück genommen.
+	(line)
+	(location headline)
 
 %% TRANSCRIPT
 
@@ -4734,16 +4750,6 @@
 	(now) (current actor $OldActor)
 	*($Action is one of $List)
 
-(understand $Words as $Action)
-	(default actions enabled)
-	*(understand $Words as non-all object $Obj)
-	~(empty $Obj)
-	~($Obj = [1])
-	(if) ($Obj = [a $RealObj]) (then)
-		(default action $RealObj $Action)
-	(else)
-		(default action $Obj $Action)
-	(endif)
 
 (understand $Words as $Action)
 	(implicit action is $Implicit)
@@ -4754,6 +4760,18 @@
 		*(understand $Words as non-all object $O)
 	(endif)
 	(recover implicit action $Implicit $O into $Action)
+
+(understand $Words as $Action)
+	(default actions enabled)
+	~{ (implicit action is $) ~(implicit action wants direction) }
+	*(understand $Words as non-all object $Obj)
+	~(empty $Obj)
+	~($Obj = [1])
+	(if) ($Obj = [a $RealObj]) (then)
+		(default action $RealObj $Action)
+	(else)
+		(default action $Obj $Action)
+	(endif)
 
 (default action $Obj [examine $Obj])
 
@@ -5843,7 +5861,7 @@
 
 (when $O won't accept actor $Rel)
 	(if) ($Rel is one of [#under #behind]) (then)
-		(uppercase)(name $Rel) (den $O) zu gelangen, wird dich nicht weiter bringen.
+		(uppercase)(name $Rel) (den $O) zu gelangen, hilft dir auch nicht weiter.
 	(else)
 		(uppercase)(name $Rel) (den $O) zu gelangen, ist unmöglich.
 	(endif)
@@ -6249,20 +6267,14 @@
 %% the verb typed by the player. This can be also adopted to new actions
 %% if the desired.
 
-%% Note, that in this case, the author must define any irregular verb (as
-%% "nimm" must lead to infinitve "nehmen") to ensure the correct output.
-
 (global variable (current verb $))
-
-(irregular $ as $) (fail)
-(irregular [nimm] as [nehmen])
 
 (set verb [$Verb | $])
 	(now) (current verb $Verb)
 
 (verb)
 	(current verb $Verb)
-	(irregular [$Verb] as [$Regular])
+	(understand infinitive [$Regular] as Verb [$Verb])
 	$Regular
 
 (verb)
@@ -6962,23 +6974,14 @@
 
 
 (parse commandline [undo] with choices $)
-	(if) ~(interpreter supports undo) (then)
-		Dieser Interpreter unterstützt kein Undo.
-	(elseif) (undo) (then)
-		Zug zurück nehmen fehlgeschlagen!
-	(else)
-		Du kannst keine weiteren Züge zurück nehmen!
-	(endif)
-	(stop)
+	(try [undo])
 
 (parse commandline $Words with choices $ChoiceList)
 	%% The commandline wasn't UNDO.
 	%% Before proceeding, save the current undo state:
 
 	(if) (save undo 1) (then)
-		Letzter Zug zurück genommen.
-		(line)
-		(location headline)
+		(narrate undoing)
 		(stop)
 	(endif)
 
