@@ -6996,7 +6996,12 @@
 		(parse action sequence $Words)
 	(endif)
 
+<<<<<<< HEAD
 (interface (parse action sequence $<Words))
+=======
+%% We use split/join predicate and new peparse predicate to
+%% extract ä ö ü ß and replace them with ae usw.
+>>>>>>> 4646342cdc9ad295dd381339d5d3803372b1a80b
 
 (parse action sequence $Words)
 	(if) (split $Words by [. ; dann] into $Left and $Right) (then)
@@ -7056,6 +7061,44 @@
 %% vom -> von
 %% im -> in
 %% am -> an
+<<<<<<< HEAD
+=======
+
+(preparse action $Words)
+	{
+		(split $Words by [zum] into $Left and $Right)
+		(append $Left [zu] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [zur] into $Left and $Right)
+		(append $Left [zu] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [vom] into $Left and $Right)
+		(append $Left [von] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [am] into $Left and $Right)
+		(append $Left [an] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [im] into $Left and $Right)
+		(append $Left [in] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(now) (corrected words [])
+		(correct umlauts in $Words)
+		(corrected words $Corrected)
+		(parse action $Corrected)
+	}
+
+%%END1
+>>>>>>> 4646342cdc9ad295dd381339d5d3803372b1a80b
 
 (preparse action $Words)
 	{
