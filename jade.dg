@@ -66,7 +66,7 @@
 #stein 
 (item *)
 (name *)	faustgroß(er) Stein(-s)
-(dict *)	stein faustgroß groß rund glatt
+(dict *)	stein faustgross gross rund glatt
 
 (* is maskulin)
 (* is #in #lichtung)
