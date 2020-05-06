@@ -116,7 +116,7 @@
 (fine where it is *)
 (supporter *)
 (name *) Steinsäule
-(dict *) säule steinsäule stein
+(dict *) saeule steinsaeule stein
 (nsyn *) steinpodest podest
 
 (descr *)
@@ -131,7 +131,7 @@
 #jadestatue 
 (item *)
 (name *)	Jadestatue
-(dict *)	grün klein statue figur jadestatue jadefigur jade
+(dict *)	gruen klein statue figur jadestatue jadefigur jade
 
 (descr *)
 
