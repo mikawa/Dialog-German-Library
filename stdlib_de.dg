@@ -3606,6 +3606,8 @@
 (grammar [betritt/betret [single]] for [enter $])
 (grammar [geh/spring/sitz/kletter/lieg/sitz/steig [in durch] [single]] for [enter $])
 
+(very unlikely [enter (room $Obj)])
+
 (unlikely [enter $Obj])
 	~(actor container $Obj)
 	~(door $Obj)
