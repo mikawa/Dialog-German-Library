@@ -3118,7 +3118,7 @@
 (describe action [cut $Obj with $Tool])
 	(den full $Obj) mit (dem $Tool) ab(no space)(zu)(no space)schneiden
 
-(describe action [lock $Obj])
+(describe action [cut $Obj])
 	(den full $Obj) ab(no space)(zu)(no space)schneiden
 
 (understand infinitive [trennen/durchtrennen/durchschneiden/kuerzen/abschneiden] as Verb [schneid])
@@ -4484,6 +4484,8 @@
 (understand command [score])
 	(scoring enabled)
 
+(grammar [punkt/punktestand] for [score])
+
 (perform [score])
 	(scoring enabled)
 	(current score $Score)
@@ -4515,6 +4517,9 @@
 %% PRONOUNS
 
 (understand command [pronouns])
+
+(grammar [pronomen] for [pronouns])
+
 (perform [pronouns])
 	"Mich" bezieht sich auf dich. (line)
 
