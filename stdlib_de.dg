@@ -1602,10 +1602,10 @@
 (describe action [look $Rel $Obj])
 	(name $Rel) (den full $Obj) (zu) schauen
 
-(grammar [schau/blick/sieh/seh [in im] [single]] for [look #in $])
-(grammar [schau/blick/sieh/seh [au aufs] [single]] for [look #on $])
-(grammar [schau/blick/sieh/seh [unter unters unterm] [single]] for [look #under $])
-(grammar [schau/blick/sieh/seh [hinter hinters hinterm] [single]] for [look #behind $])
+(grammar [schau/blick/sieh/seh [in] [single]] for [look #in $])
+(grammar [schau/blick/sieh/seh [auf] [single]] for [look #on $])
+(grammar [schau/blick/sieh/seh [unter] [single]] for [look #under $])
+(grammar [schau/blick/sieh/seh [hinter] [single]] for [look #behind $])
 
 (unlikely [look #in $Obj])
 	~(container $Obj)
@@ -3110,7 +3110,7 @@
 	(when $Obj isn't directly held)
 
 (perform [drink $Obj])
-	Du genießt einen Schluck von (den $Obj).
+	Du genießt einen Schluck von (dem $Obj).
 
 %% CUT <obj> WITH <obj>
 %% CUT <obj>
@@ -7237,6 +7237,16 @@
 	(or)
 		(split $Words by [im] into $Left and $Right)
 		(append $Left [in] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [unters] into $Left and $Right)
+		(append $Left [unter] $New)
+		(append $New $Right $New2)
+		(preparse action $New2)
+	(or)
+		(split $Words by [hinters] into $Left and $Right)
+		(append $Left [hinter] $New)
 		(append $New $Right $New2)
 		(preparse action $New2)
 	(or)
