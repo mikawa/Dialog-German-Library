@@ -478,6 +478,11 @@
 (den full [, | $List])		(den-full-oder-listing $List)
 (den full (list $List))		(den-full-listing $List)
 
+%% (dem full [einen $Obj])		(einem full $Obj) gibt es das???
+(dem full [+ | $List])		(dem-full-listing $List)
+(dem full [, | $List])		(dem-full-oder-listing $List)
+(dem full (list $List))		(dem-full-listing $List)
+
 (ein ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
 (der ($Obj is hidden))	(reveal $Obj) (fail) %% Proceed with normal handling.
 
@@ -1051,7 +1056,7 @@
 (-n)	
 		%%Noun Endung Singular
 		(current case $Case) 
-		(if) ($Case = #Akkusativ) (then)
+		(if) ($Case is one of [#Akkusativ #Dativ]) (then)
 			(no space)n
 		(endif)
 
@@ -4544,7 +4549,7 @@
 	(into $SieList)
 	(if) (nonempty $SieList) (then) "Sie" bezieht sich auf (den-oder-listing $SieList). (line) (endif)
 
-	(if) (ihnen refers to $Ihnen) (then) "Ihnen" in Bezug auf den Spieler bezieht sich auf (den $Ihnen). (line) (endif)
+	(if) (ihnen refers to $Ihnen) (then) "Ihnen" bezieht sich auf (den $Ihnen). (line) (endif)
 	(if) (narrator's ihnen refers to $Ihnen) (then) "Ihnen" im Bezug auf den Erzähler bezieht sich auf (den $Ihnen). (line) (endif)
 
 %% VERBOSE / BRIEF / SUPERBRIEF
@@ -5154,13 +5159,13 @@
 			(now) ~(narrator's ihm refers to $)
 		(endif)
 		(if) (narrator's ihn refers to $) (then)
-			(now) ~(narrator's ihm refers to $)
+			(now) ~(narrator's ihn refers to $)
 		(endif)
 		(if) (narrator's ihr refers to $) (then)
 			(now) ~(narrator's ihr refers to $)
 		(endif)
 		(if) (narrator's sie refers to $) (then)
-			(now) ~(narrator's ihm refers to $)
+			(now) ~(narrator's sie refers to $)
 		(endif)
 		(if) (narrator's ihnen refers to $) (then)
 			(now) ~(narrator's ihnen refers to $)
@@ -5584,6 +5589,13 @@
 (den-oder-listing $List)
 	(listing $List {(den $_)} @oder @den 0)
 
+(dem-full-listing $List)
+	(listing $List {(den full $_)} @und @dem 0)
+(dem-full-oder-listing $List)
+	(listing $List {(maybe link $_ {(dem full $_)})} @oder @dem 0)
+(dem-oder-listing $List)
+	(listing $List {(dem $_)} @oder @dem 0)
+
 (ein-listing $List)
 	(listing $List {(ein $_)} @und [] 0)
 
@@ -5721,8 +5733,8 @@
 			(if) ($Obj = [$Single]) (then)
 				(notice player's $Single)
 			(else)
-				(now) (ihnen refers to $Obj)
-				(now) (sie refers to $Obj)
+				(now) (ihnen refers to [$Obj])
+				(now) (sie refers to [$Obj])
 			(endif)
 		(elseif) (changing gender is #fem) (then)
 			(now) (sie refers to $Obj)
@@ -5780,6 +5792,16 @@
 	(endif)
 	(if) (ihr refers to $Obj) ~($Obj is in scope) (then)
 		(now) ~(ihr refers to $)
+	(endif)
+	(if) (ihnen refers to $Obj) ~($Obj is in scope) (then)
+		(now) ~(ihnen refers to $)
+	(endif)
+	(if)
+		(sie refers to $ObjList)
+		*($Obj is one of $ObjList)
+		~($Obj is in scope)
+	(then)
+		(now) ~(sie refers to $)
 	(endif)
 	(if)
 		(ihnen refers to $ObjList)
@@ -6391,13 +6413,6 @@
 (global variable (narrator's ihr refers to $))
 (global variable (ihnen refers to $))
 (global variable (narrator's ihnen refers to $))
-
-%% (global variable (es refers to $))
-%%(global variable (ihn refers to $))
-%%(global variable (ihm refers to $))
-%%(global variable (sie refers to $))
-%%(global variable (ihr refers to $))
-%%(global variable (ihnen refers to $))
 
 %% we offer a second way to print out action reports
 %% in infinitive context in all describe action traits
