@@ -1,6 +1,6 @@
 
 (library version)
-	Bibliothek 0.44. DE
+	Bibliothek 0.45. DE
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 1: Global variables
@@ -2505,47 +2505,47 @@
 	(then)
 		Es gibt keine erkennbaren Ausgänge.
 	(else)
-		Ausgänge: (uppercase)
+		Ausgänge führen
 		(exhaust) {
+			(now) ~(comma)
 			*(from $Room go $Dir to $Target)
-			(select) 
-			(or)
+			(if) ~(comma) (then)
+				(now) (comma)
+			(else)
 				,
-			(stopping)
+			(endif)
 			(direction $Dir)
-			(if) (door $Target) (then)
-				(Name $Dir)
-				durch (den $Target)
-				(if) ($Target is closed) (then)
-					\(momentan geschlossen\)
-				(elseif)
-					(from $Room through $Target to $R)
-					($R is visited)
-				(then)
-					nach
-					(if) (inherently dark $R) (then)
-						, in die Dunkelheit
-					(else)
-						, zu (dem $R)
-					(endif)
-				(endif)
-			(elseif) (room $Target) (then)
+			(if) (door $Target) (or) (room $Target) (then)
 				nach
-				(if) ($Dir = #in) (then)
-					drinnen
+				(if) (library links enabled) (then)
+					(link) (Name $Dir)
 				(else)
 					(Name $Dir)
 				(endif)
-				(if) ($Target is visited) (then)
-					(if) (inherently dark $Target) (then)
-						, in völlige Dunkelheit
-					(else)
-						, zu (dem $Target)
+				(if) (door $Target) (then)
+					durch (den $Target)
+					(if) ($Target is closed) (then)
+						\(momentan geschlossen\)
+					(elseif)
+						(from $Room through $Target to $R)
+					(then)
+						(describe remote room $R)
 					(endif)
+				(else)
+					(describe remote room $Target)
 				(endif)
 			(endif)
 		}
 		.
+	(endif)
+
+(describe remote room $Room)
+	(if) ($Room is visited) (then)
+		(if) (light reaches ceiling $Room) (then)
+			, zu (dem $Room)
+		(else)
+			, in die Dunkelheit
+		(endif)
 	(endif)
 
 %% EXIST (misspelled EXITS, just for the giggles)
@@ -2946,16 +2946,16 @@
 
 (unlikely [switch ~(switchable $)])
 
-(instead of [switch $Obj])
-	{ ($Obj is on) (switchable $Obj) }
-	(try [switch off $Obj])
-
-(instead of [switch $Obj])
-	($Obj is off)
-	(try [switch on $Obj])
+(instead of [switch (switchable $Obj)])
+	(if) ($Obj is on) (then)
+		(try [switch off $Obj])
+	(else)
+		(try [switch on $Obj])
+	(endif)
 
 (perform [switch $Obj])
 	(Der $Obj) (lässt $Obj) nicht an- oder ausschalten.
+	(tick) (stop)
 
 %% SQUEEZE <obj>
 
@@ -5892,6 +5892,7 @@
 (list objects $Rel $Loc)
 	(collect $Obj)
 		*($Obj is $Rel $Loc)
+		~(current player $Obj)
 	(into $List)
 	(if) (nonempty $List) (then)
 		(Name $Rel) (dem $Loc) (ist $List) (ein $List).
@@ -6111,18 +6112,29 @@
 			(else)
 				(redraw status bar)
 				($ChoiceList = [])
-				> (get input $Words)
+				(prompt and input $Words)
 			(endif)
 
 			(parse commandline $Words with choices $ChoiceList)
 		}
 	(endif)
 
+(interface (prompt and input $>Words))
+
+(prompt and input $Words)
+	*(repeat forever)
+	> (get input $Words)
+
+	%% '*' is by convention used by testers to put comments in a
+	%% transcript. Ignore it and try again.
+
+	~($Words = [\* | $])
+
 (interface (get choice of $<ChoiceList into $>Words))
 
 (get choice of $ChoiceList into $Words)
 	(enumerate choices $ChoiceList 1)
-	> (get input $Words)
+	(prompt and input $Words)
 
 (interface (enumerate choices $<ObjList $<FirstIndex))
 
@@ -6353,7 +6365,7 @@
 	(endif)
 	en?
 	(line)
-	> (get input $Words)
+	(prompt and input $Words)
 	(stoppable) (parse game over $Words)
 
 (game over option)
@@ -7156,10 +7168,6 @@
 (parse commandline [] with choices $)
 	Wie bitte?
 
-(parse commandline [\* | $] with choices $)
-	%% By convention used by testers to put comments in a transcript.
-
-
 (parse commandline [undo] with choices $)
 	(try [undo])
 
@@ -7469,7 +7477,7 @@
 	(then)
 		Willst du (describe action $ComplexAction)?
 		(par)
-		> (get input $Words)
+		(prompt and input $Words)
 		{
 			(now) (head noun is required)
 			(disambiguate by object name $Words $Template $ObjList $Result)
@@ -7487,7 +7495,7 @@
 			\( Gib die entsprechende Nummer ein\)
 		(endif)
 		(par)
-		> (get input $Words)
+		(prompt and input $Words)
 		{
 			(understand $Words as number $N)
 			($N > 0)
@@ -7634,7 +7642,7 @@
 %% Asking a yes/no question:
 
 (yesno)
-	(space) > (get input $Words)
+	(space) (prompt and input $Words)
 	(if) ($Words = [ja]) (or) ($Words = [j]) (or) ($Words = [ok]) (or) ($Words = [jo]) (then)
 	(elseif) ($Words = [nein]) (or) ($Words = [n]) (or) ($Words = [noe]) (or) ($Words = [nee]) (then)
 		(fail)
@@ -7648,7 +7656,7 @@
 (interface (get number from $<First to $<Last $>Number))
 
 (get number from $First to $Last $N)
-	$First - $Last > (get input $Input)
+	$First - $Last (prompt and input $Input)
 	(understand $Input as number $N)
 	~($N < $First)
 	~($N > $Last)
