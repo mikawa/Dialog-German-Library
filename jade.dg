@@ -44,7 +44,7 @@
 
 (prevent [leave * $X])
 
-		~($X is one of [#north #in #south])
+		~($X is one of [#north #inside #south])
 		Dort ist der Dschungel zu dicht, es gibt
         keinen Pfad in diese Richtung.
 
@@ -61,7 +61,7 @@
 		}
 
 (from * go #north to #schrein)
-(from * go #in to #schrein)
+(from * go #inside to #schrein)
 
 #stein 
 (item *)
@@ -110,7 +110,7 @@
 
 (* is maskulin)
 (from * go #south to #lichtung)
-(from * go #out to #lichtung)
+(from * go #outside to #lichtung)
 
 #säule
 (fine where it is *)

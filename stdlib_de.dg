@@ -1,6 +1,6 @@
 
 (library version)
-	Bibliothek 0.45. DE
+	Bibliothek 0.45.1 DE
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 1: Global variables
@@ -136,7 +136,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Chapter 2: Relations
 
-(relation #in)		%% Note: #in is also a direction
+(relation #in)		%% Note: #in is also a direction, im Deustchen modifiziert
 (relation #on)
 (relation #partof)
 (relation #heldby)
@@ -293,23 +293,23 @@
 (to-adverb *)		hinunter
 (opposite of * is #up)
 
-#in			%% Note: #in is also a relation
+#inside			%% Note: #in is also a relation, im Deutschen benötigen wir einen anderen Namen, da die 
 (direction *)
 (name *)		drinnen
 (dict *)		rein hinein innen drinnen
 (present-adverb *)	innen
 (from-adverb *)		drinnen
 (to-adverb *)		hinein
-(opposite of * is #out)
+(opposite of * is #outside)
 
-#out
+#outside
 (direction *)
 (name *)		draußen
 (dict *)		raus hinaus aussen draussen
 (present-adverb *)	außen
 (from-adverb *)		draußen
 (to-adverb *)		hinaus
-(opposite of * is #in)
+(opposite of * is #inside)
 
 (present-adverb $Dir)	im (name $Dir)
 (from-adverb $Dir)	von (name $Dir)
@@ -2946,16 +2946,16 @@
 
 (unlikely [switch ~(switchable $)])
 
-(instead of [switch (switchable $Obj)])
-	(if) ($Obj is on) (then)
-		(try [switch off $Obj])
-	(else)
-		(try [switch on $Obj])
-	(endif)
+(instead of [switch $Obj])
+	{ ($Obj is on) (switchable $Obj) }
+	(try [switch off $Obj])
+
+(instead of [switch $Obj])
+	($Obj is off)
+	(try [switch on $Obj])
 
 (perform [switch $Obj])
 	(Der $Obj) (lässt $Obj) nicht an- oder ausschalten.
-	(tick) (stop)
 
 %% SQUEEZE <obj>
 
@@ -3912,9 +3912,9 @@
 (grammar [geh/kriech/spazier weiter nach [direction]] for [go $])
 (grammar [geh/kriech/spazier nach [direction]] for [go $])
 (grammar [geh/kriech/spazier [direction]] for [go $])
-(grammar [geh/kriech/spazier [raus hinaus]] for [go #out])
-(grammar [geh/kriech/spazier] for [go #out])
-(grammar [geh/kriech/spazier [rein hinein]] for [go #in])
+(grammar [geh/kriech/spazier [raus hinaus]] for [go #outside])
+(grammar [geh/kriech/spazier] for [go #outside])
+(grammar [geh/kriech/spazier [rein hinein]] for [go #inside])
 (grammar [geh/kriech/spazier [hoch hinauf]] for [go #up])
 (grammar [geh/kriech/spazier [runter hinunter]] for [go #down])
 
@@ -4296,7 +4296,7 @@
 			(narrate failing to leave $Room $Dir)
 		(endif)
 	(else)
-		(if) ($Dir is one of [#out #in]) (then)
+		(if) ($Dir is one of [#outside #inside]) (then)
 			In welche Richtung?
 			(asking for direction in [go []])
 		(else)
@@ -4319,9 +4319,9 @@
 	(if) (from $Room go $Dir to $Target) (door $Target) (then)
 		durch (den $Target)
 	(endif)
-	(if) ($Dir = #in) (then)
+	(if) ($Dir = #inside) (then)
 		hinein
-	(elseif) ($Dir = #out) (then)
+	(elseif) ($Dir = #outside) (then)
 		hinaus
 	(else)
 		nach (name $Dir)
@@ -5892,7 +5892,6 @@
 (list objects $Rel $Loc)
 	(collect $Obj)
 		*($Obj is $Rel $Loc)
-		~(current player $Obj)
 	(into $List)
 	(if) (nonempty $List) (then)
 		(Name $Rel) (dem $Loc) (ist $List) (ein $List).
@@ -6112,29 +6111,18 @@
 			(else)
 				(redraw status bar)
 				($ChoiceList = [])
-				(prompt and input $Words)
+				> (get input $Words)
 			(endif)
 
 			(parse commandline $Words with choices $ChoiceList)
 		}
 	(endif)
 
-(interface (prompt and input $>Words))
-
-(prompt and input $Words)
-	*(repeat forever)
-	> (get input $Words)
-
-	%% '*' is by convention used by testers to put comments in a
-	%% transcript. Ignore it and try again.
-
-	~($Words = [\* | $])
-
 (interface (get choice of $<ChoiceList into $>Words))
 
 (get choice of $ChoiceList into $Words)
 	(enumerate choices $ChoiceList 1)
-	(prompt and input $Words)
+	> (get input $Words)
 
 (interface (enumerate choices $<ObjList $<FirstIndex))
 
@@ -6365,7 +6353,7 @@
 	(endif)
 	en?
 	(line)
-	(prompt and input $Words)
+	> (get input $Words)
 	(stoppable) (parse game over $Words)
 
 (game over option)
@@ -7168,6 +7156,10 @@
 (parse commandline [] with choices $)
 	Wie bitte?
 
+(parse commandline [\* | $] with choices $)
+	%% By convention used by testers to put comments in a transcript.
+
+
 (parse commandline [undo] with choices $)
 	(try [undo])
 
@@ -7477,7 +7469,7 @@
 	(then)
 		Willst du (describe action $ComplexAction)?
 		(par)
-		(prompt and input $Words)
+		> (get input $Words)
 		{
 			(now) (head noun is required)
 			(disambiguate by object name $Words $Template $ObjList $Result)
@@ -7495,7 +7487,7 @@
 			\( Gib die entsprechende Nummer ein\)
 		(endif)
 		(par)
-		(prompt and input $Words)
+		> (get input $Words)
 		{
 			(understand $Words as number $N)
 			($N > 0)
@@ -7642,7 +7634,7 @@
 %% Asking a yes/no question:
 
 (yesno)
-	(space) (prompt and input $Words)
+	(space) > (get input $Words)
 	(if) ($Words = [ja]) (or) ($Words = [j]) (or) ($Words = [ok]) (or) ($Words = [jo]) (then)
 	(elseif) ($Words = [nein]) (or) ($Words = [n]) (or) ($Words = [noe]) (or) ($Words = [nee]) (then)
 		(fail)
@@ -7656,7 +7648,7 @@
 (interface (get number from $<First to $<Last $>Number))
 
 (get number from $First to $Last $N)
-	$First - $Last (prompt and input $Input)
+	$First - $Last > (get input $Input)
 	(understand $Input as number $N)
 	~($N < $First)
 	~($N > $Last)
